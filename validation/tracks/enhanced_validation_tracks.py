@@ -1008,3 +1008,217 @@ generates class-consistent inputs. This demonstrates the bidirectional nature of
     )
 
 
+def track_33_cifar10_benchmark(verifier) -> TrackResult:
+    """
+    Track 33: CIFAR-10 Benchmark
+    
+    Tests ConvEqProp on CIFAR-10 with proper mini-batch training.
+    Uses small batches to avoid OOM from equilibrium iterations.
+    """
+    print("\n" + "="*60)
+    print("TRACK 33: CIFAR-10 Benchmark")
+    print("="*60)
+    
+    start = time.time()
+    
+    try:
+        from torchvision import datasets, transforms
+        from models import ConvEqProp
+    except ImportError as e:
+        print(f"  [Error] Required modules not available: {e}")
+        return TrackResult(
+            track_id=33, name="CIFAR-10 Benchmark",
+            status="fail", score=0,
+            metrics={},
+            evidence="**Error**: torchvision or ConvEqProp not available.",
+            time_seconds=time.time() - start,
+            improvements=["Install torchvision: pip install torchvision"]
+        )
+    
+    # Memory-safe configuration
+    n_train = 500 if verifier.quick_mode else 1000  # Reduced for memory
+    n_test = 200 if verifier.quick_mode else 500
+    batch_size = 32  # Small batches for equilibrium iterations
+    epochs = verifier.epochs
+    hidden_channels = 16  # Reduced from 32
+    eq_steps = 15  # Reduced from 25
+    
+    print(f"\n[33a] Loading CIFAR-10 ({n_train} train, {n_test} test, batch={batch_size})...")
+    
+    # Load CIFAR-10
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))
+    ])
+    
+    train_dataset = datasets.CIFAR10(root='/tmp/data', train=True, download=True, transform=transform)
+    test_dataset = datasets.CIFAR10(root='/tmp/data', train=False, download=True, transform=transform)
+    
+    # Create subset samplers
+    torch.manual_seed(verifier.seed)
+    train_indices = torch.randperm(len(train_dataset))[:n_train].tolist()
+    test_indices = torch.randperm(len(test_dataset))[:n_test].tolist()
+    
+    train_subset = torch.utils.data.Subset(train_dataset, train_indices)
+    test_subset = torch.utils.data.Subset(test_dataset, test_indices)
+    
+    train_loader = torch.utils.data.DataLoader(train_subset, batch_size=batch_size, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(test_subset, batch_size=batch_size, shuffle=False)
+    
+    print(f"  Loaded {len(train_subset)} train, {len(test_subset)} test samples")
+    
+    # Create ConvEqProp model
+    print(f"\n[33b] Training ConvEqProp (eq_steps={eq_steps})...")
+    model = ConvEqProp(input_channels=3, hidden_channels=hidden_channels, output_dim=10, 
+                       use_spectral_norm=True)
+    
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    
+    for epoch in range(epochs):
+        model.train()
+        epoch_loss = 0.0
+        epoch_correct = 0
+        epoch_total = 0
+        
+        for X_batch, y_batch in train_loader:
+            optimizer.zero_grad()
+            out = model(X_batch, steps=eq_steps)
+            loss = F.cross_entropy(out, y_batch)
+            loss.backward()
+            optimizer.step()
+            
+            epoch_loss += loss.item()
+            epoch_correct += (out.argmax(1) == y_batch).sum().item()
+            epoch_total += len(y_batch)
+        
+        if (epoch + 1) % max(1, epochs // 5) == 0:
+            acc = epoch_correct / epoch_total * 100
+            print(f"    Epoch {epoch+1}/{epochs}: loss={epoch_loss/len(train_loader):.3f}, acc={acc:.1f}%")
+    
+    # Evaluate EqProp
+    model.eval()
+    train_correct = test_correct = 0
+    train_total = test_total = 0
+    
+    with torch.no_grad():
+        for X_batch, y_batch in train_loader:
+            out = model(X_batch, steps=eq_steps)
+            train_correct += (out.argmax(1) == y_batch).sum().item()
+            train_total += len(y_batch)
+        
+        for X_batch, y_batch in test_loader:
+            out = model(X_batch, steps=eq_steps)
+            test_correct += (out.argmax(1) == y_batch).sum().item()
+            test_total += len(y_batch)
+    
+    eqprop_train_acc = train_correct / train_total
+    eqprop_test_acc = test_correct / test_total
+    
+    print(f"\n  EqProp Train: {eqprop_train_acc*100:.1f}%, Test: {eqprop_test_acc*100:.1f}%")
+    
+    # Create Backprop baseline (standard CNN)
+    print("\n[33c] Training Backprop baseline CNN...")
+    
+    class SimpleCNN(nn.Module):
+        def __init__(self, hidden_channels, output_dim):
+            super().__init__()
+            self.conv1 = nn.Conv2d(3, hidden_channels, 3, padding=1)
+            self.conv2 = nn.Conv2d(hidden_channels, hidden_channels*2, 3, padding=1)
+            self.pool = nn.MaxPool2d(2)
+            self.fc = nn.Linear(hidden_channels*2 * 8 * 8, output_dim)
+            
+        def forward(self, x):
+            x = F.relu(self.conv1(x))
+            x = self.pool(x)  # 16x16
+            x = F.relu(self.conv2(x))
+            x = self.pool(x)  # 8x8
+            x = x.view(x.size(0), -1)
+            return self.fc(x)
+    
+    baseline = SimpleCNN(hidden_channels, 10)
+    optimizer_bp = torch.optim.Adam(baseline.parameters(), lr=0.001)
+    
+    for epoch in range(epochs):
+        baseline.train()
+        for X_batch, y_batch in train_loader:
+            optimizer_bp.zero_grad()
+            out = baseline(X_batch)
+            loss = F.cross_entropy(out, y_batch)
+            loss.backward()
+            optimizer_bp.step()
+    
+    # Evaluate baseline
+    baseline.eval()
+    train_correct = test_correct = 0
+    train_total = test_total = 0
+    
+    with torch.no_grad():
+        for X_batch, y_batch in train_loader:
+            out = baseline(X_batch)
+            train_correct += (out.argmax(1) == y_batch).sum().item()
+            train_total += len(y_batch)
+        
+        for X_batch, y_batch in test_loader:
+            out = baseline(X_batch)
+            test_correct += (out.argmax(1) == y_batch).sum().item()
+            test_total += len(y_batch)
+    
+    bp_train_acc = train_correct / train_total
+    bp_test_acc = test_correct / test_total
+    
+    print(f"\n  Backprop Train: {bp_train_acc*100:.1f}%, Test: {bp_test_acc*100:.1f}%")
+    
+    # Calculate gap
+    gap = bp_test_acc - eqprop_test_acc
+    
+    # Score based on performance
+    if gap <= 0.05:  # Within 5%
+        score = 100
+        status = "pass"
+    elif gap <= 0.10:  # Within 10%
+        score = 80
+        status = "pass"
+    elif eqprop_test_acc > 0.25:  # Learning happened (>random for 10 classes)
+        score = 60
+        status = "partial"
+    else:
+        score = 40
+        status = "fail"
+    
+    evidence = f"""
+**Claim**: ConvEqProp achieves competitive accuracy on CIFAR-10.
+
+**Experiment**: Train ConvEqProp and CNN baseline on CIFAR-10 subset with mini-batch training.
+
+| Model | Train Acc | Test Acc | Gap to BP |
+|-------|-----------|----------|-----------|
+| ConvEqProp | {eqprop_train_acc*100:.1f}% | {eqprop_test_acc*100:.1f}% | {gap*100:+.1f}% |
+| CNN Baseline | {bp_train_acc*100:.1f}% | {bp_test_acc*100:.1f}% | — |
+
+**Configuration**:
+- Training samples: {n_train}
+- Test samples: {n_test}
+- Batch size: {batch_size}
+- Epochs: {epochs}
+- Hidden channels: {hidden_channels}
+- Equilibrium steps: {eq_steps}
+
+**Key Finding**: ConvEqProp {'achieves parity with' if gap <= 0.05 else 'trails'} CNN on CIFAR-10 
+{'(proof of scalability to real vision tasks)' if score >= 80 else '(needs more epochs/data)'}.
+"""
+    
+    return TrackResult(
+        track_id=33, name="CIFAR-10 Benchmark",
+        status=status, score=score,
+        metrics={
+            'eqprop_train': eqprop_train_acc,
+            'eqprop_test': eqprop_test_acc,
+            'backprop_train': bp_train_acc,
+            'backprop_test': bp_test_acc,
+            'gap': gap
+        },
+        evidence=evidence,
+        time_seconds=time.time() - start,
+        improvements=["Increase epochs and data for full CIFAR-10 benchmark"] if score < 80 else []
+    )
+

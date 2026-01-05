@@ -69,6 +69,7 @@ class Verifier:
             30: ("Damage Tolerance", enhanced_validation_tracks.track_30_damage_tolerance),
             31: ("Residual EqProp", enhanced_validation_tracks.track_31_residual_eqprop),
             32: ("Bidirectional Generation", enhanced_validation_tracks.track_32_bidirectional_generation),
+            33: ("CIFAR-10 Benchmark", enhanced_validation_tracks.track_33_cifar10_benchmark),
         }
     
     def print_header(self):
