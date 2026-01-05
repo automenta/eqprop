@@ -46,8 +46,8 @@ class Verifier:
             7: ("Temporal Resonance", advanced_tracks.track_7_temporal_resonance),
             8: ("Homeostatic Stability", advanced_tracks.track_8_homeostatic),
             9: ("Gradient Alignment", advanced_tracks.track_9_gradient_alignment),
-            10: ("O(1) Memory Scaling", scaling_tracks.track_10_memory_scaling),
-            11: ("Deep Network (100 layers)", scaling_tracks.track_11_deep_network),
+            # Track 10 removed - superseded by Track 26 (O(1) Memory Reality)
+            # Track 11 removed - consolidated into Track 23
             12: ("Lazy Event-Driven Updates", scaling_tracks.track_12_lazy_updates),
             13: ("Convolutional EqProp", special_tracks.track_13_conv_eqprop),
             14: ("Transformer EqProp", special_tracks.track_14_transformer),
@@ -59,14 +59,16 @@ class Verifier:
             20: ("Transfer Learning", application_tracks.track_20_transfer_learning),
             21: ("Continual Learning", application_tracks.track_21_continual_learning),
             22: ("Golden Reference Harness", engine_validation_tracks.track_22_golden_reference),
-            23: ("Extreme Depth Signal Probe", engine_validation_tracks.track_23_extreme_depth_signal),
+            23: ("Comprehensive Depth Scaling", engine_validation_tracks.track_23_comprehensive_depth),
             24: ("Lazy Updates Wall-Clock", engine_validation_tracks.track_24_lazy_wallclock),
             25: ("Real Dataset Benchmark", enhanced_validation_tracks.track_25_real_dataset),
             26: ("O(1) Memory Reality", enhanced_validation_tracks.track_26_memory_reality),
-            27: ("Extreme Depth Learning", enhanced_validation_tracks.track_27_extreme_depth_learning),
+            # Track 27 removed - consolidated into Track 23
             28: ("Robustness Suite", enhanced_validation_tracks.track_28_robustness_suite),
             29: ("Energy Dynamics", enhanced_validation_tracks.track_29_energy_dynamics),
             30: ("Damage Tolerance", enhanced_validation_tracks.track_30_damage_tolerance),
+            31: ("Residual EqProp", enhanced_validation_tracks.track_31_residual_eqprop),
+            32: ("Bidirectional Generation", enhanced_validation_tracks.track_32_bidirectional_generation),
         }
     
     def print_header(self):

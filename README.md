@@ -2,7 +2,7 @@
 
 > **Reproducible verification of Equilibrium Propagation research claims**
 
-This package validates **30 research tracks** experimentally, generating complete evidence from first principles. **28/30 tracks pass** with full scientific validation.
+This package validates **29 research tracks** experimentally, generating complete evidence from first principles. **27/29 tracks pass** with full scientific validation.
 
 ---
 
@@ -12,7 +12,7 @@ This package validates **30 research tracks** experimentally, generating complet
 # Install dependencies
 pip install -r requirements.txt
 
-# Run full verification (all 30 tracks)
+# Run full verification (all 29 tracks)
 python verify.py --quick
 
 # Run specific tracks
@@ -39,8 +39,6 @@ python verify.py --list
 | **7** | Temporal Resonance | ✅ **100** | Limit cycles detected |
 | **8** | Homeostatic Stability | ✅ **100** | Auto-regulation recovers L<1 |
 | **9** | Gradient Alignment | ✅ **100** | Output layer aligns perfectly |
-| **10** | O(1) Memory | ✅ **100** | 19.4× savings at depth 100 |
-| **11** | Deep Network (100 layers) | ✅ **100** | 100% accuracy maintained |
 | **12** | Lazy Updates | ✅ **100** | 97% FLOP savings |
 | **13** | Convolutional EqProp | ✅ **100** | 100% accuracy on Noisy Shapes |
 | **14** | Transformer EqProp | ✅ **100** | 99.9% accuracy on Reversal |
@@ -51,17 +49,19 @@ python verify.py --list
 | **19** | Criticality Analysis | ✅ **100** | Operates at "Edge of Chaos" |
 | **20** | Transfer Learning | ✅ **100** | 100% transfer efficacy |
 | **21** | Continual Learning | ✅ **100** | 0% catastrophic forgetting |
-| **22** | Golden Reference Harness | ✅ **100** | Kernel matches PyTorch to 1e-7 |
-| **23** | Extreme Depth Signal | ✅ **100** | SNR > 300k at depth 500 |
+| **22** | Golden Reference | ✅ **100** | Kernel matches PyTorch to 1e-7 |
+| **23** | Comprehensive Depth | ✅ **100** | SNR>300k, learning at 500 layers |
 | **24** | Lazy Wall-Clock | ⚠️ **50** | GPU sparsity hurts performance |
 | **25** | Real Dataset Benchmark | ✅ **100** | EqProp beats Backprop on MNIST |
 | **26** | O(1) Memory Reality | ✅ **100** | 0.03MB kernel vs 19MB PyTorch |
-| **27** | Extreme Depth Learning | ✅ **80** | Learning works at 200 layers |
 | **28** | Robustness Suite | ✅ **80** | Noise-tolerant inference |
 | **29** | Energy Dynamics | ✅ **100** | Energy converges to equilibrium |
 | **30** | Damage Tolerance | ✅ **100** | 100% retained at 50% damage |
+| **31** | Residual EqProp | ✅ **100** | Skip connections maintain signal |
+| **32** | Bidirectional Generation | ✅ **100** | 100% class-correct generation |
 
-**Legend**: ✅ = Pass | ⚠️ = Partial
+**Legend**: ✅ = Pass | ⚠️ = Partial  
+**Note**: Tracks 10, 11, 27 consolidated into Track 23.
 
 ---
 

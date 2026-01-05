@@ -1,28 +1,29 @@
 # TorEqProp Verification Results
 
-**Generated**: 2026-01-04 23:07:02
+**Generated**: 2026-01-04 23:18:02
 
 
 ## Executive Summary
 
-**Verification completed in 2.2 seconds.**
+**Verification completed in 1.8 seconds.**
 
 ### Overall Results
 
 | Metric | Value |
 |--------|-------|
-| Tracks Verified | 1 |
-| Passed | 1 ✅ |
+| Tracks Verified | 2 |
+| Passed | 2 ✅ |
 | Partial | 0 ⚠️ |
 | Failed | 0 ❌ |
 | Stubs (TODO) | 0 🔧 |
-| Average Score | 80.0/100 |
+| Average Score | 100.0/100 |
 
 ### Track Summary
 
 | # | Track | Status | Score | Time |
 |---|-------|--------|-------|------|
-| 27 | Extreme Depth Learning | ✅ | 80 | 2.2s |
+| 31 | Residual EqProp | ✅ | 100 | 0.9s |
+| 32 | Bidirectional Generation | ✅ | 100 | 0.9s |
 
 
 **Seed**: 42 (deterministic)
@@ -32,39 +33,42 @@
 ---
 
 
-## Track 27: Extreme Depth Learning
+## Track 31: Residual EqProp
 
 
-✅ **Status**: PASS | **Score**: 80.0/100 | **Time**: 2.2s
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.9s
 
 
-**Claim**: Learning works at extreme network depths (200+ layers).
+**Claim**: Skip connections maintain signal at extreme depth.
 
-**Experiment**: Train networks at depths 30→500 and measure learning.
+| Depth | Standard SNR | Residual SNR |
+|-------|--------------|--------------|
+| 100 | 298118 | 504491 |
+| 200 | 374235 | 356277 |
+| 500 | 284476 | 299228 |
 
-| Depth | Initial | Final | Δ | Lipschitz | Learned? |
-|-------|---------|-------|---|-----------|----------|
-| 30 | 7.5% | 15.0% | +7.5% | 1.000 | ✓ |
-| 100 | 9.5% | 14.0% | +4.5% | 1.000 | ✗ |
-| 200 | 11.5% | 17.0% | +5.5% | 1.000 | ✓ |
-
-**Configuration**:
-- Samples: 200
-- Epochs: 5
-- Learning rate: 0.001
-
-**Key Finding**: 
-- Learning degrades at extreme depth
-- Spectral normalization maintains L < 1 even at depth 200
-- Practical limit around 200 layers
-
-**Comparison to Prior Art**:
-Standard ResNets struggle beyond ~100 layers without skip connections.
-EqProp with spectral norm maintains learning at 500+ layers.
+**Finding**: Residual connections help at depth 500.
 
 
 
 
-### Areas for Improvement
+## Track 32: Bidirectional Generation
 
-- Consider skip connections for extreme depth as suggested in TODO7.md
+
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.9s
+
+
+**Claim**: EqProp can generate inputs from class labels (bidirectional).
+
+**Experiment**: Clamp output to target class, relax to generate input pattern.
+
+| Metric | Value |
+|--------|-------|
+| Classes tested | 5 |
+| Correct classifications | 5/5 |
+| Generation accuracy | 100% |
+
+**Key Finding**: Energy-based relaxation successfully 
+generates class-consistent inputs. This demonstrates the bidirectional nature of EqProp.
+
+
