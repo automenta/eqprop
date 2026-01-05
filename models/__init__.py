@@ -11,7 +11,9 @@ from .kernel import EqPropKernel, compare_memory_autograd_vs_kernel
 from .temporal_resonance import TemporalResonanceEqProp
 from .homeostatic import HomeostaticEqProp
 from .conv_eqprop import ConvEqProp
+from .modern_conv_eqprop import ModernConvEqProp, SimpleConvEqProp
 from .transformer import TransformerEqProp, EqPropAttention
+from .causal_transformer_eqprop import CausalTransformerEqProp
 
 __all__ = [
     'LoopedMLP', 'BackpropMLP',
@@ -23,5 +25,7 @@ __all__ = [
     'TemporalResonanceEqProp',
     'HomeostaticEqProp',
     'ConvEqProp',
+    'ModernConvEqProp', 'SimpleConvEqProp',
     'TransformerEqProp', 'EqPropAttention',
+    'CausalTransformerEqProp',
 ]
