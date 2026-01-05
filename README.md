@@ -2,7 +2,7 @@
 
 > **Reproducible verification of Equilibrium Propagation research claims**
 
-This package validates **21 research tracks** experimentally, generating complete evidence from first principles. **20/21 tracks pass** with full scientific validation.
+This package validates **24 research tracks** experimentally, generating complete evidence from first principles. **22/24 tracks pass** with full scientific validation.
 
 ---
 
@@ -51,6 +51,9 @@ python verify.py --list
 | **19** | Criticality Analysis | ✅ **100** | Operates at "Edge of Chaos" |
 | **20** | Transfer Learning | ✅ **100** | 100% transfer efficacy |
 | **21** | Continual Learning | ✅ **100** | 0% catastrophic forgetting |
+| **22** | Golden Reference Harness | ✅ **100** | Kernel matches PyTorch to 1e-7 |
+| **23** | Extreme Depth Signal | ✅ **100** | SNR > 300k at depth 500 |
+| **24** | Lazy Wall-Clock | ⚠️ **50** | GPU sparsity hurts performance |
 
 **Legend**: ✅ = Pass | ⚠️ = Partial
 

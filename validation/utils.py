@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from typing import List, Optional
+from typing import List, Optional, Dict, Tuple, Any
 from datetime import datetime
 
 def progress_bar(current: int, total: int, width: int = 20) -> str:
@@ -63,3 +63,43 @@ def evaluate_accuracy(model: nn.Module, X: torch.Tensor, y: torch.Tensor) -> flo
         acc = (out.argmax(dim=1) == y).float().mean().item()
     model.train()
     return acc
+
+
+def format_metrics_table(metrics: Dict[str, Any], headers: Tuple[str, str] = ("Metric", "Value")) -> str:
+    """Format a dict of metrics as a markdown table."""
+    rows = [f"| {k} | {format_value(v)} |" for k, v in metrics.items()]
+    header = f"| {headers[0]} | {headers[1]} |"
+    separator = "|" + "-" * (len(headers[0]) + 2) + "|" + "-" * (len(headers[1]) + 2) + "|"
+    return "\n".join([header, separator] + rows)
+
+
+def format_value(v: Any) -> str:
+    """Format a value for display in a table."""
+    if isinstance(v, float):
+        if abs(v) < 0.01 or abs(v) > 1000:
+            return f"{v:.2e}"
+        return f"{v:.3f}"
+    elif isinstance(v, bool):
+        return "✅ Yes" if v else "❌ No"
+    return str(v)
+
+
+def determine_status(score: float, pass_threshold: float = 80, partial_threshold: float = 50) -> str:
+    """Determine track status based on score."""
+    if score >= pass_threshold:
+        return "pass"
+    elif score >= partial_threshold:
+        return "partial"
+    else:
+        return "fail"
+
+
+def robustness_summary(results: Dict, metric_name: str = "accuracy") -> str:
+    """Format robustness test results summary."""
+    if f"{metric_name}_mean" not in results.get("metrics", {}):
+        return "N/A"
+    
+    mean = results["metrics"][f"{metric_name}_mean"]
+    std = results["metrics"].get(f"{metric_name}_std", 0.0)
+    
+    return f"{mean*100:.1f}% ± {std*100:.1f}%"
