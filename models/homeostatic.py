@@ -70,8 +70,8 @@ class HomeostaticEqProp(nn.Module):
         # Temporarily scale weight
         original_weight = self.layers[layer_idx].weight
         scaled_weight = original_weight * self.layer_scales[layer_idx]
-        if layer_idx == 0:
-            print(f"DEBUG: Layer 0 scale={self.layer_scales[layer_idx].item():.4f} W_norm={torch.norm(scaled_weight).item():.4f}")
+        #if layer_idx == 0:
+        #    print(f"DEBUG: Layer 0 scale={self.layer_scales[layer_idx].item():.4f} W_norm={torch.norm(scaled_weight).item():.4f}")
         
         # Create a temporary container to use shared utility
         # Wrapper to match utils interface if needed, but simple linear suffices
@@ -149,8 +149,8 @@ class HomeostaticEqProp(nn.Module):
                 factor = max(0.5, factor) # Safety clamp
                 
                 self.layer_scales[i] *= factor
-                if i == 0:
-                     print(f"DEBUG: Braking layer {i}. Vel={velocity:.5f} L={current_L:.4f} Factor={factor:.4f} NewScale={self.layer_scales[i].item():.4f}")
+                #if i == 0:
+                #     print(f"DEBUG: Braking layer {i}. Vel={velocity:.5f} L={current_L:.4f} Factor={factor:.4f} NewScale={self.layer_scales[i].item():.4f}")
                 brake_total += (1.0 - factor)
                 layers_braked += 1
                 
