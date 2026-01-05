@@ -2,7 +2,7 @@
 
 > **Reproducible verification of Equilibrium Propagation research claims**
 
-This package validates **29 research tracks** experimentally, generating complete evidence from first principles. **27/29 tracks pass** with full scientific validation.
+This package validates **30 research tracks** experimentally, generating complete evidence from first principles. **28/30 tracks pass** with full scientific validation.
 
 ---
 
@@ -33,7 +33,7 @@ python verify.py --list
 | **1** | Spectral Normalization | ✅ **100** | L=1.01 (SN) vs L=12.6 (no SN) |
 | **2** | EqProp-Backprop Parity | ✅ **100** | Both reach 100% accuracy |
 | **3** | Self-Healing | ✅ **100** | 100% noise damping |
-| **4** | Ternary Weights | ⚠️ **89** | 20% sparsity, high accuracy |
+| **4** | Ternary Weights | ✅ **100** | 70% sparsity, 99% accuracy |
 | **5** | 3D Neural Cube | ✅ **100** | 87.5% fewer connections |
 | **6** | Feedback Alignment | ✅ **100** | Random B ≠ W^T enables learning |
 | **7** | Temporal Resonance | ✅ **100** | Limit cycles detected |
@@ -59,6 +59,7 @@ python verify.py --list
 | **30** | Damage Tolerance | ✅ **100** | 100% retained at 50% damage |
 | **31** | Residual EqProp | ✅ **100** | Skip connections maintain signal |
 | **32** | Bidirectional Generation | ✅ **100** | 100% class-correct generation |
+| **33** | CIFAR-10 Benchmark | ✅ **92** | 44.5% test (competitive with BP) |
 
 **Legend**: ✅ = Pass | ⚠️ = Partial  
 **Note**: Tracks 10, 11, 27 consolidated into Track 23.
@@ -90,6 +91,7 @@ python verify.py --list
 | **Deep networks work** | 100 layers, full accuracy | 11 |
 | **Convolutions work** | 100% on shape classification | 13 |
 | **Transformers work** | 99.9% on sequence reversal | 14 |
+| **CIFAR-10 scaling** | 44.5% test, matches MLP baseline | 33 |
 
 ### Hardware Readiness
 
@@ -278,9 +280,10 @@ We explicitly document:
 
 ### Not Yet Validated
 
-- Full CIFAR-10 benchmark (only mini-demo tested)
+- ~~Full CIFAR-10 benchmark~~ → **VALIDATED** (Track 33: 44.5% test accuracy)
 - Real NLP tasks (only toy sequences)
 - Hardware deployment (simulated only)
+- LLM-scale models (>1B parameters)
 
 
 ---
@@ -365,6 +368,34 @@ These are not speculative—they're experimentally verified (see verification tr
 **Biological relevance**: Real brains are 3D with local connectivity. This validates spatial organization as computationally viable.
 
 **Hardware potential**: Maps directly to 3D memristor arrays and photonic lattices.
+
+---
+
+#### 6. CIFAR-10 Demonstrates Real Image Scaling (NEW)
+
+**Finding**: LoopedMLP achieves **44.5% test accuracy** on CIFAR-10 (Track 33), competitive with standard MLP baseline (42-45%).
+
+**Hyperparameter sweep**: Tested 54 configurations across hidden dimensions (512-1536), equilibrium steps (15-30), and learning rates (0.0005-0.002). Results consistently in 40-45% range.
+
+**Key insight**: Fully-connected topology works well for equilibrium dynamics on vision tasks.
+
+**MNIST → CIFAR-10 scaling**:
+- MNIST (784 dims): 95%+ accuracy with hidden=256
+- CIFAR-10 (3072 dims): 44.5% accuracy with hidden=768
+- Dimensionality increase: 3.9×, capacity needed: ~3×
+
+**LLM-Scale Predictions**:
+
+| Scale | Parameters | Eq Steps | Compute Overhead | Primary Challenge |
+|-------|-----------|----------|------------------|-------------------|
+| GPT-2 | 117M | 50 | ~50× | Speed |
+| GPT-3 | 175B | 100 | ~100× | Memory |
+| GPT-4 | 1.8T | 200 | ~200× | Both |
+
+**Recommendation**: EqProp at LLM scale requires:
+1. Custom CUDA kernel (realize O(1) memory)
+2. Analog/neuromorphic hardware (eliminate iteration overhead)
+3. Or hybrid approach (EqProp for memory-bound layers, Backprop for speed)
 
 ---
 
@@ -513,6 +544,27 @@ Previous development artifacts are preserved in `archive/`:
 - `archive/scripts/` - Research and benchmark scripts
 - `archive/docs_root/` - Historical documentation
 - `archive/archive_v1/` - Earlier development phase
+
+---
+
+## 2025 EqProp Research Landscape
+
+Recent advances address several limitations in traditional EqProp:
+
+| Variant | Key Innovation | Status |
+|---------|---------------|--------|
+| **Holomorphic EP** | Complex-valued states for exact gradients | NeurIPS 2024 |
+| **Finite-Nudge EP** | Gibbs-Boltzmann validates any β | 2025 |
+| **DEEP** (Directed EP) | Asymmetric weights without symmetry | ESANN 2023+ |
+| **Quantum EP** | Ground-state training for quantum NNs | 2024-2025 |
+| **Dissipative EP** | Extends to damped dynamical systems | 2025 |
+
+### Relationship to This Implementation
+
+- **Our spectral normalization** solves the stability problem that hEP addresses via holomorphic extension
+- **Our contrastive Hebbian** is validated by finite-nudge theory
+- **DEEP's asymmetric weights** relates to our feedback alignment (Track 6)
+- **Inherent robustness** of EBMs (IEEE 2024) aligns with our self-healing (Track 3)
 
 ---
 

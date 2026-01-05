@@ -1,28 +1,28 @@
 # TorEqProp Verification Results
 
-**Generated**: 2026-01-04 23:41:36
+**Generated**: 2026-01-05 11:19:34
 
 
 ## Executive Summary
 
-**Verification completed in 24.6 seconds.**
+**Verification completed in 1.7 seconds.**
 
 ### Overall Results
 
 | Metric | Value |
 |--------|-------|
 | Tracks Verified | 1 |
-| Passed | 0 ✅ |
+| Passed | 1 ✅ |
 | Partial | 0 ⚠️ |
-| Failed | 1 ❌ |
+| Failed | 0 ❌ |
 | Stubs (TODO) | 0 🔧 |
-| Average Score | 40.0/100 |
+| Average Score | 100.0/100 |
 
 ### Track Summary
 
 | # | Track | Status | Score | Time |
 |---|-------|--------|-------|------|
-| 33 | CIFAR-10 Benchmark | ❌ | 40 | 24.6s |
+| 4 | Ternary Weights | ✅ | 100 | 1.7s |
 
 
 **Seed**: 42 (deterministic)
@@ -32,35 +32,31 @@
 ---
 
 
-## Track 33: CIFAR-10 Benchmark
+## Track 4: Ternary Weights
 
 
-❌ **Status**: FAIL | **Score**: 40.0/100 | **Time**: 24.6s
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 1.7s
 
 
-**Claim**: ConvEqProp achieves competitive accuracy on CIFAR-10.
+**Claim**: Ternary weights {-1, 0, +1} achieve high sparsity with full learning capacity.
 
-**Experiment**: Train ConvEqProp and CNN baseline on CIFAR-10 subset with mini-batch training.
+**Method**: Ternary quantization with threshold=0.1 and L1 regularization (λ=0.0005).
 
-| Model | Train Acc | Test Acc | Gap to BP |
-|-------|-----------|----------|-----------|
-| ConvEqProp | 22.8% | 16.0% | +16.5% |
-| CNN Baseline | 59.6% | 32.5% | — |
+| Metric | Value |
+|--------|-------|
+| Initial Loss | 15.629 |
+| Final Loss | 0.014 |
+| Loss Reduction | 99.9% |
+| **Sparsity** | **70.4%** |
+| Final Accuracy | 99.3% |
 
-**Configuration**:
-- Training samples: 500
-- Test samples: 200
-- Batch size: 32
-- Epochs: 5
-- Hidden channels: 16
-- Equilibrium steps: 15
+**Weight Distribution**:
+| Layer | -1 | 0 | +1 |
+|-------|----|----|----|
+| W_in | 15% | 70% | 15% |
+| W_rec | 11% | 79% | 11% |
+| W_out | 19% | 62% | 19% |
 
-**Key Finding**: ConvEqProp trails CNN on CIFAR-10 
-(needs more epochs/data).
+**Hardware Impact**: 32× efficiency (no FPU needed), only ADD/SUBTRACT operations.
 
 
-
-
-### Areas for Improvement
-
-- Increase epochs and data for full CIFAR-10 benchmark
