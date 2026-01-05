@@ -60,6 +60,12 @@ python verify.py --list
 | **31** | Residual EqProp | ✅ **100** | Skip connections maintain signal |
 | **32** | Bidirectional Generation | ✅ **100** | 100% class-correct generation |
 | **33** | CIFAR-10 Benchmark | ✅ **92** | 44.5% test (competitive with BP) |
+| **34** | CIFAR-10 Breakthrough | ⚠️ **70** | 26% acc in quick mode |
+| **35** | Memory Scaling | ✅ **100** | O(√D) scaling verified |
+| **36** | Energy OOD | ✅ **100** | Logic verified |
+| **37** | Character LM | ⚠️ **60** | 56% acc on pattern task |
+| **38** | Adaptive Compute | ⚠️ **50** | Logic verified |
+| **40** | Hardware Analysis | ✅ **100** | 30-50× FLOP overhead quantified |
 
 **Legend**: ✅ = Pass | ⚠️ = Partial  
 **Note**: Tracks 10, 11, 27 consolidated into Track 23.

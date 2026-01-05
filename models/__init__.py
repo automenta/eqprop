@@ -14,6 +14,7 @@ from .conv_eqprop import ConvEqProp
 from .modern_conv_eqprop import ModernConvEqProp, SimpleConvEqProp
 from .transformer import TransformerEqProp, EqPropAttention
 from .causal_transformer_eqprop import CausalTransformerEqProp
+from .eqprop_diffusion import EqPropDiffusion
 
 __all__ = [
     'LoopedMLP', 'BackpropMLP',
@@ -28,4 +29,5 @@ __all__ = [
     'ModernConvEqProp', 'SimpleConvEqProp',
     'TransformerEqProp', 'EqPropAttention',
     'CausalTransformerEqProp',
+    'EqPropDiffusion',
 ]

@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Optional, List, Dict, Callable
 
 from .notebook import VerificationNotebook, TrackResult
-from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks, engine_validation_tracks, enhanced_validation_tracks
+from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks, engine_validation_tracks, enhanced_validation_tracks, new_tracks
 
 class Verifier:
     """Complete verification suite for all research tracks."""
@@ -70,6 +70,13 @@ class Verifier:
             31: ("Residual EqProp", enhanced_validation_tracks.track_31_residual_eqprop),
             32: ("Bidirectional Generation", enhanced_validation_tracks.track_32_bidirectional_generation),
             33: ("CIFAR-10 Benchmark", enhanced_validation_tracks.track_33_cifar10_benchmark),
+            34: ("CIFAR-10 Breakthrough", new_tracks.track_34_cifar10_breakthrough),
+            35: ("O(1) Memory Scaling", new_tracks.track_35_memory_scaling),
+            36: ("Energy OOD Detection", new_tracks.track_36_energy_ood),
+            37: ("Character LM", new_tracks.track_37_language_modeling),
+            38: ("Adaptive Compute", new_tracks.track_38_adaptive_compute),
+            39: ("EqProp Diffusion", new_tracks.track_39_eqprop_diffusion),
+            40: ("Hardware Analysis", new_tracks.track_40_hardware_analysis),
         }
     
     def print_header(self):
