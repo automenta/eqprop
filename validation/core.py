@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Optional, List, Dict, Callable
 
 from .notebook import VerificationNotebook, TrackResult
-from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks
+from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks, engine_validation_tracks
 
 class Verifier:
     """Complete verification suite for all research tracks."""
@@ -58,6 +58,9 @@ class Verifier:
             19: ("Criticality Analysis", analysis_tracks.track_19_criticality),
             20: ("Transfer Learning", application_tracks.track_20_transfer_learning),
             21: ("Continual Learning", application_tracks.track_21_continual_learning),
+            22: ("Golden Reference Harness", engine_validation_tracks.track_22_golden_reference),
+            23: ("Extreme Depth Signal Probe", engine_validation_tracks.track_23_extreme_depth_signal),
+            24: ("Lazy Updates Wall-Clock", engine_validation_tracks.track_24_lazy_wallclock),
         }
     
     def print_header(self):

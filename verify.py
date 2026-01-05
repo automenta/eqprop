@@ -16,6 +16,9 @@ RESEARCH TRACKS COVERED:
   19. Analysis: Criticality (Edge of Chaos)
   20. App: Transfer Learning
   21. App: Continual Learning
+  22. Engine: Golden Reference Harness (TODO7 Stage 1.1)
+  23. Engine: Extreme Depth Signal Probe (TODO7 Stage 2.1)
+  24. Engine: Lazy Updates Wall-Clock (TODO7 Stage 1.3)
   5. Track 3: Neural Cube 3D Topology (Score: 86.5)
   6. Track 4: Feedback Alignment (Score: 86.5)
   7. Track 5: Temporal Resonance (Score: 61.2)
