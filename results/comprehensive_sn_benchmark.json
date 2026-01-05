@@ -1,0 +1,134 @@
+{
+  "MNIST": [
+    {
+      "test_acc": 91.7,
+      "train_time": 28.49683976173401,
+      "diverged": false,
+      "final_lipschitz": 1.0,
+      "model": "MLP-h64-SN"
+    },
+    {
+      "test_acc": 90.8,
+      "train_time": 19.857300996780396,
+      "diverged": false,
+      "final_lipschitz": 2.254883050918579,
+      "model": "MLP-h64-NoSN"
+    },
+    {
+      "test_acc": 93.5,
+      "train_time": 31.141611576080322,
+      "diverged": false,
+      "final_lipschitz": 1.0,
+      "model": "MLP-h128-SN"
+    },
+    {
+      "test_acc": 93.30000000000001,
+      "train_time": 20.62049889564514,
+      "diverged": false,
+      "final_lipschitz": 2.7115366458892822,
+      "model": "MLP-h128-NoSN"
+    },
+    {
+      "test_acc": 93.5,
+      "train_time": 39.45056414604187,
+      "diverged": false,
+      "final_lipschitz": 1.0,
+      "model": "MLP-h256-SN"
+    },
+    {
+      "test_acc": 94.19999999999999,
+      "train_time": 25.500768184661865,
+      "diverged": false,
+      "final_lipschitz": 3.4763600826263428,
+      "model": "MLP-h256-NoSN"
+    }
+  ],
+  "FashionMNIST": [
+    {
+      "test_acc": 86.6,
+      "train_time": 28.86221694946289,
+      "diverged": false,
+      "final_lipschitz": 1.0,
+      "model": "MLP-h64-SN"
+    },
+    {
+      "test_acc": 86.3,
+      "train_time": 19.57551383972168,
+      "diverged": false,
+      "final_lipschitz": 1.9776166677474976,
+      "model": "MLP-h64-NoSN"
+    },
+    {
+      "test_acc": 86.3,
+      "train_time": 31.744736909866333,
+      "diverged": false,
+      "final_lipschitz": 1.0,
+      "model": "MLP-h128-SN"
+    },
+    {
+      "test_acc": 85.6,
+      "train_time": 21.229572296142578,
+      "diverged": false,
+      "final_lipschitz": 2.61568546295166,
+      "model": "MLP-h128-NoSN"
+    },
+    {
+      "test_acc": 85.9,
+      "train_time": 38.51578164100647,
+      "diverged": false,
+      "final_lipschitz": 1.0,
+      "model": "MLP-h256-SN"
+    },
+    {
+      "test_acc": 84.6,
+      "train_time": 25.0111882686615,
+      "diverged": false,
+      "final_lipschitz": 3.0686659812927246,
+      "model": "MLP-h256-NoSN"
+    }
+  ],
+  "CIFAR10": [
+    {
+      "test_acc": 42.5,
+      "train_time": 32.58812975883484,
+      "diverged": false,
+      "final_lipschitz": 1.0,
+      "model": "MLP-h64-SN"
+    },
+    {
+      "test_acc": 39.800000000000004,
+      "train_time": 22.681602478027344,
+      "diverged": false,
+      "final_lipschitz": 1.7749311923980713,
+      "model": "MLP-h64-NoSN"
+    },
+    {
+      "test_acc": 41.099999999999994,
+      "train_time": 35.7869815826416,
+      "diverged": false,
+      "final_lipschitz": 1.0,
+      "model": "MLP-h128-SN"
+    },
+    {
+      "test_acc": 40.300000000000004,
+      "train_time": 24.43842649459839,
+      "diverged": false,
+      "final_lipschitz": 2.756981611251831,
+      "model": "MLP-h128-NoSN"
+    },
+    {
+      "test_acc": 40.9,
+      "train_time": 47.181777238845825,
+      "diverged": false,
+      "final_lipschitz": 1.0,
+      "model": "MLP-h256-SN"
+    },
+    {
+      "test_acc": 39.2,
+      "train_time": 33.99661445617676,
+      "diverged": false,
+      "final_lipschitz": 3.6327879428863525,
+      "model": "MLP-h256-NoSN"
+    }
+  ]
+}
