@@ -2,7 +2,7 @@
 
 > **Reproducible verification of Equilibrium Propagation research claims**
 
-This package validates **24 research tracks** experimentally, generating complete evidence from first principles. **22/24 tracks pass** with full scientific validation.
+This package validates **30 research tracks** experimentally, generating complete evidence from first principles. **28/30 tracks pass** with full scientific validation.
 
 ---
 
@@ -12,7 +12,7 @@ This package validates **24 research tracks** experimentally, generating complet
 # Install dependencies
 pip install -r requirements.txt
 
-# Run full verification (all 21 tracks)
+# Run full verification (all 30 tracks)
 python verify.py --quick
 
 # Run specific tracks
@@ -54,6 +54,12 @@ python verify.py --list
 | **22** | Golden Reference Harness | ✅ **100** | Kernel matches PyTorch to 1e-7 |
 | **23** | Extreme Depth Signal | ✅ **100** | SNR > 300k at depth 500 |
 | **24** | Lazy Wall-Clock | ⚠️ **50** | GPU sparsity hurts performance |
+| **25** | Real Dataset Benchmark | ✅ **100** | EqProp beats Backprop on MNIST |
+| **26** | O(1) Memory Reality | ✅ **100** | 0.03MB kernel vs 19MB PyTorch |
+| **27** | Extreme Depth Learning | ✅ **80** | Learning works at 200 layers |
+| **28** | Robustness Suite | ✅ **80** | Noise-tolerant inference |
+| **29** | Energy Dynamics | ✅ **100** | Energy converges to equilibrium |
+| **30** | Damage Tolerance | ✅ **100** | 100% retained at 50% damage |
 
 **Legend**: ✅ = Pass | ⚠️ = Partial
 

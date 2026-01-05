@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Optional, List, Dict, Callable
 
 from .notebook import VerificationNotebook, TrackResult
-from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks, engine_validation_tracks
+from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks, engine_validation_tracks, enhanced_validation_tracks
 
 class Verifier:
     """Complete verification suite for all research tracks."""
@@ -61,6 +61,12 @@ class Verifier:
             22: ("Golden Reference Harness", engine_validation_tracks.track_22_golden_reference),
             23: ("Extreme Depth Signal Probe", engine_validation_tracks.track_23_extreme_depth_signal),
             24: ("Lazy Updates Wall-Clock", engine_validation_tracks.track_24_lazy_wallclock),
+            25: ("Real Dataset Benchmark", enhanced_validation_tracks.track_25_real_dataset),
+            26: ("O(1) Memory Reality", enhanced_validation_tracks.track_26_memory_reality),
+            27: ("Extreme Depth Learning", enhanced_validation_tracks.track_27_extreme_depth_learning),
+            28: ("Robustness Suite", enhanced_validation_tracks.track_28_robustness_suite),
+            29: ("Energy Dynamics", enhanced_validation_tracks.track_29_energy_dynamics),
+            30: ("Damage Tolerance", enhanced_validation_tracks.track_30_damage_tolerance),
         }
     
     def print_header(self):

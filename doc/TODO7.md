@@ -1,3 +1,5 @@
+### Issues
+
 **1. The "Vanishing Gradient" Risk**
 *   **Repo Status:** **Acknowledged, not Solved.**
     *   **Findings:** Track 11 ("Infinite Depth") verifies that gradients *can* propagate through 100 layers. However, the README explicitly includes a disclaimer: *"Gradient signal decay (even with L < 1) is an open question for scaling to 10,000 layers."*
