@@ -1,0 +1,253 @@
+{
+  "claim_id": "full_results",
+  "timestamp": "2025-12-30T18:08:38.148809",
+  "data": {
+    "trials": [
+      {
+        "trial_id": "eqprop_xor_6887_1767136051812",
+        "algorithm": "eqprop",
+        "task": "xor",
+        "config": {
+          "epochs": 2,
+          "d_model": 8,
+          "max_iters": 20,
+          "batch_size": 16,
+          "lr": 0.001,
+          "beta": 0.3,
+          "damping": 0.8,
+          "attention_type": "softmax"
+        },
+        "seed": 6887,
+        "performance": 0.4875,
+        "performance_metric": "accuracy",
+        "cost": {
+          "wall_time_seconds": 12.811426877975464,
+          "peak_memory_mb": 0.0,
+          "total_iterations": 0,
+          "param_count": 0,
+          "epochs_completed": 0
+        },
+        "status": "complete",
+        "error": "",
+        "tier": "micro",
+        "started_at": "2025-12-30T18:07:31.812415",
+        "completed_at": "2025-12-30T18:07:44.623867"
+      },
+      {
+        "trial_id": "eqprop_xor_2483_1767136036997",
+        "algorithm": "eqprop",
+        "task": "xor",
+        "config": {
+          "epochs": 2,
+          "d_model": 8,
+          "max_iters": 20,
+          "batch_size": 16,
+          "lr": 0.001,
+          "beta": 0.4,
+          "damping": 0.8,
+          "attention_type": "softmax"
+        },
+        "seed": 2483,
+        "performance": 0.4925,
+        "performance_metric": "accuracy",
+        "cost": {
+          "wall_time_seconds": 14.711093425750732,
+          "peak_memory_mb": 0.0,
+          "total_iterations": 0,
+          "param_count": 0,
+          "epochs_completed": 0
+        },
+        "status": "complete",
+        "error": "",
+        "tier": "micro",
+        "started_at": "2025-12-30T18:07:16.997710",
+        "completed_at": "2025-12-30T18:07:31.708824"
+      },
+      {
+        "trial_id": "eqprop_xor_9533_1767136026558",
+        "algorithm": "eqprop",
+        "task": "xor",
+        "config": {
+          "epochs": 2,
+          "d_model": 8,
+          "max_iters": 10,
+          "batch_size": 16,
+          "lr": 0.001,
+          "beta": 0.2,
+          "damping": 0.9,
+          "attention_type": "linear"
+        },
+        "seed": 9533,
+        "performance": 0.4925,
+        "performance_metric": "accuracy",
+        "cost": {
+          "wall_time_seconds": 10.335600852966309,
+          "peak_memory_mb": 0.0,
+          "total_iterations": 0,
+          "param_count": 0,
+          "epochs_completed": 0
+        },
+        "status": "complete",
+        "error": "",
+        "tier": "micro",
+        "started_at": "2025-12-30T18:07:06.558198",
+        "completed_at": "2025-12-30T18:07:16.893819"
+      },
+      {
+        "trial_id": "eqprop_xor_9174_1767136018314",
+        "algorithm": "eqprop",
+        "task": "xor",
+        "config": {
+          "epochs": 2,
+          "d_model": 8,
+          "max_iters": 5,
+          "batch_size": 16,
+          "lr": 0.002,
+          "beta": 0.3,
+          "damping": 0.9,
+          "attention_type": "linear"
+        },
+        "seed": 9174,
+        "performance": 0.745,
+        "performance_metric": "accuracy",
+        "cost": {
+          "wall_time_seconds": 8.140224933624268,
+          "peak_memory_mb": 0.0,
+          "total_iterations": 0,
+          "param_count": 0,
+          "epochs_completed": 0
+        },
+        "status": "complete",
+        "error": "",
+        "tier": "micro",
+        "started_at": "2025-12-30T18:06:58.314463",
+        "completed_at": "2025-12-30T18:07:06.454710"
+      },
+      {
+        "trial_id": "eqprop_xor_7236_1767136010050",
+        "algorithm": "eqprop",
+        "task": "xor",
+        "config": {
+          "epochs": 2,
+          "d_model": 8,
+          "max_iters": 5,
+          "batch_size": 16,
+          "lr": 0.002,
+          "beta": 0.15,
+          "damping": 0.9,
+          "attention_type": "linear"
+        },
+        "seed": 7236,
+        "performance": 0.745,
+        "performance_metric": "accuracy",
+        "cost": {
+          "wall_time_seconds": 8.16100811958313,
+          "peak_memory_mb": 0.0,
+          "total_iterations": 0,
+          "param_count": 0,
+          "epochs_completed": 0
+        },
+        "status": "complete",
+        "error": "",
+        "tier": "micro",
+        "started_at": "2025-12-30T18:06:50.050039",
+        "completed_at": "2025-12-30T18:06:58.211067"
+      },
+      {
+        "trial_id": "eqprop_xor_7646_1767135998345",
+        "algorithm": "eqprop",
+        "task": "xor",
+        "config": {
+          "epochs": 2,
+          "d_model": 8,
+          "max_iters": 20,
+          "batch_size": 16,
+          "lr": 0.001,
+          "beta": 0.22,
+          "damping": 0.9,
+          "attention_type": "linear"
+        },
+        "seed": 7646,
+        "performance": 0.7425,
+        "performance_metric": "accuracy",
+        "cost": {
+          "wall_time_seconds": 11.6015043258667,
+          "peak_memory_mb": 0.0,
+          "total_iterations": 0,
+          "param_count": 0,
+          "epochs_completed": 0
+        },
+        "status": "complete",
+        "error": "",
+        "tier": "micro",
+        "started_at": "2025-12-30T18:06:38.345219",
+        "completed_at": "2025-12-30T18:06:49.946742"
+      },
+      {
+        "trial_id": "eqprop_xor_3020_1767135991174",
+        "algorithm": "eqprop",
+        "task": "xor",
+        "config": {
+          "epochs": 2,
+          "d_model": 8,
+          "max_iters": 3,
+          "batch_size": 16,
+          "lr": 0.002,
+          "beta": 0.2,
+          "damping": 0.9,
+          "attention_type": "softmax"
+        },
+        "seed": 3020,
+        "performance": 0.505,
+        "performance_metric": "accuracy",
+        "cost": {
+          "wall_time_seconds": 7.067602157592773,
+          "peak_memory_mb": 0.0,
+          "total_iterations": 0,
+          "param_count": 0,
+          "epochs_completed": 0
+        },
+        "status": "complete",
+        "error": "",
+        "tier": "micro",
+        "started_at": "2025-12-30T18:06:31.174285",
+        "completed_at": "2025-12-30T18:06:38.241911"
+      },
+      {
+        "trial_id": "eqprop_xor_3627_1767135979970",
+        "algorithm": "eqprop",
+        "task": "xor",
+        "config": {
+          "epochs": 2,
+          "d_model": 8,
+          "max_iters": 20,
+          "batch_size": 16,
+          "lr": 0.001,
+          "beta": 0.25,
+          "damping": 0.9,
+          "attention_type": "softmax"
+        },
+        "seed": 3627,
+        "performance": 0.5075,
+        "performance_metric": "accuracy",
+        "cost": {
+          "wall_time_seconds": 11.100794792175293,
+          "peak_memory_mb": 0.0,
+          "total_iterations": 0,
+          "param_count": 0,
+          "epochs_completed": 0
+        },
+        "status": "complete",
+        "error": "",
+        "tier": "micro",
+        "started_at": "2025-12-30T18:06:19.970213",
+        "completed_at": "2025-12-30T18:06:31.071035"
+      }
+    ]
+  },
+  "metadata": {
+    "n_trials": 8,
+    "timestamp": "2025-12-30T18:08:38.148801"
+  },
+  "checksum": "17d1f75b7ca87ceac44f7f2780e42f4babf075f9c634cee66e5a5fa4a74b6b84"
+}

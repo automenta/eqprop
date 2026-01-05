@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Learning Dynamics Animation</title>
+<style>
+    body { font-family: sans-serif; text-align: center; }
+    #container { width: 800px; margin: 0 auto; border: 1px solid #ccc; }
+    img { width: 100%; }
+</style>
+</head>
+<body>
+    <h1>Backprop vs EqProp Learning Dynamics</h1>
+    <div id="container">
+        <img id="player" src="frame_000.svg">
+    </div>
+    <p>Epoch: <span id="epoch">0</span></p>
+    <script>
+        const frames = 26;
+        let current = 0;
+        const img = document.getElementById('player');
+        const ep = document.getElementById('epoch');
+        
+        setInterval(() => {
+            current = (current + 1) % frames;
+            img.src = `frame_${String(current).padStart(3, '0')}.svg`;
+            ep.innerText = current * 2;
+        }, 200);
+    </script>
+</body>
+</html>

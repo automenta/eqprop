@@ -1,0 +1,27 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+<rect width="100%" height="100%" fill="white"/>
+<line x1="50" y1="550" x2="750" y2="550" stroke="black" stroke-width="2"/>
+<line x1="50" y1="550" x2="50" y2="50" stroke="black" stroke-width="2"/>
+<line x1="50" y1="300.0" x2="750" y2="300.0" stroke="red" stroke-dasharray="5,5" stroke-width="2"/>
+<text x="740" y="295.0" fill="red" text-anchor="end">Stability Limit (L=1)</text>
+<rect x="100" y="321.4494466781616" width="60" height="228.55055332183838" fill="#ff9999"/>
+<text x="130.0" y="316.4494466781616" text-anchor="middle" font-size="12">0.91</text>
+<rect x="160" y="403.385791182518" width="60" height="146.614208817482" fill="#66b3ff"/>
+<text x="190.0" y="398.385791182518" text-anchor="middle" font-size="12">0.59</text>
+<text x="160" y="570" text-anchor="middle" font-weight="bold">LoopedMLP</text>
+<rect x="320" y="255.2440345287323" width="60" height="294.7559654712677" fill="#ff9999"/>
+<text x="350.0" y="250.2440345287323" text-anchor="middle" font-size="12">1.18</text>
+<rect x="380" y="403.73713076114655" width="60" height="146.26286923885345" fill="#66b3ff"/>
+<text x="410.0" y="398.73713076114655" text-anchor="middle" font-size="12">0.59</text>
+<text x="380" y="570" text-anchor="middle" font-weight="bold">ToroidalMLP</text>
+<rect x="540" y="50.0" width="60" height="500.0" fill="#ff9999"/>
+<text x="570.0" y="45.0" text-anchor="middle" font-size="12">15.47</text>
+<rect x="600" y="416.8636679649353" width="60" height="133.1363320350647" fill="#66b3ff"/>
+<text x="630.0" y="411.8636679649353" text-anchor="middle" font-size="12">0.53</text>
+<text x="600" y="570" text-anchor="middle" font-weight="bold">ModernEqProp</text>
+<rect x="600" y="50" width="20" height="20" fill="#ff9999"/>
+<text x="630" y="65" alignment-baseline="middle">Without SN</text>
+<rect x="600" y="80" width="20" height="20" fill="#66b3ff"/>
+<text x="630" y="95" alignment-baseline="middle">With SN</text>
+<text x="400.0" y="25.0" text-anchor="middle" font-size="20" font-weight="bold">Spectral Normalization & Stability</text>
+</svg>

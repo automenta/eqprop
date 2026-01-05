@@ -1,0 +1,114 @@
+{
+  "BackpropMLP": {
+    "mean_acc": 97.33333333333334,
+    "std_acc": 0.48432210483785265,
+    "mean_time": 2.1208513259887694,
+    "seeds": [
+      96.38888888888889,
+      97.5,
+      97.5,
+      97.5,
+      97.77777777777777
+    ],
+    "histories": [
+      [
+        "train_loss",
+        "test_acc"
+      ],
+      [
+        "train_loss",
+        "test_acc"
+      ],
+      [
+        "train_loss",
+        "test_acc"
+      ],
+      [
+        "train_loss",
+        "test_acc"
+      ],
+      [
+        "train_loss",
+        "test_acc"
+      ]
+    ]
+  },
+  "LoopedMLP (SN)": {
+    "mean_acc": 95.72222222222221,
+    "std_acc": 0.22222222222222285,
+    "mean_time": 37.37973985671997,
+    "seeds": [
+      95.83333333333333,
+      95.83333333333333,
+      95.27777777777777,
+      95.83333333333333,
+      95.83333333333333
+    ],
+    "histories": [
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ]
+    ]
+  },
+  "ModernEqProp (SN)": {
+    "mean_acc": 95.33333333333333,
+    "std_acc": 0.9362388636862599,
+    "mean_time": 57.136783599853516,
+    "seeds": [
+      95.27777777777777,
+      95.55555555555556,
+      95.83333333333333,
+      93.61111111111111,
+      96.38888888888889
+    ],
+    "histories": [
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ]
+    ]
+  }
+}

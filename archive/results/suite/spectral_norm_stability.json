@@ -1,0 +1,26 @@
+[
+  {
+    "model": "LoopedMLP",
+    "L_without_sn": 0.7638163566589355,
+    "L_with_sn": 0.5921868880589803,
+    "acc_without_sn": 0.48333332935969037,
+    "acc_with_sn": 0.48333332935969037,
+    "contraction_maintained": true
+  },
+  {
+    "model": "ToroidalMLP",
+    "L_without_sn": 0.997075359026591,
+    "L_with_sn": 0.5898044109344482,
+    "acc_without_sn": 0.5200000007947286,
+    "acc_with_sn": 0.8900000055631002,
+    "contraction_maintained": true
+  },
+  {
+    "model": "ModernEqProp",
+    "L_without_sn": 21.07502206166585,
+    "L_with_sn": 0.58136385679245,
+    "acc_without_sn": 0.46333332856496173,
+    "acc_with_sn": 0.4399999976158142,
+    "contraction_maintained": true
+  }
+]

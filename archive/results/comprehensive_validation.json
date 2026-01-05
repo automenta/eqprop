@@ -1,0 +1,182 @@
+{
+  "adversarial_healing": {
+    "mean": 0.0,
+    "std": 0.0,
+    "ci_lower": 0.0,
+    "ci_upper": 0.0,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "raw_results": [
+      {
+        "seed": 0,
+        "ablation_15": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "ablation_30": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "ablation_50": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "noise_damping": {
+          "damping_ratio": 7.95758299839252e-08,
+          "initial_diff": 34.310211181640625,
+          "final_diff": 2.7302635317028034e-06
+        }
+      },
+      {
+        "seed": 1,
+        "ablation_15": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "ablation_30": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "ablation_50": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "noise_damping": {
+          "damping_ratio": 8.957551367802816e-08,
+          "initial_diff": 34.176231384277344,
+          "final_diff": 3.0613534818257904e-06
+        }
+      },
+      {
+        "seed": 2,
+        "ablation_15": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "ablation_30": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "ablation_50": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "noise_damping": {
+          "damping_ratio": 8.945173544508056e-08,
+          "initial_diff": 35.110443115234375,
+          "final_diff": 3.1406900689034956e-06
+        }
+      },
+      {
+        "seed": 3,
+        "ablation_15": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "ablation_30": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "ablation_50": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "noise_damping": {
+          "damping_ratio": 9.019224078906073e-08,
+          "initial_diff": 33.39954376220703,
+          "final_diff": 3.012379693245748e-06
+        }
+      },
+      {
+        "seed": 4,
+        "ablation_15": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "ablation_30": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "ablation_50": {
+          "eqprop_functional": 1.0,
+          "bp_functional": 1.0,
+          "advantage": 0.0
+        },
+        "noise_damping": {
+          "damping_ratio": 8.236570201450862e-08,
+          "initial_diff": 34.45264434814453,
+          "final_diff": 2.837716237991117e-06
+        }
+      }
+    ]
+  },
+  "neural_cube": {
+    "mean": 0.9998240809015133,
+    "std": 0.00011841229245838205,
+    "ci_lower": 0.9996770526210229,
+    "ci_upper": 0.9999711091820037,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "raw_results": [
+      {
+        "seed": 0,
+        "cube_learning": 0.9999002574452464,
+        "flat_learning": 0.9999707689305324,
+        "cube_neurons": 216,
+        "cube_advantage": -7.051148528602891e-05
+      },
+      {
+        "seed": 1,
+        "cube_learning": 0.9999213172761524,
+        "flat_learning": 0.9999660794041028,
+        "cube_neurons": 216,
+        "cube_advantage": -4.476212795034851e-05
+      },
+      {
+        "seed": 2,
+        "cube_learning": 0.9998820049177194,
+        "flat_learning": 0.9999625951354623,
+        "cube_neurons": 216,
+        "cube_advantage": -8.059021774287078e-05
+      },
+      {
+        "seed": 3,
+        "cube_learning": 0.9998196239362248,
+        "flat_learning": 0.9999708163871724,
+        "cube_neurons": 216,
+        "cube_advantage": -0.00015119245094763478
+      },
+      {
+        "seed": 4,
+        "cube_learning": 0.999597200932223,
+        "flat_learning": 0.9999675670270141,
+        "cube_neurons": 216,
+        "cube_advantage": -0.00037036609479101923
+      }
+    ]
+  }
+}

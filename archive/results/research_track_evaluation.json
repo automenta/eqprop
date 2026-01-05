@@ -1,0 +1,101 @@
+{
+  "ranking": [
+    {
+      "rank": 1,
+      "track": "Adversarial Healing",
+      "composite_score": 87.99999753553377,
+      "viability": 85,
+      "novelty": 80,
+      "evidence": 99.99999178511253,
+      "publication": "high",
+      "finding": "Noise damped by 100% via contraction",
+      "metrics": {
+        "damping_ratio": 8.214887470320557e-08
+      }
+    },
+    {
+      "rank": 2,
+      "track": "Ternary Weights",
+      "composite_score": 87.35444238558227,
+      "viability": 80,
+      "novelty": 85,
+      "evidence": 99.51480795194094,
+      "publication": "high",
+      "finding": "47% sparsity with 100% learning capacity",
+      "metrics": {
+        "sparsity": 0.4689589038337629,
+        "bit_ops": 399872,
+        "learning": 0.9951480795194093
+      }
+    },
+    {
+      "rank": 3,
+      "track": "Feedback Alignment",
+      "composite_score": 86.49854256643175,
+      "viability": 85,
+      "novelty": 75,
+      "evidence": 99.99514188810586,
+      "publication": "medium",
+      "finding": "Random feedback enables 100% learning",
+      "metrics": {
+        "learning": 0.9999514188810587,
+        "avg_angle": -0.0004833333271866043
+      }
+    },
+    {
+      "rank": 4,
+      "track": "Neural Cube (3D)",
+      "composite_score": 86.49710436033611,
+      "viability": 70,
+      "novelty": 95,
+      "evidence": 99.99034786778702,
+      "publication": "high",
+      "finding": "3D topology learns (100%), 216 neurons",
+      "metrics": {
+        "learning": 0.9999034786778702,
+        "neurons": 216
+      }
+    },
+    {
+      "rank": 5,
+      "track": "Temporal Resonance",
+      "composite_score": 61.16410446166992,
+      "viability": 75,
+      "novelty": 90,
+      "evidence": 13.880348205566406,
+      "publication": "medium",
+      "finding": "Limit cycles: True, retention: 0.14",
+      "metrics": {
+        "cycle_detected": true,
+        "context_retention": 0.13880348205566406
+      }
+    },
+    {
+      "rank": 6,
+      "track": "Homeostatic Stability",
+      "composite_score": 59.0,
+      "viability": 50,
+      "novelty": 90,
+      "evidence": 40,
+      "publication": "medium",
+      "finding": "Needs tuning",
+      "metrics": {
+        "lipschitz_before": 1.0500000715255737,
+        "lipschitz_after": 1.0500000715255737,
+        "stable": false
+      }
+    },
+    {
+      "rank": 7,
+      "track": "Gradient Alignment",
+      "composite_score": 36.51151638080316,
+      "viability": 30,
+      "novelty": 70,
+      "evidence": 11.705054602677205,
+      "publication": "low",
+      "finding": "Weak alignment, implementation may need refinement",
+      "metrics": {
+        "5": {
+          "avg_sim": 0.20728169594492232,
+          "min_sim": 0.016510147601366043,
+          "passed": 

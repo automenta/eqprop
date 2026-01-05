@@ -1,0 +1,404 @@
+
+======================================================================
+  TorEqProp Research Campaign
+======================================================================
+  Tasks: tiny_lm,mnist
+  Trials per algorithm: 10
+  Seeds: [0, 1, 2]
+  Total trials: 60
+  Estimated time: 120 min
+======================================================================
+
+======================================================================
+📋 TASK 1/1: TINY_LM,MNIST
+======================================================================
+
+======================================================================
+  TorEqProp Competitive Hyperparameter Optimization
+======================================================================
+  Task: tiny_lm,mnist
+  Strategy: random
+  Trials per algorithm: 10
+  Epochs per trial: 4
+  EqProp search space: 13824 configs
+  Baseline search space: 180 configs
+======================================================================
+
+----------------------------------------------------------------------
+🔋 Phase 1: EqProp Hyperparameter Search
+----------------------------------------------------------------------
+
+📊 Trial 1/10 seed 0: eq_tiny_lm,mnist_0_s0
+   Config: β=0.1, damping=0.7, iters=50, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 1/10 seed 1: eq_tiny_lm,mnist_0_s1
+   Config: β=0.1, damping=0.7, iters=50, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 1/10 seed 2: eq_tiny_lm,mnist_0_s2
+   Config: β=0.1, damping=0.7, iters=50, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 2/10 seed 0: eq_tiny_lm,mnist_1_s0
+   Config: β=0.1, damping=0.95, iters=10, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 2/10 seed 1: eq_tiny_lm,mnist_1_s1
+   Config: β=0.1, damping=0.95, iters=10, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 2/10 seed 2: eq_tiny_lm,mnist_1_s2
+   Config: β=0.1, damping=0.95, iters=10, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 3/10 seed 0: eq_tiny_lm,mnist_2_s0
+   Config: β=0.05, damping=0.8, iters=100, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 3/10 seed 1: eq_tiny_lm,mnist_2_s1
+   Config: β=0.05, damping=0.8, iters=100, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 3/10 seed 2: eq_tiny_lm,mnist_2_s2
+   Config: β=0.05, damping=0.8, iters=100, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 4/10 seed 0: eq_tiny_lm,mnist_3_s0
+   Config: β=0.3, damping=0.9, iters=50, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 4/10 seed 1: eq_tiny_lm,mnist_3_s1
+   Config: β=0.3, damping=0.9, iters=50, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 4/10 seed 2: eq_tiny_lm,mnist_3_s2
+   Config: β=0.3, damping=0.9, iters=50, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 5/10 seed 0: eq_tiny_lm,mnist_4_s0
+   Config: β=0.1, damping=0.9, iters=50, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 5/10 seed 1: eq_tiny_lm,mnist_4_s1
+   Config: β=0.1, damping=0.9, iters=50, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 5/10 seed 2: eq_tiny_lm,mnist_4_s2
+   Config: β=0.1, damping=0.9, iters=50, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 6/10 seed 0: eq_tiny_lm,mnist_5_s0
+   Config: β=0.3, damping=0.7, iters=50, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 6/10 seed 1: eq_tiny_lm,mnist_5_s1
+   Config: β=0.3, damping=0.7, iters=50, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 6/10 seed 2: eq_tiny_lm,mnist_5_s2
+   Config: β=0.3, damping=0.7, iters=50, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 7/10 seed 0: eq_tiny_lm,mnist_6_s0
+   Config: β=0.2, damping=0.9, iters=10, d=128
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 7/10 seed 1: eq_tiny_lm,mnist_6_s1
+   Config: β=0.2, damping=0.9, iters=10, d=128
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 7/10 seed 2: eq_tiny_lm,mnist_6_s2
+   Config: β=0.2, damping=0.9, iters=10, d=128
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 8/10 seed 0: eq_tiny_lm,mnist_7_s0
+   Config: β=0.25, damping=0.8, iters=50, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 8/10 seed 1: eq_tiny_lm,mnist_7_s1
+   Config: β=0.25, damping=0.8, iters=50, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 8/10 seed 2: eq_tiny_lm,mnist_7_s2
+   Config: β=0.25, damping=0.8, iters=50, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 9/10 seed 0: eq_tiny_lm,mnist_8_s0
+   Config: β=0.15, damping=0.8, iters=20, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 9/10 seed 1: eq_tiny_lm,mnist_8_s1
+   Config: β=0.15, damping=0.8, iters=20, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 9/10 seed 2: eq_tiny_lm,mnist_8_s2
+   Config: β=0.15, damping=0.8, iters=20, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 10/10 seed 0: eq_tiny_lm,mnist_9_s0
+   Config: β=0.05, damping=0.8, iters=10, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 10/10 seed 1: eq_tiny_lm,mnist_9_s1
+   Config: β=0.05, damping=0.8, iters=10, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 10/10 seed 2: eq_tiny_lm,mnist_9_s2
+   Config: β=0.05, damping=0.8, iters=10, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+----------------------------------------------------------------------
+⚡ Phase 2: Baseline Hyperparameter Search
+----------------------------------------------------------------------
+
+📊 Trial 1/10 seed 0: bp_tiny_lm,mnist_0_s0
+   Config: lr=0.001, opt=adam, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 1/10 seed 1: bp_tiny_lm,mnist_0_s1
+   Config: lr=0.001, opt=adam, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 1/10 seed 2: bp_tiny_lm,mnist_0_s2
+   Config: lr=0.001, opt=adam, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 2/10 seed 0: bp_tiny_lm,mnist_1_s0
+   Config: lr=0.002, opt=adam, d=128
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 2/10 seed 1: bp_tiny_lm,mnist_1_s1
+   Config: lr=0.002, opt=adam, d=128
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 2/10 seed 2: bp_tiny_lm,mnist_1_s2
+   Config: lr=0.002, opt=adam, d=128
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 3/10 seed 0: bp_tiny_lm,mnist_2_s0
+   Config: lr=0.005, opt=adamw, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 3/10 seed 1: bp_tiny_lm,mnist_2_s1
+   Config: lr=0.005, opt=adamw, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 3/10 seed 2: bp_tiny_lm,mnist_2_s2
+   Config: lr=0.005, opt=adamw, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 4/10 seed 0: bp_tiny_lm,mnist_3_s0
+   Config: lr=0.005, opt=adamw, d=128
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 4/10 seed 1: bp_tiny_lm,mnist_3_s1
+   Config: lr=0.005, opt=adamw, d=128
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 4/10 seed 2: bp_tiny_lm,mnist_3_s2
+   Config: lr=0.005, opt=adamw, d=128
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 5/10 seed 0: bp_tiny_lm,mnist_4_s0
+   Config: lr=0.005, opt=adamw, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 5/10 seed 1: bp_tiny_lm,mnist_4_s1
+   Config: lr=0.005, opt=adamw, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 5/10 seed 2: bp_tiny_lm,mnist_4_s2
+   Config: lr=0.005, opt=adamw, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 6/10 seed 0: bp_tiny_lm,mnist_5_s0
+   Config: lr=0.0005, opt=adam, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 6/10 seed 1: bp_tiny_lm,mnist_5_s1
+   Config: lr=0.0005, opt=adam, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 6/10 seed 2: bp_tiny_lm,mnist_5_s2
+   Config: lr=0.0005, opt=adam, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 7/10 seed 0: bp_tiny_lm,mnist_6_s0
+   Config: lr=0.002, opt=adamw, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 7/10 seed 1: bp_tiny_lm,mnist_6_s1
+   Config: lr=0.002, opt=adamw, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 7/10 seed 2: bp_tiny_lm,mnist_6_s2
+   Config: lr=0.002, opt=adamw, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 8/10 seed 0: bp_tiny_lm,mnist_7_s0
+   Config: lr=0.005, opt=adam, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 8/10 seed 1: bp_tiny_lm,mnist_7_s1
+   Config: lr=0.005, opt=adam, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 8/10 seed 2: bp_tiny_lm,mnist_7_s2
+   Config: lr=0.005, opt=adam, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 9/10 seed 0: bp_tiny_lm,mnist_8_s0
+   Config: lr=0.005, opt=adamw, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 9/10 seed 1: bp_tiny_lm,mnist_8_s1
+   Config: lr=0.005, opt=adamw, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 9/10 seed 2: bp_tiny_lm,mnist_8_s2
+   Config: lr=0.005, opt=adamw, d=256
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 10/10 seed 0: bp_tiny_lm,mnist_9_s0
+   Config: lr=0.001, opt=adamw, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 10/10 seed 1: bp_tiny_lm,mnist_9_s1
+   Config: lr=0.001, opt=adamw, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+📊 Trial 10/10 seed 2: bp_tiny_lm,mnist_9_s2
+   Config: lr=0.001, opt=adamw, d=64
+   ⏳ Running (0s)
+   ✅ Performance: 0.0000, Time: 0.0s
+
+======================================================================
+  HYPEROPT ANALYSIS
+======================================================================
+
+📊 Best Configurations:
+
+  🔋 EqProp Best: 0.0000
+     Config: β=0.1, damping=0.7, iters=50, d=256
+     Time: 0.0s
+
+  ⚡ Baseline Best: 0.0000
+     Config: lr=0.001, opt=adam, d=256
+     Time: 0.0s
+
+📈 Statistical Comparison (all trials):
+   EqProp: 0.0000 ± 0.0000 (n=30)
+   Baseline: 0.0000 ± 0.0000 (n=30)
+   Difference: +0.00%
+   p-value: nan
+   Cohen's d: 0.00
+   Significant: No
+
+⚖️  Matched Comparisons (30 pairs, time_matched):
+   EqProp wins: 0/30
+   Baseline wins: 0/30
+   Ties: 30/30
+   Avg performance diff: +0.0000
+   Avg time ratio (EqProp/Baseline): 1.00x
+
+🎯 Pareto Frontier (performance vs time):
+   Total on frontier: 1
+   EqProp: 1, Baseline: 0
+   🔋 0.0000 @ 0.0s
+
+⏱️  Time-Normalized Analysis:
+   Avg EqProp time: 0.0s
+   Avg Baseline time: 0.0s
+   Speed advantage: 1.0x faster
+   Performance gap: +0.0000
+
+======================================================================
+  VERDICT
+======================================================================
+  📊 No significant difference between EqProp and baseline
+     Δ=+0.0%, p=nan
+  🎯 EqProp dominates Pareto frontier (1/1)
+
+----------------------------------------------------------------------
+  💡 INSIGHTS
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+  📋 RECOMMENDATIONS
+----------------------------------------------------------------------
+======================================================================
+
+✅ tiny_lm,mnist complete in 0.0 min
+
+======================================================================
+  CAMPAIGN COMPLETE
+======================================================================
+  Completed: 1/1 tasks
+  Total time: 0.0 min
+  Tasks: tiny_lm,mnist
+
+----------------------------------------------------------------------
+📊 Combined Analysis
+----------------------------------------------------------------------
+  tiny_lm,mnist: EqProp=0.0000, BP=0.0000 → ⚡ BP (+0.0%)
+======================================================================

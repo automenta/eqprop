@@ -1,0 +1,191 @@
+{
+  "ModernEqProp": {
+    "mean_accuracy": 0.819375,
+    "std_accuracy": 0,
+    "mean_best_accuracy": 0.819375,
+    "mean_epoch_time": 3.1748945713043213,
+    "mean_convergence_steps": 10.0,
+    "param_count": 729610,
+    "seeds": [
+      {
+        "model_name": "ModernEqProp",
+        "seed": 42,
+        "final_accuracy": 0.819375,
+        "best_accuracy": 0.819375,
+        "train_accuracy": 0.801875,
+        "train_loss": 0.7794419234991073,
+        "epoch_time": 3.1748945713043213,
+        "convergence_steps": 10,
+        "param_count": 729610
+      }
+    ]
+  },
+  "SpectralTorEqProp": {
+    "mean_accuracy": 0.849375,
+    "std_accuracy": 0,
+    "mean_best_accuracy": 0.849375,
+    "mean_epoch_time": 4.595152854919434,
+    "mean_convergence_steps": 13.0,
+    "param_count": 337815,
+    "seeds": [
+      {
+        "model_name": "SpectralTorEqProp",
+        "seed": 42,
+        "final_accuracy": 0.849375,
+        "best_accuracy": 0.849375,
+        "train_accuracy": 0.84625,
+        "train_loss": 0.6243091660737992,
+        "epoch_time": 4.595152854919434,
+        "convergence_steps": 13,
+        "param_count": 337815
+      }
+    ]
+  },
+  "DiffTorEqProp": {
+    "mean_accuracy": 0.819375,
+    "std_accuracy": 0,
+    "mean_best_accuracy": 0.819375,
+    "mean_epoch_time": 5.094804048538208,
+    "mean_convergence_steps": 10.0,
+    "param_count": 729610,
+    "seeds": [
+      {
+        "model_name": "DiffTorEqProp",
+        "seed": 42,
+        "final_accuracy": 0.819375,
+        "best_accuracy": 0.819375,
+        "train_accuracy": 0.801875,
+        "train_loss": 0.7794527411460876,
+        "epoch_time": 5.094804048538208,
+        "convergence_steps": 10,
+        "param_count": 729610
+      }
+    ]
+  },
+  "TPEqProp": {
+    "mean_accuracy": 0.843125,
+    "std_accuracy": 0,
+    "mean_best_accuracy": 0.843125,
+    "mean_epoch_time": 3.4954476356506348,
+    "mean_convergence_steps": 10.0,
+    "param_count": 796426,
+    "seeds": [
+      {
+        "model_name": "TPEqProp",
+        "seed": 42,
+        "final_accuracy": 0.843125,
+        "best_accuracy": 0.843125,
+        "train_accuracy": 0.7584375,
+        "train_loss": 0.8747144782543183,
+        "epoch_time": 3.4954476356506348,
+        "convergence_steps": 10,
+        "param_count": 796426
+      }
+    ]
+  },
+  "TorEqODEProp": {
+    "mean_accuracy": 0.10375,
+    "std_accuracy": 0,
+    "mean_best_accuracy": 0.10375,
+    "mean_epoch_time": 5.037030220031738,
+    "mean_convergence_steps": 50.0,
+    "param_count": 729610,
+    "seeds": [
+      {
+        "model_name": "TorEqODEProp",
+        "seed": 42,
+        "final_accuracy": 0.10375,
+        "best_accuracy": 0.10375,
+        "train_accuracy": 0.183125,
+        "train_loss": 2.841229100227356,
+        "epoch_time": 5.037030220031738,
+        "convergence_steps": 50,
+        "param_count": 729610
+      }
+    ]
+  },
+  "TCEP": {
+    "mean_accuracy": 0.111875,
+    "std_accuracy": 0,
+    "mean_best_accuracy": 0.111875,
+    "mean_epoch_time": 5.594233751296997,
+    "mean_convergence_steps": 50.0,
+    "param_count": 729610,
+    "seeds": [
+      {
+        "model_name": "TCEP",
+        "seed": 42,
+        "final_accuracy": 0.111875,
+        "best_accuracy": 0.111875,
+        "train_accuracy": 0.188125,
+        "train_loss": 3.00694317817688,
+        "epoch_time": 5.594233751296997,
+        "convergence_steps": 50,
+        "param_count": 729610
+      }
+    ]
+  },
+  "MSTEP": {
+    "mean_accuracy": 0.625625,
+    "std_accuracy": 0,
+    "mean_best_accuracy": 0.625625,
+    "mean_epoch_time": 4.365821361541748,
+    "mean_convergence_steps": 12.0,
+    "param_count": 1503373,
+    "seeds": [
+      {
+        "model_name": "MSTEP",
+        "seed": 42,
+        "final_accuracy": 0.625625,
+        "best_accuracy": 0.625625,
+        "train_accuracy": 0.4715625,
+        "train_loss": 1.8343158340454102,
+        "epoch_time": 4.365821361541748,
+        "convergence_steps": 12,
+        "param_count": 1503373
+      }
+    ]
+  },
+  "TEPSSR": {
+    "mean_accuracy": 0.799375,
+    "std_accuracy": 0,
+    "mean_best_accuracy": 0.799375,
+    "mean_epoch_time": 4.491488218307495,
+    "mean_convergence_steps": 15.0,
+    "param_count": 993546,
+    "seeds": [
+      {
+        "model_name": "TEPSSR",
+        "seed": 42,
+        "final_accuracy": 0.799375,
+        "best_accuracy": 0.799375,
+        "train_accuracy": 0.7625,
+        "train_loss": 0.8610185813903809,
+        "epoch_time": 4.491488218307495,
+        "convergence_steps": 15,
+        "param_count": 993546
+      }
+    ]
+  },
+  "HTSEP": {
+    "mean_accuracy": 0.590625,
+    "std_accuracy": 0,
+    "mean_best_accuracy": 0.590625,
+    "mean_epoch_time": 6.107009410858154,
+    "mean_convergence_steps": 30.0,
+    "param_count": 795404,
+    "seeds": [
+      {
+        "model_name": "HTSEP",
+        "seed": 42,
+        "final_accuracy": 0.590625,
+        "best_accuracy": 0.590625,
+        "train_accuracy": 0.4596875,
+        "train_loss": 1.7797593140602113,
+        "epoch_time": 6.107009410858154,
+        "convergence_steps": 30,
+        "param_count": 795404
+      }
+    ]
+  }
+}

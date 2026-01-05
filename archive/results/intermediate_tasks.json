@@ -1,0 +1,11 @@
+[
+  {
+    "task": "mnist_14x14",
+    "model": "TPEqProp",
+    "input_dim": 196,
+    "test_acc": 0.911,
+    "best_val_acc": 0.9068333333333334,
+    "train_time_s": 411.3940980434418,
+    "params": 388678
+  }
+]

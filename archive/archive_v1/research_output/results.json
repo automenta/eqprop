@@ -1,0 +1,869 @@
+{
+  "trials": [
+    {
+      "trial_id": "eqprop_xor_3627_1767135979970",
+      "algorithm": "eqprop",
+      "task": "xor",
+      "config": {
+        "epochs": 2,
+        "d_model": 8,
+        "max_iters": 20,
+        "batch_size": 16,
+        "lr": 0.001,
+        "beta": 0.25,
+        "damping": 0.9,
+        "attention_type": "softmax"
+      },
+      "seed": 3627,
+      "performance": 0.5075,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 11.100794792175293,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 2
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:06:19.970213",
+      "completed_at": "2025-12-30T18:06:31.071035"
+    },
+    {
+      "trial_id": "eqprop_xor_3020_1767135991174",
+      "algorithm": "eqprop",
+      "task": "xor",
+      "config": {
+        "epochs": 2,
+        "d_model": 8,
+        "max_iters": 3,
+        "batch_size": 16,
+        "lr": 0.002,
+        "beta": 0.2,
+        "damping": 0.9,
+        "attention_type": "softmax"
+      },
+      "seed": 3020,
+      "performance": 0.505,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 7.067602157592773,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 2
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:06:31.174285",
+      "completed_at": "2025-12-30T18:06:38.241911"
+    },
+    {
+      "trial_id": "eqprop_xor_7646_1767135998345",
+      "algorithm": "eqprop",
+      "task": "xor",
+      "config": {
+        "epochs": 2,
+        "d_model": 8,
+        "max_iters": 20,
+        "batch_size": 16,
+        "lr": 0.001,
+        "beta": 0.22,
+        "damping": 0.9,
+        "attention_type": "linear"
+      },
+      "seed": 7646,
+      "performance": 0.7425,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 11.6015043258667,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 2
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:06:38.345219",
+      "completed_at": "2025-12-30T18:06:49.946742"
+    },
+    {
+      "trial_id": "eqprop_xor_7236_1767136010050",
+      "algorithm": "eqprop",
+      "task": "xor",
+      "config": {
+        "epochs": 2,
+        "d_model": 8,
+        "max_iters": 5,
+        "batch_size": 16,
+        "lr": 0.002,
+        "beta": 0.15,
+        "damping": 0.9,
+        "attention_type": "linear"
+      },
+      "seed": 7236,
+      "performance": 0.745,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 8.16100811958313,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 2
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:06:50.050039",
+      "completed_at": "2025-12-30T18:06:58.211067"
+    },
+    {
+      "trial_id": "eqprop_xor_9174_1767136018314",
+      "algorithm": "eqprop",
+      "task": "xor",
+      "config": {
+        "epochs": 2,
+        "d_model": 8,
+        "max_iters": 5,
+        "batch_size": 16,
+        "lr": 0.002,
+        "beta": 0.3,
+        "damping": 0.9,
+        "attention_type": "linear"
+      },
+      "seed": 9174,
+      "performance": 0.745,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 8.140224933624268,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 2
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:06:58.314463",
+      "completed_at": "2025-12-30T18:07:06.454710"
+    },
+    {
+      "trial_id": "eqprop_xor_9533_1767136026558",
+      "algorithm": "eqprop",
+      "task": "xor",
+      "config": {
+        "epochs": 2,
+        "d_model": 8,
+        "max_iters": 10,
+        "batch_size": 16,
+        "lr": 0.001,
+        "beta": 0.2,
+        "damping": 0.9,
+        "attention_type": "linear"
+      },
+      "seed": 9533,
+      "performance": 0.4925,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 10.335600852966309,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 2
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:07:06.558198",
+      "completed_at": "2025-12-30T18:07:16.893819"
+    },
+    {
+      "trial_id": "eqprop_xor_2483_1767136036997",
+      "algorithm": "eqprop",
+      "task": "xor",
+      "config": {
+        "epochs": 2,
+        "d_model": 8,
+        "max_iters": 20,
+        "batch_size": 16,
+        "lr": 0.001,
+        "beta": 0.4,
+        "damping": 0.8,
+        "attention_type": "softmax"
+      },
+      "seed": 2483,
+      "performance": 0.4925,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 14.711093425750732,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 2
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:07:16.997710",
+      "completed_at": "2025-12-30T18:07:31.708824"
+    },
+    {
+      "trial_id": "eqprop_xor_6887_1767136051812",
+      "algorithm": "eqprop",
+      "task": "xor",
+      "config": {
+        "epochs": 2,
+        "d_model": 8,
+        "max_iters": 20,
+        "batch_size": 16,
+        "lr": 0.001,
+        "beta": 0.3,
+        "damping": 0.8,
+        "attention_type": "softmax"
+      },
+      "seed": 6887,
+      "performance": 0.4875,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 12.811426877975464,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 2
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:07:31.812415",
+      "completed_at": "2025-12-30T18:07:44.623867"
+    },
+    {
+      "trial_id": "eqprop_cartpole_4435_1767136095155",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 10,
+        "batch_size": 32,
+        "lr": 0.002,
+        "episodes": 3,
+        "beta": 0.3,
+        "damping": 0.9,
+        "attention_type": "linear"
+      },
+      "seed": 4435,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.7571702003479004,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.3\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:15.155598",
+      "completed_at": "2025-12-30T18:08:16.912788"
+    },
+    {
+      "trial_id": "eqprop_cartpole_301_1767136097016",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 8,
+        "batch_size": 32,
+        "lr": 0.002,
+        "episodes": 3,
+        "beta": 0.25,
+        "damping": 0.8,
+        "attention_type": "linear"
+      },
+      "seed": 301,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.7466070652008057,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.25\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:17.016447",
+      "completed_at": "2025-12-30T18:08:18.763077"
+    },
+    {
+      "trial_id": "eqprop_cartpole_5316_1767136098866",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 3,
+        "batch_size": 32,
+        "lr": 0.002,
+        "episodes": 3,
+        "beta": 0.22,
+        "damping": 0.8,
+        "attention_type": "softmax"
+      },
+      "seed": 5316,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.7633979320526123,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.22\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:18.866868",
+      "completed_at": "2025-12-30T18:08:20.630285"
+    },
+    {
+      "trial_id": "eqprop_cartpole_9862_1767136100734",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 5,
+        "batch_size": 32,
+        "lr": 0.002,
+        "episodes": 3,
+        "beta": 0.3,
+        "damping": 0.8,
+        "attention_type": "linear"
+      },
+      "seed": 9862,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.7429618835449219,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.3\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:20.734415",
+      "completed_at": "2025-12-30T18:08:22.477395"
+    },
+    {
+      "trial_id": "eqprop_cartpole_6664_1767136102581",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 5,
+        "batch_size": 32,
+        "lr": 0.001,
+        "episodes": 3,
+        "beta": 0.2,
+        "damping": 0.9,
+        "attention_type": "softmax"
+      },
+      "seed": 6664,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.7512364387512207,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.2\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:22.581649",
+      "completed_at": "2025-12-30T18:08:24.332906"
+    },
+    {
+      "trial_id": "eqprop_cartpole_8569_1767136104436",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 5,
+        "batch_size": 32,
+        "lr": 0.001,
+        "episodes": 3,
+        "beta": 0.4,
+        "damping": 0.8,
+        "attention_type": "softmax"
+      },
+      "seed": 8569,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.749229907989502,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.4\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:24.436965",
+      "completed_at": "2025-12-30T18:08:26.186212"
+    },
+    {
+      "trial_id": "eqprop_cartpole_8323_1767136106289",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 3,
+        "batch_size": 32,
+        "lr": 0.002,
+        "episodes": 3,
+        "beta": 0.4,
+        "damping": 0.8,
+        "attention_type": "softmax"
+      },
+      "seed": 8323,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.7613766193389893,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.4\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:26.289954",
+      "completed_at": "2025-12-30T18:08:28.051346"
+    },
+    {
+      "trial_id": "eqprop_cartpole_8688_1767136108155",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 10,
+        "batch_size": 32,
+        "lr": 0.002,
+        "episodes": 3,
+        "beta": 0.22,
+        "damping": 0.9,
+        "attention_type": "softmax"
+      },
+      "seed": 8688,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.7474050521850586,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.22\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:28.155636",
+      "completed_at": "2025-12-30T18:08:29.903059"
+    },
+    {
+      "trial_id": "eqprop_cartpole_6318_1767136110006",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 5,
+        "batch_size": 32,
+        "lr": 0.002,
+        "episodes": 3,
+        "beta": 0.15,
+        "damping": 0.8,
+        "attention_type": "linear"
+      },
+      "seed": 6318,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.741816520690918,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.15\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:30.006906",
+      "completed_at": "2025-12-30T18:08:31.748741"
+    },
+    {
+      "trial_id": "eqprop_cartpole_5993_1767136111853",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 10,
+        "batch_size": 32,
+        "lr": 0.001,
+        "episodes": 3,
+        "beta": 0.22,
+        "damping": 0.9,
+        "attention_type": "linear"
+      },
+      "seed": 5993,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.7419095039367676,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.22\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:31.853142",
+      "completed_at": "2025-12-30T18:08:33.595070"
+    },
+    {
+      "trial_id": "eqprop_cartpole_1634_1767136113699",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 8,
+        "batch_size": 32,
+        "lr": 0.001,
+        "episodes": 3,
+        "beta": 0.3,
+        "damping": 0.9,
+        "attention_type": "softmax"
+      },
+      "seed": 1634,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.7554919719696045,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.3\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:33.699142",
+      "completed_at": "2025-12-30T18:08:35.454652"
+    },
+    {
+      "trial_id": "eqprop_cartpole_7468_1767136115558",
+      "algorithm": "eqprop",
+      "task": "cartpole",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 20,
+        "batch_size": 32,
+        "lr": 0.001,
+        "episodes": 3,
+        "beta": 0.3,
+        "damping": 0.8,
+        "attention_type": "softmax"
+      },
+      "seed": 7468,
+      "performance": 0.0,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 1.7337517738342285,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 0
+      },
+      "status": "failed",
+      "error": "Exit code 2: usage: train_rl.py [-h] [--env ENV] [--episodes EPISODES]\n                   [--hidden-dim HIDDEN_DIM] [--lr LR] [--use-bp]\n                   [--eval-interval EVAL_INTERVAL] [--max-iters MAX_ITERS]\n                   [--damping DAMPING] [--seed SEED]\ntrain_rl.py: error: unrecognized arguments: --epochs 1 --d-model 8 --batch-size 32 --beta 0.3\n",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:35.558870",
+      "completed_at": "2025-12-30T18:08:37.292640"
+    },
+    {
+      "trial_id": "eqprop_mnist_7677_1767136130119",
+      "algorithm": "eqprop",
+      "task": "mnist",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 5,
+        "batch_size": 128,
+        "lr": 0.001,
+        "subset": 2000,
+        "beta": 0.25,
+        "damping": 0.8,
+        "attention_type": "linear"
+      },
+      "seed": 7677,
+      "performance": 0.273,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 13.004783153533936,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 1
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:08:50.119466",
+      "completed_at": "2025-12-30T18:09:03.124269"
+    },
+    {
+      "trial_id": "eqprop_mnist_9417_1767136143228",
+      "algorithm": "eqprop",
+      "task": "mnist",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 8,
+        "batch_size": 128,
+        "lr": 0.001,
+        "subset": 2000,
+        "beta": 0.22,
+        "damping": 0.9,
+        "attention_type": "linear"
+      },
+      "seed": 9417,
+      "performance": 0.2656,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 14.491303205490112,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 1
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:09:03.228606",
+      "completed_at": "2025-12-30T18:09:17.719933"
+    },
+    {
+      "trial_id": "eqprop_mnist_2040_1767136157825",
+      "algorithm": "eqprop",
+      "task": "mnist",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 3,
+        "batch_size": 128,
+        "lr": 0.001,
+        "subset": 2000,
+        "beta": 0.4,
+        "damping": 0.9,
+        "attention_type": "linear"
+      },
+      "seed": 2040,
+      "performance": 0.2731,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 11.058566808700562,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 1
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:09:17.825249",
+      "completed_at": "2025-12-30T18:09:28.883834"
+    },
+    {
+      "trial_id": "eqprop_mnist_6501_1767136168988",
+      "algorithm": "eqprop",
+      "task": "mnist",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 8,
+        "batch_size": 128,
+        "lr": 0.002,
+        "subset": 2000,
+        "beta": 0.25,
+        "damping": 0.8,
+        "attention_type": "softmax"
+      },
+      "seed": 6501,
+      "performance": 0.5167,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 15.420811653137207,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 1
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:09:28.988053",
+      "completed_at": "2025-12-30T18:09:44.408885"
+    },
+    {
+      "trial_id": "eqprop_mnist_1791_1767136184513",
+      "algorithm": "eqprop",
+      "task": "mnist",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 10,
+        "batch_size": 128,
+        "lr": 0.001,
+        "subset": 2000,
+        "beta": 0.22,
+        "damping": 0.8,
+        "attention_type": "linear"
+      },
+      "seed": 1791,
+      "performance": 0.2879,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 16.904259204864502,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 1
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:09:44.513407",
+      "completed_at": "2025-12-30T18:10:01.417687"
+    },
+    {
+      "trial_id": "eqprop_mnist_9544_1767136201522",
+      "algorithm": "eqprop",
+      "task": "mnist",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 3,
+        "batch_size": 128,
+        "lr": 0.002,
+        "subset": 2000,
+        "beta": 0.15,
+        "damping": 0.8,
+        "attention_type": "softmax"
+      },
+      "seed": 9544,
+      "performance": 0.25,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 11.03976058959961,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 1
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:10:01.522649",
+      "completed_at": "2025-12-30T18:10:12.562429"
+    },
+    {
+      "trial_id": "eqprop_mnist_8982_1767136212667",
+      "algorithm": "eqprop",
+      "task": "mnist",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 5,
+        "batch_size": 128,
+        "lr": 0.001,
+        "subset": 2000,
+        "beta": 0.15,
+        "damping": 0.8,
+        "attention_type": "softmax"
+      },
+      "seed": 8982,
+      "performance": 0.2231,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 13.418981075286865,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 1
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:10:12.667043",
+      "completed_at": "2025-12-30T18:10:26.086045"
+    },
+    {
+      "trial_id": "eqprop_mnist_2364_1767136226190",
+      "algorithm": "eqprop",
+      "task": "mnist",
+      "config": {
+        "epochs": 1,
+        "d_model": 8,
+        "max_iters": 10,
+        "batch_size": 128,
+        "lr": 0.002,
+        "subset": 2000,
+        "beta": 0.3,
+        "damping": 0.9,
+        "attention_type": "softmax"
+      },
+      "seed": 2364,
+      "performance": 0.6172,
+      "performance_metric": "accuracy",
+      "cost": {
+        "wall_time_seconds": 16.869990825653076,
+        "peak_memory_mb": 0.0,
+        "total_iterations": 0,
+        "param_count": 0,
+        "epochs_completed": 1
+      },
+      "status": "complete",
+      "error": "",
+      "tier": "micro",
+      "started_at": "2025-12-30T18:10:26.190824",
+      "completed_at": "2025-12-30T18:10:43.060835"
+    }
+  ],
+  "metadata": {
+    "created": "2025-12-30T18:06:19.968624",
+    "version": "1.0",
+    "updated": "2025-12-30T18:10:43.063136"
+  }
+}

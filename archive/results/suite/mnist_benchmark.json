@@ -1,0 +1,107 @@
+{
+  "BackpropMLP": {
+    "mean_acc": 95.13666666666667,
+    "std_acc": 0.2561683474245463,
+    "mean_time": 19.578706741333008,
+    "seeds": [
+      95.26,
+      94.78,
+      95.37
+    ],
+    "histories": [
+      [
+        "train_loss",
+        "test_acc"
+      ],
+      [
+        "train_loss",
+        "test_acc"
+      ],
+      [
+        "train_loss",
+        "test_acc"
+      ]
+    ]
+  },
+  "LoopedMLP (SN)": {
+    "mean_acc": 94.37333333333333,
+    "std_acc": 0.21761331658599462,
+    "mean_time": 47.16269834836324,
+    "seeds": [
+      94.07,
+      94.48,
+      94.57
+    ],
+    "histories": [
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ]
+    ]
+  },
+  "ToroidalMLP (SN)": {
+    "mean_acc": 94.50999999999999,
+    "std_acc": 0.04320493798938372,
+    "mean_time": 47.56329838434855,
+    "seeds": [
+      94.55,
+      94.45,
+      94.53
+    ],
+    "histories": [
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ]
+    ]
+  },
+  "ModernEqProp (SN)": {
+    "mean_acc": 85.44666666666667,
+    "std_acc": 1.242372282727239,
+    "mean_time": 59.05695382754008,
+    "seeds": [
+      86.88,
+      85.61,
+      83.85
+    ],
+    "histories": [
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ],
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ]
+    ]
+  }
+}

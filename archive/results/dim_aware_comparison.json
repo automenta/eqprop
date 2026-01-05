@@ -1,0 +1,26 @@
+[
+  {
+    "model": "TPEqProp",
+    "test_acc": 0.87625,
+    "params": 250762,
+    "time_s": 25.159493923187256
+  },
+  {
+    "model": "DimensionScaledEqProp",
+    "test_acc": 0.095,
+    "params": 233738,
+    "time_s": 33.29415941238403
+  },
+  {
+    "model": "EmbeddingEqProp",
+    "test_acc": 0.1121875,
+    "params": 384394,
+    "time_s": 0.07258081436157227
+  },
+  {
+    "model": "ProjectedEqProp",
+    "test_acc": 0.101875,
+    "params": 149770,
+    "time_s": 0.07179403305053711
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "ModernEqProp": {
+    "seeds": [
+      {
+        "seed": 42,
+        "final_accuracy": 0.8891,
+        "best_accuracy": 0.8891,
+        "mean_epoch_time": 58.8845055103302,
+        "initial_convergence_steps": 17,
+        "final_convergence_steps": 13
+      }
+    ],
+    "mean_accuracy": 0.8891,
+    "mean_best_accuracy": 0.8891,
+    "mean_epoch_time": 58.8845055103302,
+    "mean_convergence_steps": 13.0
+  },
+  "SpectralTorEqProp": {
+    "seeds": [
+      {
+        "seed": 42,
+        "final_accuracy": 0.9134,
+        "best_accuracy": 0.9134,
+        "mean_epoch_time": 69.15523028373718,
+        "initial_convergence_steps": 14,
+        "final_convergence_steps": 11
+      }
+    ],
+    "mean_accuracy": 0.9134,
+    "mean_best_accuracy": 0.9134,
+    "mean_epoch_time": 69.15523028373718,
+    "mean_convergence_steps": 11.0
+  }
+}

@@ -1,0 +1,53 @@
+[
+  {
+    "task": "digits",
+    "model": "MLP",
+    "mean_test_acc": 0.9611111111111111,
+    "std_test_acc": 0.0,
+    "mean_time_s": 0.7411248683929443,
+    "params": 8970,
+    "seeds": [
+      {
+        "seed": 42,
+        "val_acc": 0.9721448467966574,
+        "test_acc": 0.9611111111111111,
+        "train_time_s": 0.7411248683929443,
+        "params": 8970
+      }
+    ]
+  },
+  {
+    "task": "digits",
+    "model": "TPEqProp",
+    "mean_test_acc": 0.8861111111111111,
+    "std_test_acc": 0.0,
+    "mean_time_s": 9.495707035064697,
+    "params": 42442,
+    "seeds": [
+      {
+        "seed": 42,
+        "val_acc": 0.9387186629526463,
+        "test_acc": 0.8861111111111111,
+        "train_time_s": 9.495707035064697,
+        "params": 42442
+      }
+    ]
+  },
+  {
+    "task": "digits",
+    "model": "SpectralTorEqProp",
+    "mean_test_acc": 0.9416666666666667,
+    "std_test_acc": 0.0,
+    "mean_time_s": 10.92305588722229,
+    "params": 13815,
+    "seeds": [
+      {
+        "seed": 42,
+        "val_acc": 0.9526462395543176,
+        "test_acc": 0.9416666666666667,
+        "train_time_s": 10.92305588722229,
+        "params": 13815
+      }
+    ]
+  }
+]

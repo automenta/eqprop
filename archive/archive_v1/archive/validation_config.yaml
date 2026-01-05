@@ -1,0 +1,394 @@
+# ============================================================================
+# PHASE 1: Classification Experiments
+# ============================================================================
+classification:
+  enabled: true
+  seeds: [0, 1, 2, 3, 4]  # 5 seeds for classification
+  
+  datasets:
+    - name: mnist
+      display_name: "MNIST"
+      epochs: 10
+      success_threshold: 0.90
+      baseline_threshold: 0.85  # BP baseline expected
+      priority: 1
+      
+    - name: fashion
+      display_name: "Fashion-MNIST"
+      epochs: 10
+      success_threshold: 0.80
+      baseline_threshold: 0.78
+      priority: 2
+      
+    - name: cifar10
+      display_name: "CIFAR-10"
+      epochs: 10
+      success_threshold: 0.45
+      baseline_threshold: 0.40
+      priority: 3
+      
+    - name: svhn
+      display_name: "SVHN"
+      epochs: 10
+      success_threshold: 0.50
+      baseline_threshold: 0.45
+      priority: 4
+  
+  algorithms:
+    - name: eqprop
+      display_name: "EqProp"
+      command_template: "python train.py --dataset {dataset} --epochs {epochs} --seed {seed} --d-model 128"
+      
+    # BP baseline uses separate script
+    - name: bp
+      display_name: "BP Baseline"
+      command_template: "python train_mnist_bp.py --dataset {dataset} --epochs {epochs} --seed {seed}"
+  
+  metric: "test_accuracy"
+  metric_pattern: "Test Acc[uracy]*:\\s*([\\d.]+)"
+
+# ============================================================================
+# PHASE 2: Algorithmic Reasoning Experiments  
+# ============================================================================
+algorithmic:
+  enabled: true
+  seeds: [0, 1, 2, 3, 4]  # 5 seeds
+  
+  tasks:
+    - name: parity_8
+      display_name: "Parity N=8"
+      task: parity
+      seq_len: 8
+      epochs: 15
+      success_threshold: 0.90
+      priority: 1
+      
+    - name: parity_12
+      display_name: "Parity N=12"
+      task: parity
+      seq_len: 12
+      epochs: 20
+      success_threshold: 0.85
+      priority: 2
+      
+    - name: copy
+      display_name: "Copy Task"
+      task: copy
+      seq_len: 8
+      epochs: 10
+      success_threshold: 0.95
+      priority: 3
+      
+    - name: addition
+      display_name: "Addition 4-digit"
+      task: addition
+      n_digits: 4
+      epochs: 25
+      success_threshold: 0.50
+      priority: 4
+  
+  algorithms:
+    - name: eqprop
+      display_name: "EqProp"
+      command_template: "python train_algorithmic.py --task {task} --seq-len {seq_len} --epochs {epochs} --seed {seed}"
+      
+    - name: bp
+      display_name: "BP Baseline"
+      command_template: "python train_algorithmic.py --task {task} --seq-len {seq_len} --epochs {epochs} --seed {seed} --use-bp"
+  
+  metric: "test_accuracy"
+  metric_pattern: "Test Accuracy:\\s*([\\d.]+)"
+
+# ============================================================================
+# PHASE 3: Reinforcement Learning Experiments
+# ============================================================================
+rl:
+  enabled: true
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # 10 seeds for RL (higher variance)
+  
+  environments:
+    - name: CartPole-v1
+      display_name: "CartPole"
+      episodes: 500
+      success_threshold: 195
+      priority: 1
+      
+    - name: Acrobot-v1
+      display_name: "Acrobot"
+      episodes: 500
+      success_threshold: -100
+      priority: 2
+      
+    - name: MountainCar-v0
+      display_name: "MountainCar"
+      episodes: 1000
+      success_threshold: -110
+      priority: 3
+      
+    - name: LunarLander-v2
+      display_name: "LunarLander"
+      episodes: 1000
+      success_threshold: 200
+      priority: 4
+  
+  algorithms:
+    - name: eqprop
+      display_name: "EqProp"
+      command_template: "python train_rl.py --env {env} --episodes {episodes} --seed {seed}"
+      
+    - name: bp
+      display_name: "BP Baseline"
+      command_template: "python train_rl.py --env {env} --episodes {episodes} --seed {seed} --use-bp"
+  
+  metric: "avg_reward"
+  metric_pattern: "Final Average Reward:\\s*([\\d.]+)"
+
+# ============================================================================
+# PHASE 4: Extended Training (Accuracy Push)
+# ============================================================================
+extended:
+  enabled: true
+  seeds: [0, 1, 2]  # 3 seeds for long runs
+  
+  experiments:
+    - name: mnist_extended
+      display_name: "MNIST Extended"
+      dataset: mnist
+      epochs: 100
+      d_model: 256
+      success_threshold: 0.945
+      priority: 1
+      
+    - name: fashion_extended
+      display_name: "Fashion Extended"
+      dataset: fashion
+      epochs: 100
+      d_model: 256
+      success_threshold: 0.88
+      priority: 2
+  
+  algorithms:
+    - name: eqprop
+      display_name: "EqProp"
+      command_template: "python train.py --dataset {dataset} --epochs {epochs} --d-model {d_model} --seed {seed} --beta 0.22"
+      
+    - name: bp
+      display_name: "BP Baseline"
+      command_template: "python train.py --dataset {dataset} --epochs {epochs} --d-model {d_model} --seed {seed} --use-bp"
+
+# ============================================================================
+# PHASE 5: Memory Profiling
+# ============================================================================
+memory:
+  enabled: true
+  seeds: [0, 1, 2]  # 3 seeds
+  
+  model_sizes:
+    - name: d256
+      display_name: "d=256"
+      d_model: 256
+      priority: 1
+      
+    - name: d1024
+      display_name: "d=1024"
+      d_model: 1024
+      priority: 2
+      
+    - name: d2048
+      display_name: "d=2048"
+      d_model: 2048
+      priority: 3
+  
+  command_template: "python profile_memory.py --d-model {d_model} --max-iters 100 --seed {seed}"
+  
+  metric: "memory_ratio"
+  metric_pattern: "Ratio\\s*([\\d.]+)"
+
+# ============================================================================
+# Ablation Studies (after core validation)
+# ============================================================================
+ablation:
+  enabled: false  # Enable after core validation complete
+  seeds: [0, 1, 2]
+  
+  parameters:
+    max_iters: [5, 10, 20, 50]
+    damping: [0.5, 0.7, 0.9]
+    beta: [0.1, 0.2, 0.3, 0.4]
+
+# ============================================================================
+# PHASE 1: Model Size Comparison (Quick Results First!)
+# ============================================================================
+# Runs FIRST to provide quick insights before investing in larger experiments.
+# Discovers "punch above weight" scenarios where smaller EqProp beats larger BP.
+size_comparison:
+  enabled: true
+  seeds: [0, 1, 2]
+  
+  # Model sizes: micro→tiny→small→medium→large (5 sizes for fine-grained analysis)
+  # max_iters calibrated to match BP's computational effort at each size
+  sizes:
+    - name: micro
+      display_name: "Micro"
+      d_model: 16
+      hidden_dim: 8
+      max_iters: 100  # Very small models: use many iterations to match BP effort
+      priority: 1
+      
+    - name: tiny
+      display_name: "Tiny"
+      d_model: 32
+      hidden_dim: 16
+      max_iters: 80   # Increased to match BP training time
+      priority: 2
+      
+    - name: small
+      display_name: "Small"
+      d_model: 64
+      hidden_dim: 32
+      max_iters: 60   # Increased for fair comparison
+      priority: 3
+      
+    - name: medium
+      display_name: "Medium"  
+      d_model: 128
+      hidden_dim: 64
+      max_iters: 50   # Balance between speed and convergence
+      priority: 4
+      
+    - name: large
+      display_name: "Large"
+      d_model: 256
+      hidden_dim: 128
+      max_iters: 50   # From Phase 1: matches BP's training time
+      priority: 5
+  
+  # Experiments to run at each size (expanded for more insights)
+  experiments:
+    # Classification (quick, informative)
+    - name: mnist_size
+      type: classification
+      dataset: mnist
+      epochs: 3  # Reduced for speed
+      metric: test_accuracy
+      success_threshold: 0.80
+      
+    - name: fashion_size
+      type: classification
+      dataset: fashion
+      epochs: 3
+      metric: test_accuracy
+      success_threshold: 0.70
+      
+    # Reinforcement Learning (where EqProp shines!)
+    - name: cartpole_size
+      type: rl
+      env: CartPole-v1
+      episodes: 200  # Reduced for faster iteration
+      metric: avg_reward
+      success_threshold: 150
+      
+    - name: acrobot_size
+      type: rl
+      env: Acrobot-v1
+      episodes: 300
+      metric: avg_reward
+      success_threshold: -100
+  
+  # Command templates by type (with per-size tuned max_iters and optimal beta)
+  # Note: max_iters calibrated per size to match BP computational effort
+  command_templates:
+    classification:
+      eqprop: "python train.py --dataset {dataset} --epochs {epochs} --d-model {d_model} --max-iters {max_iters} --beta 0.22 --seed {seed}"
+      bp: "python train_mnist_bp.py --dataset {dataset} --epochs {epochs} --d-model {d_model} --seed {seed}"
+    rl:
+      eqprop: "python train_rl.py --env {env} --episodes {episodes} --hidden-dim {hidden_dim} --max-iters {max_iters} --seed {seed}"
+      bp: "python train_rl.py --env {env} --episodes {episodes} --hidden-dim {hidden_dim} --seed {seed} --use-bp"
+
+# ============================================================================
+# Baselines Configuration (Multi-baseline support)
+# ============================================================================
+baselines:
+  - name: bp
+    display_name: "Backpropagation"
+    enabled: true
+    is_primary: true
+    description: "Standard backpropagation baseline"
+    
+  # Future baselines can be added here:
+  # - name: adam_only  
+  #   display_name: "Adam (no iterative)"
+  #   enabled: false
+  #   is_primary: false
+  # - name: sgd
+  #   display_name: "SGD Baseline"
+  #   enabled: false
+
+# ============================================================================
+# Statistical Validation Settings
+# ============================================================================
+statistics:
+  significance_level: 0.05  # p-value threshold
+  breakthrough_p_threshold: 0.01  # Stronger threshold for "breakthrough"
+  min_effect_size: 0.8  # Cohen's d for "large effect"
+  min_seeds_for_validation: 3  # Minimum seeds before comparing
+
+# ============================================================================
+# Fairness Constraints
+# ============================================================================
+fairness:
+  match_parameters: true
+  parameter_tolerance: 0.05  # ±5%
+  report_walltime: true
+  report_memory: true
+
+# ============================================================================
+# Output Settings
+# ============================================================================
+output:
+  results_db: "data/validation_results.json"
+  logs_dir: "logs/validation"
+  readme_path: "README.md"
+
+# ============================================================================
+# Dashboard Settings
+# ============================================================================
+dashboard:
+  refresh_interval: 1.0
+  show_current_output: true
+  max_output_lines: 10
+
+# ============================================================================
+# Hyperparameter Optimization Settings
+# ============================================================================
+hyperopt:
+  enabled: true
+  strategy: random  # grid, random
+  n_trials: 50      # per algorithm per task
+  
+  eqprop_search_space:
+    beta: [0.05, 0.1, 0.15, 0.2, 0.22, 0.25, 0.3]
+    damping: [0.7, 0.8, 0.9, 0.95]
+    max_iters: [10, 20, 50, 100]
+    tol: [0.0001, 0.00001, 0.000001]
+    attention_type: [linear]
+    symmetric: [false, true]
+    update_mode: [mse_proxy, vector_field]
+    d_model: [64, 128, 256]
+    lr: [0.0005, 0.001, 0.002]
+
+  baseline_search_space:
+    lr: [0.0001, 0.0005, 0.001, 0.002, 0.005]
+    optimizer: [adam, adamw]
+    d_model: [64, 128, 256]
+    weight_decay: [0, 0.0001, 0.001]
+    scheduler: [none, cosine]
+
+  cost_metrics:
+    track_time: true
+    track_memory: true
+    track_iterations: true
+
+  matching:
+    strategy: time_matched  # param_matched, time_matched, size_matched
+    tolerance: 0.1  # 10% matching tolerance

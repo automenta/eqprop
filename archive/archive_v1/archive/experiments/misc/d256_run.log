@@ -1,0 +1,10 @@
+usage: train.py [-h] [--dataset DATASET] [--batch-size BATCH_SIZE]
+                [--d-model D_MODEL] [--n-heads N_HEADS] [--d-ff D_FF]
+                [--dropout DROPOUT] [--attention-type ATTENTION_TYPE]
+                [--symmetric] [--max-iters MAX_ITERS] [--tol TOL]
+                [--damping DAMPING] [--beta BETA] [--lr LR] [--epochs EPOCHS]
+                [--update-mode UPDATE_MODE] [--compile] [--seed SEED]
+                [--wandb] [--wandb-project WANDB_PROJECT]
+                [--wandb-entity WANDB_ENTITY] [--log-interval LOG_INTERVAL]
+                [--device DEVICE] [--num-workers NUM_WORKERS]
+train.py: error: argument --seed: invalid Optional value: '42'

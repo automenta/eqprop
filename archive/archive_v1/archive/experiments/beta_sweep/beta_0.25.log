@@ -1,0 +1,184 @@
+======================================================================
+Training TorEqProp on MNIST
+======================================================================
+Device: cuda
+Model: d_model=256, n_heads=8, d_ff=1024
+Attention: linear, Symmetric: False
+Beta: 0.25, LR: 0.002, Damping: 0.8
+Compile: True, Wandb: False
+======================================================================
+Compiling model with torch.compile...
+Epoch 0 [0/469] Loss: 2.9472 Acc: 0.2734 Iters: 50/50
+Epoch 0 [100/469] Loss: 2.2834 Acc: 0.1875 Iters: 50/50
+Epoch 0 [200/469] Loss: 2.2911 Acc: 0.1406 Iters: 50/50
+Epoch 0 [300/469] Loss: 2.2578 Acc: 0.1562 Iters: 50/50
+Epoch 0 [400/469] Loss: 2.1988 Acc: 0.2734 Iters: 50/50
+W1229 00:41:57.403000 663145 torch/_dynamo/convert_frame.py:964] [0/8] torch._dynamo hit config.recompile_limit (8)
+W1229 00:41:57.403000 663145 torch/_dynamo/convert_frame.py:964] [0/8]    function: 'inner' (/home/me/.local/lib/python3.13/site-packages/torch/_dynamo/external_utils.py:68)
+W1229 00:41:57.403000 663145 torch/_dynamo/convert_frame.py:964] [0/8]    last reason: 0/7: tensor 'fn._parameters['bias']' size mismatch at index 0. expected 10, actual 256. Guard failed on a parameter, consider using torch._dynamo.config.force_parameter_static_shapes = False to allow dynamism on parameters.
+W1229 00:41:57.403000 663145 torch/_dynamo/convert_frame.py:964] [0/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W1229 00:41:57.403000 663145 torch/_dynamo/convert_frame.py:964] [0/8] To diagnose recompilation issues, see https://pytorch.org/docs/main/torch.compiler_troubleshooting.html.
+
+Epoch 0 Summary:
+  Train Loss: 2.2431, Train Acc: 0.1901
+  Test Loss: 2.0704, Test Acc: 0.3045
+  Avg Iters: 50.0/50.0
+  Time: 66.5s
+Epoch 1 [0/469] Loss: 2.1506 Acc: 0.2188 Iters: 50/50
+Epoch 1 [100/469] Loss: 1.8561 Acc: 0.3047 Iters: 50/50
+Epoch 1 [200/469] Loss: 1.6426 Acc: 0.5078 Iters: 50/50
+Epoch 1 [300/469] Loss: 1.3525 Acc: 0.5312 Iters: 50/50
+Epoch 1 [400/469] Loss: 0.8558 Acc: 0.6562 Iters: 50/50
+
+Epoch 1 Summary:
+  Train Loss: 1.4809, Train Acc: 0.4956
+  Test Loss: 0.8585, Test Acc: 0.7105
+  Avg Iters: 50.0/50.0
+  Time: 63.7s
+Epoch 2 [0/469] Loss: 0.8259 Acc: 0.7109 Iters: 50/50
+Epoch 2 [100/469] Loss: 0.7646 Acc: 0.7812 Iters: 50/50
+Epoch 2 [200/469] Loss: 0.6852 Acc: 0.7969 Iters: 50/50
+Epoch 2 [300/469] Loss: 0.6517 Acc: 0.7734 Iters: 50/50
+Epoch 2 [400/469] Loss: 0.6650 Acc: 0.7734 Iters: 50/50
+
+Epoch 2 Summary:
+  Train Loss: 0.7239, Train Acc: 0.7620
+  Test Loss: 0.6080, Test Acc: 0.8099
+  Avg Iters: 50.0/50.0
+  Time: 64.2s
+Epoch 3 [0/469] Loss: 0.6047 Acc: 0.8203 Iters: 50/50
+Epoch 3 [100/469] Loss: 0.5652 Acc: 0.8359 Iters: 50/50
+Epoch 3 [200/469] Loss: 0.5120 Acc: 0.8047 Iters: 50/50
+Epoch 3 [300/469] Loss: 0.7097 Acc: 0.7891 Iters: 50/50
+Epoch 3 [400/469] Loss: 0.4884 Acc: 0.8516 Iters: 50/50
+
+Epoch 3 Summary:
+  Train Loss: 0.5592, Train Acc: 0.8298
+  Test Loss: 0.4803, Test Acc: 0.8567
+  Avg Iters: 50.0/50.0
+  Time: 64.0s
+Epoch 4 [0/469] Loss: 0.4785 Acc: 0.8438 Iters: 50/50
+Epoch 4 [100/469] Loss: 0.5682 Acc: 0.7969 Iters: 50/50
+Epoch 4 [200/469] Loss: 0.4443 Acc: 0.8750 Iters: 50/50
+Epoch 4 [300/469] Loss: 0.4380 Acc: 0.8672 Iters: 50/50
+Epoch 4 [400/469] Loss: 0.4701 Acc: 0.8438 Iters: 50/50
+
+Epoch 4 Summary:
+  Train Loss: 0.4377, Train Acc: 0.8725
+  Test Loss: 0.3979, Test Acc: 0.8803
+  Avg Iters: 50.0/50.0
+  Time: 64.7s
+Epoch 5 [0/469] Loss: 0.6491 Acc: 0.8359 Iters: 50/50
+Epoch 5 [100/469] Loss: 0.4044 Acc: 0.8750 Iters: 50/50
+Epoch 5 [200/469] Loss: 0.3318 Acc: 0.8672 Iters: 50/50
+Epoch 5 [300/469] Loss: 0.6389 Acc: 0.8359 Iters: 50/50
+Epoch 5 [400/469] Loss: 0.4711 Acc: 0.8516 Iters: 50/50
+
+Epoch 5 Summary:
+  Train Loss: 0.4292, Train Acc: 0.8776
+  Test Loss: 0.4173, Test Acc: 0.8741
+  Avg Iters: 50.0/50.0
+  Time: 63.9s
+Epoch 6 [0/469] Loss: 0.4398 Acc: 0.8828 Iters: 50/50
+Epoch 6 [100/469] Loss: 0.2785 Acc: 0.9453 Iters: 50/50
+Epoch 6 [200/469] Loss: 0.2856 Acc: 0.9219 Iters: 50/50
+Epoch 6 [300/469] Loss: 0.3276 Acc: 0.8984 Iters: 50/50
+Epoch 6 [400/469] Loss: 0.3485 Acc: 0.9062 Iters: 50/50
+
+Epoch 6 Summary:
+  Train Loss: 0.3801, Train Acc: 0.8911
+  Test Loss: 0.3467, Test Acc: 0.8987
+  Avg Iters: 50.0/50.0
+  Time: 64.4s
+Epoch 7 [0/469] Loss: 0.3178 Acc: 0.9219 Iters: 50/50
+Epoch 7 [100/469] Loss: 0.4225 Acc: 0.8750 Iters: 50/50
+Epoch 7 [200/469] Loss: 0.2681 Acc: 0.9375 Iters: 50/50
+Epoch 7 [300/469] Loss: 0.2649 Acc: 0.9219 Iters: 50/50
+Epoch 7 [400/469] Loss: 0.3650 Acc: 0.8984 Iters: 50/50
+
+Epoch 7 Summary:
+  Train Loss: 0.3421, Train Acc: 0.9022
+  Test Loss: 0.3261, Test Acc: 0.9037
+  Avg Iters: 50.0/50.0
+  Time: 63.6s
+Epoch 8 [0/469] Loss: 0.3211 Acc: 0.9062 Iters: 50/50
+Epoch 8 [100/469] Loss: 0.3425 Acc: 0.8984 Iters: 50/50
+Epoch 8 [200/469] Loss: 0.5528 Acc: 0.8516 Iters: 50/50
+Epoch 8 [300/469] Loss: 0.2807 Acc: 0.9219 Iters: 50/50
+Epoch 8 [400/469] Loss: 0.3606 Acc: 0.8984 Iters: 50/50
+
+Epoch 8 Summary:
+  Train Loss: 0.3214, Train Acc: 0.9089
+  Test Loss: 0.3149, Test Acc: 0.9075
+  Avg Iters: 50.0/50.0
+  Time: 64.2s
+Epoch 9 [0/469] Loss: 0.2275 Acc: 0.9609 Iters: 50/50
+Epoch 9 [100/469] Loss: 0.2378 Acc: 0.9297 Iters: 50/50
+Epoch 9 [200/469] Loss: 0.2176 Acc: 0.9688 Iters: 50/50
+Epoch 9 [300/469] Loss: 0.3220 Acc: 0.9062 Iters: 50/50
+Epoch 9 [400/469] Loss: 0.2490 Acc: 0.9453 Iters: 50/50
+
+Epoch 9 Summary:
+  Train Loss: 0.3110, Train Acc: 0.9105
+  Test Loss: 0.3094, Test Acc: 0.9092
+  Avg Iters: 50.0/50.0
+  Time: 64.6s
+Epoch 10 [0/469] Loss: 0.1929 Acc: 0.9453 Iters: 50/50
+Epoch 10 [100/469] Loss: 0.3502 Acc: 0.9062 Iters: 50/50
+Epoch 10 [200/469] Loss: 0.3002 Acc: 0.8984 Iters: 50/50
+Epoch 10 [300/469] Loss: 0.2158 Acc: 0.9297 Iters: 50/50
+Epoch 10 [400/469] Loss: 0.1292 Acc: 0.9609 Iters: 50/50
+
+Epoch 10 Summary:
+  Train Loss: 0.3007, Train Acc: 0.9145
+  Test Loss: 0.2797, Test Acc: 0.9197
+  Avg Iters: 50.0/50.0
+  Time: 63.6s
+Epoch 11 [0/469] Loss: 0.2484 Acc: 0.9219 Iters: 50/50
+Epoch 11 [100/469] Loss: 0.3810 Acc: 0.9062 Iters: 50/50
+Epoch 11 [200/469] Loss: 0.3100 Acc: 0.9453 Iters: 50/50
+Epoch 11 [300/469] Loss: 0.2439 Acc: 0.9062 Iters: 50/50
+Epoch 11 [400/469] Loss: 0.2422 Acc: 0.9453 Iters: 50/50
+
+Epoch 11 Summary:
+  Train Loss: 0.2911, Train Acc: 0.9170
+  Test Loss: 0.2876, Test Acc: 0.9197
+  Avg Iters: 50.0/50.0
+  Time: 64.2s
+Epoch 12 [0/469] Loss: 0.2035 Acc: 0.9297 Iters: 50/50
+Epoch 12 [100/469] Loss: 0.1735 Acc: 0.9609 Iters: 50/50
+Epoch 12 [200/469] Loss: 0.2625 Acc: 0.9297 Iters: 50/50
+Epoch 12 [300/469] Loss: 0.3202 Acc: 0.9141 Iters: 50/50
+Epoch 12 [400/469] Loss: 0.2471 Acc: 0.9375 Iters: 50/50
+
+Epoch 12 Summary:
+  Train Loss: 0.2817, Train Acc: 0.9191
+  Test Loss: 0.2918, Test Acc: 0.9146
+  Avg Iters: 50.0/50.0
+  Time: 63.5s
+Epoch 13 [0/469] Loss: 0.4924 Acc: 0.8438 Iters: 50/50
+Epoch 13 [100/469] Loss: 0.2195 Acc: 0.9375 Iters: 50/50
+Epoch 13 [200/469] Loss: 0.3082 Acc: 0.9141 Iters: 50/50
+Epoch 13 [300/469] Loss: 0.3318 Acc: 0.9141 Iters: 50/50
+Epoch 13 [400/469] Loss: 0.2085 Acc: 0.9453 Iters: 50/50
+
+Epoch 13 Summary:
+  Train Loss: 0.2780, Train Acc: 0.9212
+  Test Loss: 0.2718, Test Acc: 0.9206
+  Avg Iters: 50.0/50.0
+  Time: 64.1s
+Epoch 14 [0/469] Loss: 0.1912 Acc: 0.9453 Iters: 50/50
+Epoch 14 [100/469] Loss: 0.2617 Acc: 0.9141 Iters: 50/50
+Epoch 14 [200/469] Loss: 0.3063 Acc: 0.9141 Iters: 50/50
+Epoch 14 [300/469] Loss: 0.1823 Acc: 0.9531 Iters: 50/50
+Epoch 14 [400/469] Loss: 0.2328 Acc: 0.9609 Iters: 50/50
+
+Epoch 14 Summary:
+  Train Loss: 0.2752, Train Acc: 0.9210
+  Test Loss: 0.2729, Test Acc: 0.9212
+  Avg Iters: 50.0/50.0
+  Time: 63.8s
+
+======================================================================
+Training complete! Best test accuracy: 0.9212
+======================================================================

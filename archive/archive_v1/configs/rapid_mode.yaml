@@ -1,0 +1,29 @@
+# Rapid Experimentation Mode Configuration
+# Use for quick exploration: ~5-10 min per experiment
+
+# Model (reduced for speed)
+d_model: 64
+n_heads: 4
+d_ff: 256
+dropout: 0.1
+
+# Training (minimal epochs)
+epochs: 3
+batch_size: 128
+lr: 0.002
+
+# Equilibrium solver (faster convergence)
+max_iters: 20
+tol: 1e-4
+damping: 0.8
+
+# EqProp
+beta: 0.22
+beta_anneal: false
+update_mode: mse_proxy
+
+# Performance
+compile: false  # Disabled for rapid feedback
+
+# Dataset default
+dataset: mnist

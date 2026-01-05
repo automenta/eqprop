@@ -1,0 +1,17 @@
+{
+  "ConvEqProp (SN)": {
+    "mean_acc": 19.93,
+    "std_acc": 0.0,
+    "mean_time": 145.89360237121582,
+    "seeds": [
+      19.93
+    ],
+    "histories": [
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ]
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "ModernEqProp": {
+    "seeds": [
+      {
+        "seed": 42,
+        "final_accuracy": 0.8891,
+        "best_accuracy": 0.8891,
+        "mean_epoch_time": 58.2677526473999,
+        "initial_convergence_steps": 17,
+        "final_convergence_steps": 13
+      }
+    ],
+    "mean_accuracy": 0.8891,
+    "mean_best_accuracy": 0.8891,
+    "mean_epoch_time": 58.2677526473999,
+    "mean_convergence_steps": 13.0
+  },
+  "SpectralTorEqProp": {
+    "seeds": [
+      {
+        "seed": 42,
+        "final_accuracy": 0.9134,
+        "best_accuracy": 0.9134,
+        "mean_epoch_time": 68.79428839683533,
+        "initial_convergence_steps": 14,
+        "final_convergence_steps": 11
+      }
+    ],
+    "mean_accuracy": 0.9134,
+    "mean_best_accuracy": 0.9134,
+    "mean_epoch_time": 68.79428839683533,
+    "mean_convergence_steps": 11.0
+  },
+  "DiffTorEqProp": {
+    "seeds": [
+      {
+        "seed": 42,
+        "final_accuracy": 0.8935,
+        "best_accuracy": 0.8935,
+        "mean_epoch_time": 96.59605145454407,
+        "initial_convergence_steps": 17,
+        "final_convergence_steps": 13
+      }
+    ],
+    "mean_accuracy": 0.8935,
+    "mean_best_accuracy": 0.8935,
+    "mean_epoch_time": 96.59605145454407,
+    "mean_convergence_steps": 13.0
+  }
+}

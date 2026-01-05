@@ -1,0 +1,6 @@
+usage: analyze_adaptive_compute.py [-h] --checkpoint CHECKPOINT
+                                   [--output OUTPUT] [--plot-dir PLOT_DIR]
+                                   [--max-iters MAX_ITERS] [--tol TOL]
+                                   [--damping DAMPING]
+analyze_adaptive_compute.py: error: the following arguments are required: --checkpoint
+Warning: matplotlib not available, skipping plots

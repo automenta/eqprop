@@ -1,0 +1,19 @@
+Warning: matplotlib not available, skipping plots
+Loading model and data...
+Traceback (most recent call last):
+  File "/home/me/toreq/analyze_adaptive_compute.py", line 307, in <module>
+    main()
+    ~~~~^^
+  File "/home/me/toreq/analyze_adaptive_compute.py", line 160, in main
+    embedding, model, output_head, test_loader, config, device = load_model_and_data(args.checkpoint)
+                                                                 ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/me/toreq/analyze_adaptive_compute.py", line 64, in load_model_and_data
+    embedding.load_state_dict(checkpoint['embedding'])
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/me/.local/lib/python3.13/site-packages/torch/nn/modules/module.py", line 2593, in load_state_dict
+    raise RuntimeError(
+    ...<3 lines>...
+    )
+RuntimeError: Error(s) in loading state_dict for Linear:
+	Missing key(s) in state_dict: "weight", "bias". 
+	Unexpected key(s) in state_dict: "_orig_mod.weight", "_orig_mod.bias". 

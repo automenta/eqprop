@@ -1,0 +1,207 @@
+# Publication Experiments Configuration
+
+# =============================================================================
+# EXPERIMENTS REQUIRED FOR PUBLICATION
+# =============================================================================
+# Run: python toreq.py --validate-claims
+# This will execute all experiments needed to validate paper claims
+# =============================================================================
+
+version: "1.0"
+generated: "2025-12-31"
+
+# -----------------------------------------------------------------------------
+# CLAIM 1: Spectral Normalization Maintains L < 1
+# -----------------------------------------------------------------------------
+spectral_normalization:
+  description: "Validate that spectral normalization maintains Lipschitz < 1"
+  
+  experiments:
+    - name: "Lipschitz Analysis (Untrained)"
+      script: "scripts/test_spectral_norm_all.py"
+      args: ["--mode", "untrained"]
+      seeds: [42, 123, 456]
+      expected:
+        LoopedMLP: { L: "<1.0", tolerance: 0.1 }
+        ToroidalMLP: { L: "<1.0", tolerance: 0.1 }
+        ModernEqProp: { L: "<1.0", tolerance: 0.1 }
+    
+    - name: "Lipschitz Analysis (Trained, No SN)"
+      script: "scripts/test_spectral_norm_all.py"
+      args: ["--mode", "trained", "--no-spectral-norm"]
+      seeds: [42]
+      expected:
+        LoopedMLP: { L: ">1.0" }  # Should break
+        ToroidalMLP: { L: ">1.0" }  # Should break
+        ModernEqProp: { L: ">1.0" }  # Should break badly
+    
+    - name: "Lipschitz Analysis (Trained, With SN)"
+      script: "scripts/test_spectral_norm_all.py"
+      args: ["--mode", "trained", "--spectral-norm"]
+      seeds: [42, 123, 456]
+      expected:
+        LoopedMLP: { L: "<1.0", tolerance: 0.1 }
+        ToroidalMLP: { L: "<1.0", tolerance: 0.1 }
+        ModernEqProp: { L: "<1.0", tolerance: 0.1 }
+  
+  output:
+    json: "results/lipschitz_analysis.json"
+    figures:
+      - "figures/lipschitz_before_after.png"
+      - "figures/lipschitz_training_curve.png"
+
+# -----------------------------------------------------------------------------
+# CLAIM 2: Competitive Accuracy (97.50%)
+# -----------------------------------------------------------------------------
+competitive_accuracy:
+  description: "Validate EqProp matches Backprop accuracy"
+  
+  experiments:
+    - name: "Competitive Benchmark"
+      script: "scripts/competitive_benchmark.py"
+      args: ["--epochs", "50", "--seeds", "5"]
+      timeout_minutes: 60
+      expected:
+        ModernEqProp:
+          accuracy: { min: 0.96, max: 0.99 }
+          gap_to_bp: { max: 0.02 }  # Within 2% of Backprop
+  
+  output:
+    json: "results/competitive_benchmark.json"
+    figures:
+      - "figures/accuracy_comparison.png"
+      - "figures/training_curves.png"
+
+# -----------------------------------------------------------------------------
+# CLAIM 3: β-Annealing Causes Instability
+# -----------------------------------------------------------------------------
+beta_annealing_instability:
+  description: "Validate that β-annealing causes collapse, fixed β is stable"
+  
+  experiments:
+    - name: "β-Annealing Test"
+      script: "scripts/beta_annealing_test.py"
+      args: ["--anneal-from", "0.3", "--anneal-to", "0.20", "--epochs", "20"]
+      seeds: [42, 123, 456]
+      expected:
+        collapse_epoch: { min: 10, max: 20 }  # Should collapse
+    
+    - name: "Fixed β = 0.20"
+      script: "scripts/fixed_beta_test.py"
+      args: ["--beta", "0.20", "--epochs", "20"]
+      seeds: [42, 123, 456]
+      expected:
+        final_accuracy: { min: 0.89, max: 0.95 }
+        stable: true  # Should NOT collapse
+    
+    - name: "Fixed β = 0.22"
+      script: "scripts/fixed_beta_test.py"
+      args: ["--beta", "0.22", "--epochs", "20"]
+      seeds: [42, 123, 456]
+      expected:
+        final_accuracy: { min: 0.91, max: 0.95 }
+        stable: true
+  
+  output:
+    json: "results/beta_annealing.json"
+    figures:
+      - "figures/beta_annealing_collapse.png"
+      - "figures/fixed_beta_stability.png"
+
+# -----------------------------------------------------------------------------
+# CLAIM 4: Optimal β = 0.22
+# -----------------------------------------------------------------------------
+optimal_beta:
+  description: "Validate β = 0.22 is optimal"
+  
+  experiments:
+    - name: "β Sweep"
+      script: "scripts/beta_sweep.py"
+      args: ["--betas", "0.18,0.20,0.21,0.22,0.23,0.24,0.25,0.28", "--epochs", "15"]
+      seeds: [42, 123, 456]
+      expected:
+        optimal_beta: "0.22"
+        all_stable: true
+  
+  output:
+    json: "results/beta_sweep.json"
+    figures:
+      - "figures/beta_accuracy_curve.png"
+
+# -----------------------------------------------------------------------------
+# CLAIM 5: Gradient Equivalence
+# -----------------------------------------------------------------------------
+gradient_equivalence:
+  description: "Validate EqProp gradients match Backprop"
+  
+  experiments:
+    - name: "Gradient Cosine Similarity"
+      script: "scripts/test_gradient_equiv.py"  # In archive
+      args: ["--beta", "0.001", "--mode", "symmetric"]
+      expected:
+        cosine_similarity: { min: 0.99 }
+  
+  output:
+    json: "results/gradient_equivalence.json"
+
+# -----------------------------------------------------------------------------
+# FULL VALIDATION PIPELINE
+# -----------------------------------------------------------------------------
+validation_pipeline:
+  description: "Complete validation for publication readiness"
+  
+  steps:
+    - claim: "spectral_normalization"
+      required: true
+      
+    - claim: "competitive_accuracy"
+      required: true
+      
+    - claim: "beta_annealing_instability"
+      required: true
+      
+    - claim: "optimal_beta"
+      required: true
+      
+    - claim: "gradient_equivalence"
+      required: false  # Nice to have
+  
+  on_success:
+    - "python scripts/generate_paper.py --paper spectral_normalization"
+    - "echo '✅ All claims validated - paper generation complete'"
+  
+  on_failure:
+    - "echo '❌ Validation failed - see reports for details'"
+
+# -----------------------------------------------------------------------------
+# STATISTICAL REQUIREMENTS
+# -----------------------------------------------------------------------------
+statistics:
+  min_seeds: 3
+  confidence_level: 0.95
+  
+  metrics:
+    - name: "accuracy"
+      aggregation: "mean"
+      report: ["mean", "std", "ci_lower", "ci_upper"]
+    
+    - name: "lipschitz"
+      aggregation: "max"
+      report: ["max", "mean", "std"]
+    
+    - name: "training_time"
+      aggregation: "mean"
+      report: ["mean", "std"]
+
+# -----------------------------------------------------------------------------
+# OUTPUT CONFIGURATION
+# -----------------------------------------------------------------------------
+output:
+  results_dir: "results/"
+  figures_dir: "figures/"
+  reports_dir: "reports/"
+  
+  formats:
+    data: ["json", "csv"]
+    figures: ["png", "pdf"]
+    reports: ["md", "html"]

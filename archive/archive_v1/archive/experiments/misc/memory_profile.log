@@ -1,0 +1,15 @@
+======================================================================
+Memory Profiling: EqProp vs BP
+======================================================================
+ d_model  batch  EqProp (MB)      BP (MB)    Ratio
+----------------------------------------------------------------------
+      64    128         79.6         76.2     1.05x
+     128    128        194.7        187.7     1.04x
+     256     64        202.6        191.8     1.06x
+     512     32        349.6        312.2     1.12x
+----------------------------------------------------------------------
+
+Interpretation:
+- Ratio < 1.0: EqProp uses LESS memory than BP
+- Ratio > 1.0: EqProp uses MORE memory than BP
+- Target: EqProp should use <50% of BP memory for large models

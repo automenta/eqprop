@@ -1,0 +1,52 @@
+{
+  "Digits (8x8)": {
+    "LoopedMLP": {
+      "best_acc": 82.5,
+      "params": {
+        "lr": 0.001,
+        "beta": 0.22,
+        "max_steps": 30
+      }
+    }
+  },
+  "MNIST": {
+    "LoopedMLP": {
+      "best_acc": 86.86,
+      "params": {
+        "lr": 0.002,
+        "beta": 0.22,
+        "max_steps": 30
+      }
+    }
+  },
+  "Fashion-MNIST": {
+    "LoopedMLP": {
+      "best_acc": 75.6,
+      "params": {
+        "lr": 0.002,
+        "beta": 0.5,
+        "max_steps": 30
+      }
+    }
+  },
+  "CartPole-BC": {
+    "LoopedMLP": {
+      "best_acc": 82.0,
+      "params": {
+        "lr": 0.001,
+        "beta": 0.22,
+        "max_steps": 30
+      }
+    }
+  },
+  "Acrobot-BC": {
+    "LoopedMLP": {
+      "best_acc": 76.5,
+      "params": {
+        "lr": 0.002,
+        "beta": 0.5,
+        "max_steps": 30
+      }
+    }
+  }
+}

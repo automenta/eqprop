@@ -1,0 +1,74 @@
+[
+  {
+    "task": "digits",
+    "model": "MLP",
+    "mean_test_acc": 0.9666666666666667,
+    "std_test_acc": 0.005555555555555536,
+    "mean_time_s": 0.6549814939498901,
+    "params": 8970,
+    "seeds": [
+      {
+        "seed": 42,
+        "val_acc": 0.9721448467966574,
+        "test_acc": 0.9611111111111111,
+        "train_time_s": 0.7246425151824951,
+        "params": 8970
+      },
+      {
+        "seed": 43,
+        "val_acc": 0.9749303621169917,
+        "test_acc": 0.9722222222222222,
+        "train_time_s": 0.5853204727172852,
+        "params": 8970
+      }
+    ]
+  },
+  {
+    "task": "digits",
+    "model": "MSTEP",
+    "mean_test_acc": 0.9208333333333334,
+    "std_test_acc": 0.006944444444444475,
+    "mean_time_s": 29.87877631187439,
+    "params": 50634,
+    "seeds": [
+      {
+        "seed": 42,
+        "val_acc": 0.935933147632312,
+        "test_acc": 0.9138888888888889,
+        "train_time_s": 30.245484352111816,
+        "params": 50634
+      },
+      {
+        "seed": 43,
+        "val_acc": 0.9387186629526463,
+        "test_acc": 0.9277777777777778,
+        "train_time_s": 29.512068271636963,
+        "params": 50634
+      }
+    ]
+  },
+  {
+    "task": "digits",
+    "model": "EnhancedMSTEP",
+    "mean_test_acc": 0.9180555555555556,
+    "std_test_acc": 0.018055555555555547,
+    "mean_time_s": 43.22341239452362,
+    "params": 64444,
+    "seeds": [
+      {
+        "seed": 42,
+        "val_acc": 0.9415041782729805,
+        "test_acc": 0.9,
+        "train_time_s": 43.33545422554016,
+        "params": 64444
+      },
+      {
+        "seed": 43,
+        "val_acc": 0.9331476323119777,
+        "test_acc": 0.9361111111111111,
+        "train_time_s": 43.11137056350708,
+        "params": 64444
+      }
+    ]
+  }
+]

@@ -1,0 +1,43 @@
+======================================================================
+Training TorEqProp on MNIST
+======================================================================
+Device: cuda
+Model: d_model=128, n_heads=4, d_ff=512
+Attention: linear, Symmetric: False
+Beta: 0.1, LR: 0.001, Damping: 0.9
+Compile: True, Wandb: False
+======================================================================
+Compiling model with torch.compile...
+/home/me/.local/lib/python3.13/site-packages/torch/_inductor/compile_fx.py:236: UserWarning: TensorFloat32 tensor cores for float32 matrix multiplication available but not enabled. Consider setting `torch.set_float32_matmul_precision('high')` for better performance.
+  warnings.warn(
+Epoch 0 [0/469] Loss: 3.4333 Acc: 0.1641 Iters: 50/50
+Epoch 0 [100/469] Loss: 1.9563 Acc: 0.3984 Iters: 45/20
+Epoch 0 [200/469] Loss: 1.3551 Acc: 0.5625 Iters: 50/33
+Epoch 0 [300/469] Loss: 0.6964 Acc: 0.7891 Iters: 50/40
+Epoch 0 [400/469] Loss: 0.7382 Acc: 0.7734 Iters: 50/50
+W1228 10:21:11.773000 559393 torch/_dynamo/convert_frame.py:964] [0/8] torch._dynamo hit config.recompile_limit (8)
+W1228 10:21:11.773000 559393 torch/_dynamo/convert_frame.py:964] [0/8]    function: 'inner' (/home/me/.local/lib/python3.13/site-packages/torch/_dynamo/external_utils.py:68)
+W1228 10:21:11.773000 559393 torch/_dynamo/convert_frame.py:964] [0/8]    last reason: 0/7: tensor 'fn._parameters['bias']' size mismatch at index 0. expected 10, actual 128. Guard failed on a parameter, consider using torch._dynamo.config.force_parameter_static_shapes = False to allow dynamism on parameters.
+W1228 10:21:11.773000 559393 torch/_dynamo/convert_frame.py:964] [0/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W1228 10:21:11.773000 559393 torch/_dynamo/convert_frame.py:964] [0/8] To diagnose recompilation issues, see https://pytorch.org/docs/main/torch.compiler_troubleshooting.html.
+
+Epoch 0 Summary:
+  Train Loss: 1.2725, Train Acc: 0.6088
+  Test Loss: 0.5433, Test Acc: 0.8373
+  Avg Iters: 48.2/33.1
+  Time: 73.5s
+Epoch 1 [0/469] Loss: 0.4637 Acc: 0.8984 Iters: 50/34
+Epoch 1 [100/469] Loss: 0.3667 Acc: 0.8984 Iters: 50/46
+Epoch 1 [200/469] Loss: 0.5827 Acc: 0.8359 Iters: 50/50
+Epoch 1 [300/469] Loss: 0.5310 Acc: 0.8203 Iters: 50/46
+Epoch 1 [400/469] Loss: 0.3842 Acc: 0.8828 Iters: 50/35
+
+Epoch 1 Summary:
+  Train Loss: 0.4420, Train Acc: 0.8701
+  Test Loss: 0.3349, Test Acc: 0.9069
+  Avg Iters: 50.0/40.2
+  Time: 58.2s
+
+======================================================================
+Training complete! Best test accuracy: 0.9069
+======================================================================

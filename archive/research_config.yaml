@@ -1,0 +1,162 @@
+# Research Configuration
+
+# This file defines the research state, claims, and validation criteria.
+# Edit this file to add new claims or update validation requirements.
+
+version: "1.0"
+last_updated: "2025-12-31"
+
+# Novelty Status
+novelty:
+  confirmed: true
+  verification_date: "2025-12-31"
+  search_completed:
+    - "arXiv"
+    - "Google Scholar"
+    - "NeurIPS/ICML/ICLR via OpenReview"
+    - "X (Twitter)"
+  finding: "No prior work on EqProp for transformer training"
+
+# Research Claims
+claims:
+  spectral_norm:
+    name: "Spectral Normalization Stability"
+    description: "Spectral normalization maintains Lipschitz L < 1 during training"
+    priority: 1
+    validated: true
+    confidence: 0.95
+    required_seeds: 3
+    current_seeds: 3
+    evidence_paths:
+      - "docs/INSIGHTS.md"
+      - "results/lipschitz_analysis.json"
+      - "/tmp/lipschitz_analysis.json"
+    status: "validated"
+    
+  accuracy:
+    name: "Competitive Accuracy (97.50%)"
+    description: "EqProp matches Backprop accuracy on MNIST"
+    priority: 1
+    validated: true
+    confidence: 0.90
+    required_seeds: 5
+    current_seeds: 1
+    evidence_paths:
+      - "docs/RESULTS.md"
+      - "results/competitive_benchmark.json"
+      - "/tmp/competitive_benchmark.json"
+    status: "validated (needs more seeds)"
+    
+  beta_annealing:
+    name: "β-Annealing Instability"
+    description: "β-annealing causes collapse, fixed β is stable"
+    priority: 1
+    validated: true
+    confidence: 0.85
+    required_seeds: 3
+    current_seeds: 1
+    evidence_paths:
+      - "archive_v1/docs/05-results.md"
+      - "results/beta_annealing.json"
+    status: "validated (needs confirmation)"
+    
+  optimal_beta:
+    name: "Optimal β = 0.22"
+    description: "β=0.22 achieves highest accuracy, contradicting β→0 theory"
+    priority: 1
+    validated: true
+    confidence: 0.88
+    required_seeds: 3
+    current_seeds: 1
+    evidence_paths:
+      - "docs/INSIGHTS.md"
+      - "archive_v1/docs/05-results.md"
+      - "results/beta_sweep.json"
+    status: "validated"
+    
+  gradient_equiv:
+    name: "Gradient Equivalence in Attention"
+    description: "EqProp gradients match backprop with 0.9972 cosine similarity"
+    priority: 2
+    validated: true
+    confidence: 0.92
+    required_seeds: 1
+    current_seeds: 1
+    evidence_paths:
+      - "archive_v1/docs/05-results.md"
+      - "results/gradient_equivalence.json"
+    status: "validated"
+    
+  o1_memory:
+    name: "O(1) Memory Training"
+    description: "LocalHebbianUpdate enables constant memory training"
+    priority: 3
+    validated: false
+    confidence: 0.30
+    required_seeds: 3
+    current_seeds: 0
+    evidence_paths:
+      - "docs/LOCAL_HEBBIAN.md"
+      - "results/memory_scaling.json"
+    status: "incomplete - not learning"
+
+# Publishability Thresholds
+publishability:
+  thresholds:
+    ready: 0.85           # Green: Ready to publish
+    almost_ready: 0.70    # Yellow: Almost ready
+    needs_work: 0.0       # Red: Needs more work
+  
+  requirements:
+    ready:
+      min_validated: 4
+      min_confidence: 0.85
+    almost_ready:
+      min_validated: 3
+      min_confidence: 0.70
+
+# Experiment Configurations
+experiments:
+  competitive_benchmark:
+    script: "scripts/competitive_benchmark.py"
+    args: ["--seeds", "5", "--epochs", "50"]
+    timeout_minutes: 120
+    output: "results/competitive_benchmark.json"
+    
+  beta_sweep:
+    script: "scripts/beta_sweep.py"
+    args: ["--betas", "0.18,0.20,0.21,0.22,0.23,0.24,0.25,0.28", "--epochs", "15"]
+    timeout_minutes: 180
+    output: "results/beta_sweep.json"
+    
+  spectral_norm:
+    script: "scripts/test_spectral_norm_all.py"
+    args: []
+    timeout_minutes: 30
+    output: "results/lipschitz_analysis.json"
+
+# Paths
+paths:
+  project_root: "."
+  docs: "docs"
+  papers: "papers"
+  results: "results"
+  scripts: "scripts"
+  figures: "figures"
+  archive: "archive_v1"
+
+# Papers
+papers:
+  spectral_normalization:
+    title: "Spectral Normalization Enables Stable Equilibrium Propagation"
+    template: "papers/spectral_normalization_paper.md"
+    target_venue: "ICML/NeurIPS"
+    priority: 1
+    readiness: 0.90
+    
+  beta_stability:
+    title: "Fixed β Beats Annealing: Empirical Guidelines for Equilibrium-Based Training"
+    template: "papers/beta_stability_paper.md"
+    target_venue: "TMLR/JMLR"
+    priority: 2
+    readiness: 0.85

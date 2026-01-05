@@ -1,0 +1,54 @@
+{
+  "statistics": {
+    "mean_iterations": 10.0,
+    "std_iterations": 0.0,
+    "min_iterations": 10,
+    "max_iterations": 10,
+    "correlation_confidence": NaN,
+    "correlation_margin": NaN,
+    "p_value_confidence": NaN,
+    "p_value_margin": NaN
+  },
+  "per_class": {
+    "0": {
+      "mean": 10.0,
+      "std": 0.0
+    },
+    "1": {
+      "mean": 10.0,
+      "std": 0.0
+    },
+    "2": {
+      "mean": 10.0,
+      "std": 0.0
+    },
+    "3": {
+      "mean": 10.0,
+      "std": 0.0
+    },
+    "4": {
+      "mean": 10.0,
+      "std": 0.0
+    },
+    "5": {
+      "mean": 10.0,
+      "std": 0.0
+    },
+    "6": {
+      "mean": 10.0,
+      "std": 0.0
+    },
+    "7": {
+      "mean": 10.0,
+      "std": 0.0
+    },
+    "8": {
+      "mean": 10.0,
+      "std": 0.0
+    },
+    "9": {
+      "mean": 10.0,
+      "std": 0.0
+    }
+  }
+}

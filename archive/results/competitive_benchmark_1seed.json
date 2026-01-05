@@ -1,0 +1,46 @@
+{
+  "BackpropMLP": {
+    "mean_acc": 96.94444444444444,
+    "std_acc": 0.0,
+    "mean_time": 0.3353252410888672,
+    "seeds": [
+      96.94444444444444
+    ],
+    "histories": [
+      [
+        "train_loss",
+        "test_acc"
+      ]
+    ]
+  },
+  "LoopedMLP (SN)": {
+    "mean_acc": 73.88888888888889,
+    "std_acc": 0.0,
+    "mean_time": 3.454448938369751,
+    "seeds": [
+      73.88888888888889
+    ],
+    "histories": [
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ]
+    ]
+  },
+  "ModernEqProp (SN)": {
+    "mean_acc": 82.22222222222223,
+    "std_acc": 0.0,
+    "mean_time": 5.552531003952026,
+    "seeds": [
+      82.22222222222223
+    ],
+    "histories": [
+      [
+        "train_loss",
+        "test_acc",
+        "convergence_rate"
+      ]
+    ]
+  }
+}

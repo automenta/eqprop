@@ -1,0 +1,226 @@
+# Custom Experiment Campaign Configuration
+# 
+# This file demonstrates how to define custom experiments using the
+# TorEqProp experiment framework. See src/experiment_framework.py for
+# available experiment types and options.
+#
+# Usage:
+#   python run_discovery.py --config configs/experiments.yaml
+#
+# To add new experiment types, see src/experiment_framework.py and
+# register them with ExperimentRegistry.register_experiment()
+
+experiments:
+  # ============================================================================
+  # Phase 1: Rapid Dataset Sweep (~25 min)
+  # ============================================================================
+  
+  - name: MNIST Rapid
+    type: classification
+    dataset: mnist
+    epochs: 3
+    rapid: true
+    success_threshold: 0.80
+    priority: HIGH
+    expected_time_min: 5
+    hypothesis: "Baseline validation - should achieve ~85% in 3 epochs"
+    
+  - name: Fashion Rapid
+    type: classification
+    dataset: fashion
+    epochs: 3
+    rapid: true
+    success_threshold: 0.70
+    priority: HIGH
+    expected_time_min: 5
+    hypothesis: "Harder than MNIST - expect ~75%"
+    
+  - name: CIFAR-10 Rapid
+    type: classification
+    dataset: cifar10
+    epochs: 3
+    rapid: true
+    success_threshold: 0.35
+    priority: HIGH
+    expected_time_min: 8
+    hypothesis: "Significant complexity jump - expect ~45% if working"
+    
+  - name: SVHN Rapid
+    type: classification
+    dataset: svhn
+    epochs: 3
+    rapid: true
+    success_threshold: 0.40
+    priority: MEDIUM
+    expected_time_min: 8
+    hypothesis: "Real-world digits - expect ~50%"
+
+  # ============================================================================
+  # Phase 2: Algorithmic Tasks (~25 min)
+  # ============================================================================
+  
+  - name: Parity N=8
+    type: algorithmic
+    task: parity
+    seq_len: 8
+    epochs: 10
+    success_threshold: 0.90
+    priority: HIGH
+    expected_time_min: 5
+    hypothesis: "Adaptive compute test - track iterations vs difficulty"
+    analyze_difficulty: true
+    
+  - name: Parity N=12
+    type: algorithmic
+    task: parity
+    seq_len: 12
+    epochs: 15
+    success_threshold: 0.85
+    priority: MEDIUM
+    expected_time_min: 8
+    hypothesis: "Longer sequences should need more iterations"
+    
+  - name: Copy Task
+    type: algorithmic
+    task: copy
+    seq_len: 8
+    epochs: 5
+    success_threshold: 0.95
+    priority: MEDIUM
+    expected_time_min: 3
+    hypothesis: "Easy baseline - should converge quickly"
+    
+  - name: Addition 4-digit
+    type: algorithmic
+    task: addition
+    seq_len: 8
+    n_digits: 4
+    epochs: 20
+    success_threshold: 0.50
+    priority: HIGH
+    expected_time_min: 10
+    hypothesis: "Carry propagation is inherently sequential"
+
+  # ============================================================================
+  # Phase 3: Reinforcement Learning (~25 min)
+  # ============================================================================
+  
+  - name: CartPole EqProp
+    type: rl
+    env: CartPole-v1
+    episodes: 500
+    use_bp: false
+    success_threshold: 195.0
+    priority: HIGH
+    expected_time_min: 15
+    hypothesis: "Can EqProp gradients solve classic control?"
+    
+  - name: CartPole BP
+    type: rl
+    env: CartPole-v1
+    episodes: 500
+    use_bp: true
+    success_threshold: 195.0
+    priority: HIGH
+    expected_time_min: 10
+    hypothesis: "BP baseline for comparison"
+
+  # ============================================================================
+  # Phase 4: Accuracy Push (~7 hours)
+  # ============================================================================
+  
+  - name: MNIST Extended
+    type: classification
+    dataset: mnist
+    epochs: 100
+    rapid: false
+    d_model: 256
+    success_threshold: 0.945
+    priority: HIGH
+    expected_time_min: 180
+    hypothesis: "Extended training should reach 94.5%+ based on trajectory"
+    extra_args:
+      beta: 0.22
+      dropout: 0.1
+      compile: true
+      
+  - name: MNIST Scaled
+    type: classification
+    dataset: mnist
+    epochs: 50
+    rapid: false
+    d_model: 512
+    success_threshold: 0.95
+    priority: MEDIUM
+    expected_time_min: 240
+    hypothesis: "Larger model capacity should push past 95%"
+    extra_args:
+      beta: 0.22
+      n_heads: 16
+      d_ff: 2048
+      dropout: 0.1
+      compile: true
+
+  # ============================================================================
+  # Phase 5: Memory Profiling (~35 min)
+  # ============================================================================
+  
+  - name: Memory d=256
+    type: memory
+    d_model: 256
+    max_iters: 100
+    success_threshold: 1.5
+    priority: MEDIUM
+    expected_time_min: 5
+    hypothesis: "Baseline memory measurement"
+    
+  - name: Memory d=1024
+    type: memory
+    d_model: 1024
+    max_iters: 100
+    success_threshold: 0.8
+    priority: HIGH
+    expected_time_min: 10
+    hypothesis: "O(1) advantage should emerge at scale"
+    
+  - name: Memory d=2048
+    type: memory
+    d_model: 2048
+    max_iters: 100
+    success_threshold: 0.5
+    priority: HIGH
+    expected_time_min: 20
+    hypothesis: "Clear O(1) memory advantage at large scale"
+
+# ============================================================================
+# Adding Custom Experiment Types
+# ============================================================================
+#
+# To add a new experiment type:
+#
+# 1. Create a new class in src/experiment_framework.py:
+#
+#    class MyNewExperiment(Experiment):
+#        @property
+#        def category(self) -> str:
+#            return "my_category"
+#        
+#        def build_command(self) -> str:
+#            return f"python my_script.py --arg {self.config['my_arg']}"
+#        
+#        def get_metric_extractor(self) -> MetricExtractor:
+#            return AccuracyExtractor()  # Or create custom
+#        
+#        def get_success_criteria(self) -> Tuple[str, float]:
+#            return ("my_metric", self.config.get("threshold", 0.5))
+#
+# 2. Register it:
+#
+#    ExperimentRegistry.register_experiment("my_type", MyNewExperiment)
+#
+# 3. Use in YAML:
+#
+#    - name: My Custom Experiment
+#      type: my_type
+#      my_arg: value
+#      threshold: 0.75
