@@ -32,53 +32,11 @@ from pathlib import Path
 from torch.nn.utils.parametrizations import spectral_norm
 
 import sys
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 from models import LoopedMLP, ConvEqProp, TernaryEqProp, FeedbackAlignmentEqProp
 
 
-class ConfigurableLoopedMLP(nn.Module):
-    """LoopedMLP with configurable SN."""
     
-    def __init__(self, input_dim, hidden_dim, output_dim, use_sn=True, max_steps=20):
-        super().__init__()
-        self.hidden_dim = hidden_dim
-        self.max_steps = max_steps
-        self.use_sn = use_sn
-        
-        self.W_in = nn.Linear(input_dim, hidden_dim)
-        self.W_rec = nn.Linear(hidden_dim, hidden_dim)
-        self.W_out = nn.Linear(hidden_dim, output_dim)
-        
-        if use_sn:
-            self.W_in = spectral_norm(self.W_in)
-            self.W_rec = spectral_norm(self.W_rec)
-            self.W_out = spectral_norm(self.W_out)
-        
-        for m in [self.W_in, self.W_rec, self.W_out]:
-            layer = m.parametrizations.weight.original if hasattr(m, 'parametrizations') else m
-            if hasattr(layer, 'weight'):
-                nn.init.xavier_uniform_(layer.weight, gain=0.5)
-    
-    def forward(self, x, steps=None):
-        steps = steps or self.max_steps
-        batch_size = x.shape[0]
-        
-        h = torch.zeros(batch_size, self.hidden_dim, device=x.device)
-        x_proj = self.W_in(x)
-        
-        for _ in range(steps):
-            h = torch.tanh(x_proj + self.W_rec(h))
-        
-        return self.W_out(h)
-    
-    def compute_lipschitz(self):
-        with torch.no_grad():
-            if self.use_sn:
-                return 1.0  # SN guarantees L ≤ 1
-            else:
-                W = self.W_rec.weight
-                s = torch.linalg.svdvals(W)
-                return s[0].item()
 
 
 def load_dataset(name, n_train=5000, n_test=1000):
@@ -224,7 +182,7 @@ def run_benchmark():
             configurations.append({
                 'name': f'MLP-h{hidden}-{sn_label}',
                 'factory': lambda input_dim, output_dim, h=hidden, sn=use_sn: 
-                    ConfigurableLoopedMLP(input_dim, h, output_dim, use_sn=sn, max_steps=20),
+                    LoopedMLP(input_dim, h, output_dim, use_spectral_norm=sn, max_steps=20),
                 'is_conv': False,
                 'epochs': 15,
                 'lr': 0.001,

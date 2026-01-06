@@ -18,53 +18,11 @@ import numpy as np
 import time
 import json
 from pathlib import Path
-from torch.nn.utils.parametrizations import spectral_norm
+import sys
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from models import LoopedMLP
 
 
-class TinyLoopedMLP(nn.Module):
-    """Very small model to stress test stability."""
-    
-    def __init__(self, input_dim, hidden_dim, output_dim, use_sn=True, max_steps=30):
-        super().__init__()
-        self.hidden_dim = hidden_dim
-        self.max_steps = max_steps
-        self.use_sn = use_sn
-        
-        self.W_in = nn.Linear(input_dim, hidden_dim)
-        self.W_rec = nn.Linear(hidden_dim, hidden_dim)
-        self.W_out = nn.Linear(hidden_dim, output_dim)
-        
-        if use_sn:
-            self.W_in = spectral_norm(self.W_in)
-            self.W_rec = spectral_norm(self.W_rec)
-            self.W_out = spectral_norm(self.W_out)
-        
-        # Xavier init with larger gain to stress test
-        for m in [self.W_in, self.W_rec, self.W_out]:
-            layer = m.parametrizations.weight.original if hasattr(m, 'parametrizations') else m
-            if hasattr(layer, 'weight'):
-                nn.init.xavier_uniform_(layer.weight, gain=1.0)  # Larger gain = more stress
-    
-    def forward(self, x, steps=None):
-        steps = steps or self.max_steps
-        batch_size = x.shape[0]
-        
-        h = torch.zeros(batch_size, self.hidden_dim, device=x.device)
-        x_proj = self.W_in(x)
-        
-        for _ in range(steps):
-            h = torch.tanh(x_proj + self.W_rec(h))
-        
-        return self.W_out(h)
-    
-    def compute_lipschitz(self):
-        with torch.no_grad():
-            W = self.W_rec.weight if not self.use_sn else self.W_rec.parametrizations.weight.original
-            try:
-                s = torch.linalg.svdvals(W)
-                return s[0].item()
-            except:
-                return self.W_rec.weight.norm().item()
 
 
 def run_stress_test(name, input_dim, hidden_dim, output_dim, loader, test_loader, 
@@ -83,7 +41,7 @@ def run_stress_test(name, input_dim, hidden_dim, output_dim, loader, test_loader
         print(f"\n--- {label} ---")
         
         torch.manual_seed(42)  # Same init for fair comparison
-        model = TinyLoopedMLP(input_dim, hidden_dim, output_dim, use_sn=use_sn, max_steps=steps)
+        model = LoopedMLP(input_dim, hidden_dim, output_dim, use_spectral_norm=use_sn, max_steps=steps)
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
         
         lipschitz_history = []

@@ -26,89 +26,11 @@ from pathlib import Path
 from torch.nn.utils.parametrizations import spectral_norm
 
 import sys
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
-class ProperLoopedMLP(nn.Module):
-    """
-    Correctly implemented LoopedMLP with proper initialization.
-    
-    Key features:
-    - Xavier initialization scaled for equilibrium dynamics
-    - Proper spectral norm application
-    - Configurable depth for fair comparison
-    """
-    
-    def __init__(self, input_dim, hidden_dim, output_dim, use_sn=True, max_steps=30):
-        super().__init__()
-        self.input_dim = input_dim
-        self.hidden_dim = hidden_dim
-        self.output_dim = output_dim
-        self.use_sn = use_sn
-        self.max_steps = max_steps
-        
-        # Properly sized hidden dimension (relative to input)
-        # Rule of thumb: hidden ~= sqrt(input * output) for equilibrium networks
-        
-        self.W_in = nn.Linear(input_dim, hidden_dim, bias=True)
-        self.W_rec = nn.Linear(hidden_dim, hidden_dim, bias=True)
-        self.W_out = nn.Linear(hidden_dim, output_dim, bias=True)
-        
-        # Apply spectral norm BEFORE initialization
-        if use_sn:
-            self.W_in = spectral_norm(self.W_in)
-            self.W_rec = spectral_norm(self.W_rec)
-            self.W_out = spectral_norm(self.W_out)
-        
-        # Proper initialization for equilibrium networks
-        self._init_weights()
-    
-    def _init_weights(self):
-        """Initialize weights for stable equilibrium dynamics."""
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Linear):
-                # Get the actual weight (accounting for spectral norm wrapper)
-                if hasattr(module, 'parametrizations'):
-                    weight = module.parametrizations.weight.original
-                else:
-                    weight = module.weight
-                
-                # Xavier uniform with gain optimized for tanh + equilibrium
-                # Smaller gain (0.3-0.5) is critical for equilibrium convergence
-                nn.init.xavier_uniform_(weight, gain=0.4)
-                
-                if module.bias is not None:
-                    nn.init.zeros_(module.bias)
-    
-    def forward(self, x, steps=None):
-        steps = steps or self.max_steps
-        batch_size = x.shape[0]
-        
-        # Initialize hidden state
-        h = torch.zeros(batch_size, self.hidden_dim, device=x.device, dtype=x.dtype)
-        
-        # Pre-compute input projection (constant across iterations)
-        x_proj = self.W_in(x)
-        
-        # Equilibrium iteration
-        for _ in range(steps):
-            h = torch.tanh(x_proj + self.W_rec(h))
-        
-        # Output from equilibrium
-        return self.W_out(h)
-    
-    def compute_lipschitz(self):
-        """Compute actual Lipschitz constant of recurrent dynamics."""
-        with torch.no_grad():
-            if self.use_sn:
-                # SN guarantees L ≤ 1, but check actual value
-                W = self.W_rec.weight
-                s = torch.linalg.svdvals(W)
-                return s[0].item()
-            else:
-                W = self.W_rec.weight
-                s = torch.linalg.svdvals(W)
-                return s[0].item()
+from models import LoopedMLP
+
 
 
 def load_dataset(name, n_train=5000, n_test=1000):
@@ -323,11 +245,11 @@ def run_extended_benchmark():
             print(f"\n--- {label} ---")
             
             torch.manual_seed(42)  # Same initialization
-            model = ProperLoopedMLP(
+            model = LoopedMLP(
                 input_dim, 
                 recommended_hidden, 
                 n_classes, 
-                use_sn=use_sn, 
+                use_spectral_norm=use_sn, 
                 max_steps=30
             )
             
