@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Optional, List, Dict, Callable
 
 from .notebook import VerificationNotebook, TrackResult
-from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks, engine_validation_tracks, enhanced_validation_tracks, new_tracks
+from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks, engine_validation_tracks, enhanced_validation_tracks, new_tracks, rapid_validation, framework_validation
 
 class Verifier:
     """Complete verification suite for all research tracks."""
@@ -51,6 +51,7 @@ class Verifier:
         
         # Track definitions
         self.tracks = {
+            0: ("Framework Validation", framework_validation.track_0_framework_validation),
             1: ("Spectral Normalization Stability", core_tracks.track_1_spectral_norm),
             2: ("EqProp vs Backprop Parity", core_tracks.track_2_backprop_parity),
             3: ("Adversarial Self-Healing", core_tracks.track_3_adversarial_healing),
@@ -91,6 +92,7 @@ class Verifier:
             38: ("Adaptive Compute", new_tracks.track_38_adaptive_compute),
             39: ("EqProp Diffusion", new_tracks.track_39_eqprop_diffusion),
             40: ("Hardware Analysis", new_tracks.track_40_hardware_analysis),
+            41: ("Rapid Rigorous Validation", rapid_validation.track_41_rapid_rigorous_validation),
         }
     
     def print_header(self):
@@ -210,6 +212,11 @@ class Verifier:
         
         if track_ids is None:
             track_ids = list(self.tracks.keys())
+        
+        # Auto-run Track 0 (Framework Validation) in intermediate/full modes
+        if (self.intermediate_mode or (not self.quick_mode)) and 0 not in track_ids:
+            print("\n⚙️  Running Track 0 (Framework Validation) automatically...")
+            track_ids = [0] + track_ids
         
         results = {}
         start_time = time.time()

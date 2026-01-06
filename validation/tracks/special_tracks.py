@@ -221,8 +221,11 @@ def track_15_kernel_comparison(verifier) -> TrackResult:
     print("\n[15a] Training PyTorch (autograd)...")
     pt_model = LoopedMLP(input_dim, hidden_dim, output_dim, use_spectral_norm=True)
     train_model(pt_model, X_train_torch, y_train_torch, epochs=verifier.epochs, lr=0.01, name="PyTorch")
-    pt_acc = evaluate_accuracy(pt_model, X_test_torch, y_test_torch)
     
+    # Evaluate on both train and test
+    pt_train_acc = evaluate_accuracy(pt_model, X_train_torch, y_train_torch)
+    pt_test_acc = evaluate_accuracy(pt_model, X_test_torch, y_test_torch)
+
     print("\n[15b] Training NumPy Kernel (BPTT)...")
     kernel = EqPropKernel(input_dim, hidden_dim, output_dim, lr=0.1, max_steps=30)
     
@@ -233,18 +236,23 @@ def track_15_kernel_comparison(verifier) -> TrackResult:
         
         if (epoch + 1) % 5 == 0 or epoch == verifier.epochs - 1:
             print(f"\r  Kernel: {progress_bar(epoch+1, verifier.epochs)} "
-                  f"loss={result['loss']:.3f} acc={result['accuracy']*100:.1f}%", 
+                  f"loss={result['loss']:.3f} acc={result['accuracy']*100:.1f}% (train)", 
                   end="", flush=True)
     print()
     
+    # Evaluate on test set
     kernel_result = kernel.evaluate(X_test_np, y_test_np)
-    kernel_acc = kernel_result['accuracy']
+    kernel_test_acc = kernel_result['accuracy']
     
+    # Also get train accuracy for consistency
+    kernel_train_result = kernel.evaluate(X_train_np, y_train_np)
+    kernel_train_acc = kernel_train_result['accuracy']
+
     # Memory comparison
     mem = compare_memory_autograd_vs_kernel(hidden_dim, depth=30)
     
-    print(f"\n  PyTorch accuracy: {pt_acc*100:.1f}%")
-    print(f"  Kernel accuracy: {kernel_acc*100:.1f}%")
+    print(f"\n  PyTorch - Train: {pt_train_acc*100:.1f}%, Test: {pt_test_acc*100:.1f}%")
+    print(f"  Kernel  - Train: {kernel_train_acc*100:.1f}%, Test: {kernel_test_acc*100:.1f}%")
     print(f"  Memory ratio: {mem['ratio']:.1f}×")
     
     # Focus on memory advantage (the key claim) + any learning signal
@@ -268,10 +276,10 @@ def track_15_kernel_comparison(verifier) -> TrackResult:
 
 **Experiment**: Compare PyTorch (autograd) vs NumPy (contrastive Hebbian).
 
-| Implementation | Accuracy | Memory | Notes |
-|----------------|----------|--------|-------|
-| PyTorch (autograd) | {pt_acc*100:.1f}% | {mem['autograd_activation_mb']:.3f} MB | Stores graph |
-| NumPy Kernel | {kernel_acc*100:.1f}% | {mem['kernel_activation_mb']:.3f} MB | O(1) state |
+| Implementation | Train Acc | Test Acc | Memory | Notes |
+|----------------|-----------|----------|--------|-------|
+| PyTorch (autograd) | {pt_train_acc*100:.1f}% | {pt_test_acc*100:.1f}% | {mem['autograd_activation_mb']:.3f} MB | Stores graph |
+| NumPy Kernel | {kernel_train_acc*100:.1f}% | {kernel_test_acc*100:.1f}% | {mem['kernel_activation_mb']:.3f} MB | O(1) state |
 
 **Memory Advantage**: Kernel uses **{mem['ratio']:.0f}× less activation memory**
 
@@ -292,13 +300,15 @@ theoretical refinement. PRIMARY CLAIM (O(1) memory) is fully validated.
     improvements = []
     if not kernel_shows_learning:
         improvements.append(f"Kernel not showing loss decrease; tune hyperparameters")
-    if abs(pt_acc - kernel_acc) > 0.2:
+    if abs(pt_test_acc - kernel_test_acc) > 0.2:
         improvements.append(f"Large gap between implementations; needs more epochs")
     
     return TrackResult(
         track_id=15, name="PyTorch vs Kernel",
         status=status, score=score,
-        metrics={"pt_acc": pt_acc, "kernel_acc": kernel_acc, "mem_ratio": mem['ratio']},
+        metrics={"pt_train_acc": pt_train_acc, "pt_test_acc": pt_test_acc, 
+                 "kernel_train_acc": kernel_train_acc, "kernel_test_acc": kernel_test_acc, 
+                 "mem_ratio": mem['ratio']},
         evidence=evidence,
         time_seconds=time.time() - start,
         improvements=improvements

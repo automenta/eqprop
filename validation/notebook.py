@@ -1,6 +1,6 @@
 
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List, Dict, Optional
 from datetime import datetime
 from pathlib import Path
 import numpy as np
@@ -16,6 +16,10 @@ class TrackResult:
     evidence: str  # Markdown evidence block
     time_seconds: float
     improvements: List[str] = field(default_factory=list)
+    evidence_level: str = "smoke"  # 'smoke', 'directional', 'conclusive'
+    limitations: List[str] = field(default_factory=list)
+    reproducibility_hash: Optional[str] = None
+
 
 
 class VerificationNotebook:
@@ -72,12 +76,31 @@ class VerificationNotebook:
         self.track_results.append(result)
         
         status_icon = {"pass": "✅", "fail": "❌", "partial": "⚠️", "stub": "🔧"}.get(result.status, "❓")
+        evidence_icon = {"smoke": "🧪", "directional": "📊", "conclusive": "✅"}.get(result.evidence_level, "❓")
+        evidence_label = {
+            "smoke": "Smoke Test",
+            "directional": "Directional",
+            "conclusive": "Conclusive"
+        }.get(result.evidence_level, "Unknown")
         
         content = f"""
 {status_icon} **Status**: {result.status.upper()} | **Score**: {result.score:.1f}/100 | **Time**: {result.time_seconds:.1f}s
 
+{evidence_icon} **Evidence Level**: {evidence_label}
+
 {result.evidence}
 """
+        
+        # Add limitations if any
+        if result.limitations:
+            content += "\n**Limitations**:\n"
+            for lim in result.limitations:
+                content += f"- {lim}\n"
+        
+        # Add reproducibility hash if available
+        if result.reproducibility_hash:
+            content += f"\n*Reproducibility Hash*: `{result.reproducibility_hash}`\n"
+        
         self.add_section(f"Track {result.track_id}: {result.name}", content)
         
         # Add improvements if any
