@@ -1,29 +1,29 @@
 # TorEqProp Verification Results
 
-**Generated**: 2026-01-05 21:48:29
+**Generated**: 2026-01-05 22:11:56
 
 
 ## Executive Summary
 
-**Verification completed in 4.9 seconds.**
+**Verification completed in 10.1 seconds.**
 
 ### Overall Results
 
 | Metric | Value |
 |--------|-------|
 | Tracks Verified | 2 |
-| Passed | 2 ✅ |
-| Partial | 0 ⚠️ |
+| Passed | 1 ✅ |
+| Partial | 1 ⚠️ |
 | Failed | 0 ❌ |
 | Stubs (TODO) | 0 🔧 |
-| Average Score | 93.8/100 |
+| Average Score | 87.5/100 |
 
 ### Track Summary
 
 | # | Track | Status | Score | Time |
 |---|-------|--------|-------|------|
-| 0 | Framework Validation | ✅ | 100 | 0.4s |
-| 41 | Rapid Rigorous Validation | ✅ | 88 | 4.4s |
+| 0 | Framework Validation | ✅ | 100 | 0.5s |
+| 37 | Language Modeling | ⚠️ | 75 | 9.7s |
 
 
 **Seed**: 42 (deterministic)
@@ -36,7 +36,7 @@
 ## Track 0: Framework Validation
 
 
-✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.4s
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.5s
 
 🧪 **Evidence Level**: Smoke Test
 
@@ -63,84 +63,42 @@ functions work correctly before running model validation tracks.
 
 
 
-## Track 41: Rapid Rigorous Validation
+## Track 37: Language Modeling
 
 
-✅ **Status**: PASS | **Score**: 87.5/100 | **Time**: 4.4s
+⚠️ **Status**: PARTIAL | **Score**: 75.0/100 | **Time**: 9.7s
 
-✅ **Evidence Level**: Conclusive
-
-
-## Rapid Rigorous Validation Results
-
-**Configuration**: 5000 samples × 3 seeds × 50 epochs
-**Runtime**: 4.4s
-**Evidence Level**: conclusive
-
----
-
-## Test Results
+🧪 **Evidence Level**: Smoke Test
 
 
-> **Claim**: Spectral Normalization is necessary for stable EqProp training
-> 
-> ✅ **Evidence Level**: Conclusive (statistically significant)
+**Claim**: EqProp matches or exceeds Backprop in language modeling while potentially using fewer parameters.
+
+**Dataset**: Shakespeare
+**Config**: hidden=128, layers=3, epochs=15
+
+## Results
+
+| Model | Params | Perplexity | Accuracy |
+|-------|--------|------------|----------|
+| backprop_100 | 419,509 | 18.36 | 25.4% |
+| eqprop_full_100 | 419,253 | 26.00 | 14.1% |
+| eqprop_recurrent_core_100 | 154,293 | 25.12 | 16.1% |
+| eqprop_full_90 | 370,013 | 25.99 | 13.8% |
+| eqprop_recurrent_core_90 | 136,973 | 26.98 | 14.2% |
 
 
-| Condition | Accuracy (mean±std) | Lipschitz L |
-|-----------|---------------------|-------------|
-| **With SN** | 100.0% ± 0.0% | 1.01 |
-| Without SN | 100.0% ± 0.0% | 2.81 |
+**Analysis**:
+- Backprop baseline: 18.36 perplexity
+- Best EqProp: 25.12 perplexity (eqprop_recurrent_core_100)
+- EqProp matches Backprop: ❌ No
+- EqProp more efficient: ❌ Not demonstrated
 
-**Effect Size (accuracy)**: negligible (+0.00)
-**Significance**: p = 1.000 (not significant)
-**Stability**: SN maintains L < 1: ✅ Yes (L = 1.007)
-
-
-> **Claim**: EqProp achieves accuracy parity with Backpropagation
-> 
-> ✅ **Evidence Level**: Conclusive (statistically significant)
-
-### Statistical Comparison: EqProp vs Backprop
-
-| Metric | EqProp | Backprop |
-|--------|---------|---------|
-| Mean accuracy | 1.000 | 1.000 |
-| 95% CI | ±0.000 | ±0.000 |
-| n | 3 | 3 |
-
-**Effect Size**: negligible (+0.00)
-**Significance**: p = 1.000 (not significant)
-
-**Parity**: ✅ Achieved (|d| = 0.00)
-
-> **Claim**: EqProp networks exhibit self-healing via contraction
-> 
-> ✅ **Evidence Level**: Conclusive (statistically significant)
-
-
-| Metric | Value |
-|--------|-------|
-| Initial noise magnitude | 0.5 |
-| Mean damping ratio | 0.000 |
-| Noise reduction | 100.0% |
-
-**Self-Healing**: ✅ Demonstrated (noise reduced to 0.0%)
+**Note**: Run full experiment with `python experiments/language_modeling_comparison.py --epochs 50` for complete analysis.
 
 
 
----
 
-## Summary
+### Areas for Improvement
 
-| Test | Status | Key Metric |
-|------|--------|------------|
-| SN Necessity | ✅ | L = 1.007 |
-| EqProp-Backprop Parity | ✅ | d = +0.00 |
-| Self-Healing | ✅ | 100.0% noise reduction |
-
-**Tests Passed**: 3/3
-
-
-*Reproducibility Hash*: `1df8aae4`
-
+- Tune EqProp hyperparameters (eq_steps, alpha, lr)
+- Test smaller EqProp models (75% params)

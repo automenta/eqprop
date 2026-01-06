@@ -9,7 +9,10 @@ These scripts correspond to the "Breakthrough" phase of the roadmap.
 - **Track 34**: [`cifar_breakthrough.py`](./cifar_breakthrough.py) - ModernConvEqProp on CIFAR-10.
 - **Track 35**: [`memory_scaling_demo.py`](./memory_scaling_demo.py) - O(1) memory scaling verification.
 - **Track 36**: [`energy_confidence.py`](./energy_confidence.py) - Energy-based OOD detection.
-- **Track 37**: [`language_modeling.py`](./language_modeling.py) - Character-level language modeling.
+- **Track 37**: 
+    - [`language_modeling.py`](./language_modeling.py) - Single EqProp character-level LM training
+    - [`language_modeling_comparison.py`](./language_modeling_comparison.py) - **EqProp vs Backprop comparison** with parameter efficiency analysis
+
 - **Track 38**: [`adaptive_compute.py`](./adaptive_compute.py) - Variable computation limits per sample.
 - **Track 39**: [`diffusion_mnist.py`](./diffusion_mnist.py) - Score-based generative modeling.
 - **Track 40**: [`flop_analysis.py`](./flop_analysis.py) - Hardware efficiency and FLOP counting.

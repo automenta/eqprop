@@ -105,12 +105,19 @@ Track 0 validates the validation framework itself, ensuring Cohen's d, t-tests, 
 | **39** | **EqProp Diffusion** | ✅ Pass | Energy-based denoising | [Source](validation/tracks/new_tracks.py) |
 | **40** | **Hardware Analysis** | ✅ Pass | FLOPs & Efficiency | [Source](validation/tracks/new_tracks.py) |
 
-### 5. Breakthrough Performance (Tracks 33-34)
+### 5. Breakthrough Performance (Tracks 33-34, 37)
 | Track | Name | Target | Status | Code |
 |---|---|---|---|---|
 | **33** | **CIFAR-10 Baseline** | > 45% | ✅ Pass (44.5%) | [Source](validation/tracks/enhanced_validation_tracks.py) |
 | **34** | **CIFAR-10 Scaled** | > 75% | ✅ Pass (Architecture) | [Source](validation/tracks/new_tracks.py) |
-| **37** | **Language Modeling** | < 2.5 PPL | ✅ Pass (Structure) | [Source](validation/tracks/new_tracks.py) |
+| **37** | **Language Modeling** | EqProp ≈ Backprop | ⚠️ Partial | [Source](validation/tracks/new_tracks.py) |
+
+Track 37 now provides **comprehensive EqProp vs Backprop comparison**:
+- Tests 5 EqProp variants (full, attention_only, recurrent_core, hybrid, looped_mlp)
+- Progressive parameter efficiency analysis (100% → 90% → 75%)
+- Metrics: perplexity, accuracy, bits-per-character
+- Run: `python experiments/language_modeling_comparison.py --epochs 50`
+
 
 ### 6. Rapid Rigor (Track 41) ⭐ NEW
 | Track | Name | Status | Statistical Methods | Code |

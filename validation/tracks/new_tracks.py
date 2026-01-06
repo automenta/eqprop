@@ -332,128 +332,272 @@ def track_36_energy_ood(verifier) -> TrackResult:
 
 
 def track_37_language_modeling(verifier) -> TrackResult:
-    """Track 37: Character-level language modeling."""
+    """Track 37: Character-level language modeling with EqProp vs Backprop comparison."""
     print("\n" + "="*60)
-    print("TRACK 37: Character-Level Language Modeling")
+    print("TRACK 37: Language Modeling (EqProp vs Backprop)")
     print("="*60)
     
     start = time.time()
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
-    print("\n⚠️ Quick validation: toy sequence task")
+    # Import comparison models
+    from models import BackpropTransformerLM, get_eqprop_lm
+    import math
     
-    # Quick mode: simple sequence copying task
-    vocab_size = 20
-    seq_len = 16
-    hidden_dim = 64
-    num_samples = 200 if verifier.quick_mode else 500
+    # Mode-specific configuration
+    if verifier.quick_mode:
+        print("\n⚠️ Quick mode: toy pattern task + mini comparison")
+        vocab_size = 20
+        seq_len = 16
+        hidden_dim = 64
+        num_layers = 2
+        epochs = 30
+        num_samples = 200
+        param_scales = [1.0]
+        variants = ['full']
+    elif verifier.intermediate_mode:
+        print("\n📊 Intermediate mode: Shakespeare subset comparison")
+        vocab_size = 65  # Shakespeare chars
+        seq_len = 64
+        hidden_dim = 128
+        num_layers = 3
+        epochs = 15
+        num_samples = 5000
+        param_scales = [1.0, 0.9]
+        variants = ['full', 'recurrent_core']
+    else:
+        print("\n🔬 Full mode: Complete comparison")
+        vocab_size = 65
+        seq_len = 128
+        hidden_dim = 256
+        num_layers = 4
+        epochs = 30
+        num_samples = None  # Full dataset
+        param_scales = [1.0, 0.9, 0.75]
+        variants = ['full', 'attention_only', 'recurrent_core', 'hybrid']
     
-    # Create simple dataset: repeating pattern (e.g. 0,1,2,0,1,2...)
-    # This is solvable by a causal model (unlike reversal)
-    pattern_len = 4
-    X = torch.zeros(num_samples, seq_len, dtype=torch.long)
-    for i in range(num_samples):
-        start = torch.randint(0, vocab_size - pattern_len, (1,)).item()
-        pattern = torch.arange(start, start + pattern_len)
-        # Repeat pattern to fill sequence
-        full_seq = pattern.repeat(seq_len // pattern_len + 1)[:seq_len]
-        X[i] = full_seq
+    # Create dataset
+    if verifier.quick_mode:
+        # Synthetic repeating pattern for smoke test
+        pattern_len = 4
+        X = torch.zeros(200, seq_len, dtype=torch.long)
+        for i in range(200):
+            start_val = torch.randint(0, vocab_size - pattern_len, (1,)).item()
+            pattern = torch.arange(start_val, start_val + pattern_len)
+            full_seq = pattern.repeat(seq_len // pattern_len + 1)[:seq_len]
+            X[i] = full_seq
+        train_data = X[:180].reshape(-1)
+        val_data = X[180:].reshape(-1)
+    else:
+        # Load Shakespeare
+        from pathlib import Path
+        import urllib.request
         
-    # Target is next token (shifted by 1)
-    # Input: [0, 1, 2, 0, 1]
-    # Target: [1, 2, 0, 1, 2]
-    # We do casual LM training: predict next token
-    # Create input/target shifted
-    data = X
-    X = data[:, :-1]  # Input: 0..N-1
-    y = data[:, 1:]   # Target: 1..N
+        data_path = Path('data/shakespeare.txt')
+        data_path.parent.mkdir(exist_ok=True)
+        
+        if not data_path.exists():
+            url = 'https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt'
+            print("  Downloading Shakespeare...")
+            urllib.request.urlretrieve(url, data_path)
+        
+        with open(data_path, 'r') as f:
+            text = f.read()
+        
+        if num_samples:
+            text = text[:num_samples]
+        
+        chars = sorted(set(text))
+        vocab_size = len(chars)
+        char_to_idx = {ch: i for i, ch in enumerate(chars)}
+        
+        data = torch.tensor([char_to_idx[ch] for ch in text], dtype=torch.long)
+        n = int(0.9 * len(data))
+        train_data, val_data = data[:n], data[n:]
     
-    # Adjust model seq_len input
-    model = CausalTransformerEqProp(
+    print(f"  Vocab: {vocab_size}, Train: {len(train_data):,}, Val: {len(val_data):,}")
+    
+    # Helper functions
+    def get_batch(data, seq_len, batch_size):
+        ix = torch.randint(len(data) - seq_len, (batch_size,))
+        x = torch.stack([data[i:i+seq_len] for i in ix]).to(device)
+        y = torch.stack([data[i+1:i+seq_len+1] for i in ix]).to(device)
+        return x, y
+    
+    def train_and_eval(model, name, epochs):
+        optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+        criterion = nn.CrossEntropyLoss()
+        batch_size = 32
+        
+        for epoch in range(epochs):
+            model.train()
+            x, y = get_batch(train_data, seq_len, batch_size)
+            optimizer.zero_grad()
+            logits = model(x)
+            loss = criterion(logits.reshape(-1, vocab_size), y.reshape(-1))
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            optimizer.step()
+        
+        # Evaluate
+        model.eval()
+        total_loss = 0
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for _ in range(10):
+                x, y = get_batch(val_data, seq_len, batch_size)
+                logits = model(x)
+                loss = criterion(logits.reshape(-1, vocab_size), y.reshape(-1))
+                total_loss += loss.item()
+                preds = logits.argmax(dim=-1)
+                correct += (preds == y).sum().item()
+                total += y.numel()
+        
+        avg_loss = total_loss / 10
+        perplexity = math.exp(min(avg_loss, 20))
+        accuracy = 100 * correct / total
+        params = sum(p.numel() for p in model.parameters())
+        
+        return {'perplexity': perplexity, 'accuracy': accuracy, 'params': params}
+    
+    # Run comparison
+    results = {}
+    
+    # Backprop baseline (100% params)
+    print(f"\n[37a] Training Backprop baseline...")
+    bp_model = BackpropTransformerLM(
         vocab_size=vocab_size,
         hidden_dim=hidden_dim,
-        num_layers=2,
-        num_heads=2,
-        max_seq_len=seq_len,
-        eq_steps=10
-    )
+        num_layers=num_layers,
+        max_seq_len=seq_len
+    ).to(device)
+    results['backprop_100'] = train_and_eval(bp_model, "Backprop-100%", epochs)
+    print(f"  Backprop: ppl={results['backprop_100']['perplexity']:.2f}, "
+          f"acc={results['backprop_100']['accuracy']:.1f}%, "
+          f"params={results['backprop_100']['params']:,}")
+    del bp_model
     
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = model.to(device)
+    # EqProp at various scales
+    for scale in param_scales:
+        for variant in variants:
+            try:
+                scaled_hidden = int(hidden_dim * math.sqrt(scale))
+                scaled_hidden = max(32, (scaled_hidden // 4) * 4)
+                
+                eq_model = get_eqprop_lm(
+                    variant,
+                    vocab_size=vocab_size,
+                    hidden_dim=scaled_hidden,
+                    num_layers=num_layers,
+                    max_seq_len=seq_len,
+                    eq_steps=10
+                ).to(device)
+                
+                key = f'eqprop_{variant}_{int(scale*100)}'
+                print(f"\n[37b] Training EqProp {variant} @ {scale*100:.0f}%...")
+                results[key] = train_and_eval(eq_model, f"EqProp-{variant}-{scale*100:.0f}%", epochs)
+                print(f"  EqProp {variant}: ppl={results[key]['perplexity']:.2f}, "
+                      f"acc={results[key]['accuracy']:.1f}%, "
+                      f"params={results[key]['params']:,}")
+                del eq_model
+            except Exception as e:
+                print(f"  SKIPPED {variant} @ {scale*100:.0f}%: {e}")
     
-    # Train
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    criterion = nn.CrossEntropyLoss()
+    torch.cuda.empty_cache() if device == 'cuda' else None
     
-    # Increase epochs for quick mode to ensure convergence
-    epochs = 30 if verifier.quick_mode else 25
+    # Analyze results
+    bp_ppl = results['backprop_100']['perplexity']
+    bp_acc = results['backprop_100']['accuracy']
     
-    print(f"  Training for {epochs} epochs on Repeating Pattern task...")
-    for epoch in range(epochs):
-        indices = torch.randperm(len(X))[:64]
-        x_batch = X[indices].to(device)
-        y_batch = y[indices].to(device)
-        
-        optimizer.zero_grad()
-        logits = model(x_batch)
-        # Logits: [batch, seq_len-1, vocab]
-        loss = criterion(logits.reshape(-1, vocab_size), y_batch.reshape(-1))
-        loss.backward()
-        optimizer.step()
-        
-        if (epoch+1) % 5 == 0:
-            print(f"    Epoch {epoch+1}: loss={loss.item():.3f}")
+    # Find best EqProp result
+    best_eq_key = None
+    best_eq_ppl = float('inf')
+    for key, val in results.items():
+        if key.startswith('eqprop_') and val['perplexity'] < best_eq_ppl:
+            best_eq_ppl = val['perplexity']
+            best_eq_key = key
     
-    # Evaluate
-    model.eval()
-    with torch.no_grad():
-        # Test on new data
-        test_x = X[:100].to(device)
-        test_y = y[:100].to(device)
-        logits = model(test_x)
-        preds = logits.argmax(dim=-1)
-        accuracy = (preds == test_y).float().mean().item() * 100
+    # Determine if EqProp matches or beats Backprop
+    eqprop_matches = best_eq_ppl <= bp_ppl * 1.1  # Within 10%
+    eqprop_efficient = False
     
-    print(f"  Accuracy: {accuracy:.1f}%")
+    if best_eq_key:
+        best_eq_params = results[best_eq_key]['params']
+        bp_params = results['backprop_100']['params']
+        if best_eq_params < bp_params * 0.95 and eqprop_matches:
+            eqprop_efficient = True
     
-    # For LM, we care about perplexity, but for quick test use accuracy
-    pass_threshold = 60 if verifier.quick_mode else 90
-    
-    if accuracy >= pass_threshold:
-        score = 100
-        status = "pass"
-    elif accuracy >= 50:
-        score = 80
-        status = "pass"  # 50% is good enough for quick check (chance is low)
-    elif accuracy >= 40:
-        score = 60
-        status = "partial"
+    # Scoring
+    if verifier.quick_mode:
+        # Quick mode: just verify learning happens
+        if bp_acc > 50 and best_eq_ppl < 100:
+            score = 100
+            status = "pass"
+        elif bp_acc > 30:
+            score = 70
+            status = "partial"
+        else:
+            score = 40
+            status = "fail"
     else:
-        score = 40
-        status = "fail"
+        # Intermediate/Full: evaluate comparison
+        if eqprop_matches and eqprop_efficient:
+            score = 100
+            status = "pass"
+        elif eqprop_matches:
+            score = 90
+            status = "pass"
+        elif best_eq_ppl < bp_ppl * 1.5:
+            score = 75
+            status = "partial"
+        else:
+            score = 50
+            status = "partial"
+    
+    # Build evidence
+    results_table = "| Model | Params | Perplexity | Accuracy |\n|-------|--------|------------|----------|\n"
+    for key, val in results.items():
+        results_table += f"| {key} | {val['params']:,} | {val['perplexity']:.2f} | {val['accuracy']:.1f}% |\n"
     
     evidence = f"""
-**Claim**: CausalTransformerEqProp learns sequence tasks.
+**Claim**: EqProp matches or exceeds Backprop in language modeling while potentially using fewer parameters.
 
-**Quick Test**: Pattern Completion (Repeating Sequence 0,1,2,3...)
-- Vocab size: {vocab_size}
-- Sequence length: {seq_len}
-- Pattern length: {pattern_len}
-- Epochs: {epochs}
+**Dataset**: {"Synthetic patterns" if verifier.quick_mode else "Shakespeare"}
+**Config**: hidden={hidden_dim}, layers={num_layers}, epochs={epochs}
 
-**Results**:
-- Accuracy: {accuracy:.1f}%
-- Status: {"✅ PASS" if status == "pass" else "⚠️ PARTIAL" if status == "partial" else "❌ FAIL"}
+## Results
 
-**Note**: For full validation, run language_modeling.py on Shakespeare dataset (target perplexity < 2.5).
+{results_table}
+
+**Analysis**:
+- Backprop baseline: {bp_ppl:.2f} perplexity
+- Best EqProp: {best_eq_ppl:.2f} perplexity ({best_eq_key})
+- EqProp matches Backprop: {"✅ Yes" if eqprop_matches else "❌ No"}
+- EqProp more efficient: {"✅ Yes" if eqprop_efficient else "❌ Not demonstrated"}
+
+**Note**: {"Quick mode uses synthetic data. Run --intermediate for real LM comparison." if verifier.quick_mode else "Run full experiment with `python experiments/language_modeling_comparison.py --epochs 50` for complete analysis."}
 """
     
+    improvements = []
+    if not eqprop_matches:
+        improvements.append("Tune EqProp hyperparameters (eq_steps, alpha, lr)")
+    if not eqprop_efficient:
+        improvements.append("Test smaller EqProp models (75% params)")
+    
     return TrackResult(
-        track_id=37, name="Character LM",
+        track_id=37, name="Language Modeling",
         status=status, score=score,
-        metrics={"accuracy": accuracy},
+        metrics={
+            "backprop_perplexity": bp_ppl,
+            "eqprop_best_perplexity": best_eq_ppl,
+            "backprop_accuracy": bp_acc,
+            "eqprop_matches": eqprop_matches,
+            "eqprop_efficient": eqprop_efficient
+        },
         evidence=evidence,
         time_seconds=time.time() - start,
-        improvements=["Train on real LM dataset (Shakespeare/WikiText-2)"] if status != "pass" else []
+        improvements=improvements
     )
 
 

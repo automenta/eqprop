@@ -16,6 +16,14 @@ from .transformer import TransformerEqProp, EqPropAttention
 from .causal_transformer_eqprop import CausalTransformerEqProp
 from .eqprop_diffusion import EqPropDiffusion
 
+# Language modeling comparison models
+from .backprop_transformer_lm import BackpropTransformerLM, create_scaled_model
+from .eqprop_lm_variants import (
+    get_eqprop_lm, list_eqprop_lm_variants, create_eqprop_lm,
+    FullEqPropLM, EqPropAttentionOnlyLM, RecurrentEqPropLM,
+    HybridEqPropLM, LoopedMLPForLM
+)
+
 __all__ = [
     'LoopedMLP', 'BackpropMLP',
     'TernaryEqProp',
@@ -30,4 +38,10 @@ __all__ = [
     'TransformerEqProp', 'EqPropAttention',
     'CausalTransformerEqProp',
     'EqPropDiffusion',
+    # LM comparison models
+    'BackpropTransformerLM', 'create_scaled_model',
+    'get_eqprop_lm', 'list_eqprop_lm_variants', 'create_eqprop_lm',
+    'FullEqPropLM', 'EqPropAttentionOnlyLM', 'RecurrentEqPropLM',
+    'HybridEqPropLM', 'LoopedMLPForLM',
 ]
+
