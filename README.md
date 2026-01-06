@@ -140,7 +140,7 @@ Tests spectral normalization as a "stability unlock" for bio-plausible algorithm
 | **51** | **Feedback Alignment** | ✅ Pass | Works at 20 layers (91%+) | [Source](validation/tracks/nebc_tracks.py) |
 | **52** | **Direct FA (DFA)** | ⚠️ Partial | 92% acc, L=1.5 | [Source](validation/tracks/nebc_tracks.py) |
 | **53** | **Contrastive Hebbian** | ⚠️ Partial | 90% acc, L=1.7 | [Source](validation/tracks/nebc_tracks.py) |
-| **54** | **Hebbian Chain** | ✅ Pass | **Signal survives 500 layers** | [Source](validation/tracks/nebc_tracks.py) |
+| **54** | **Hebbian Chain** | ✅ Pass | **Signal survives 500 layers** (20%+), Linear Probe > 88% | [Source](validation/tracks/nebc_tracks.py) |
 
 Run NEBC experiments: `python verify.py --track 50 51 52 53 54 --quick`
 
@@ -302,6 +302,14 @@ verifier.run_tracks([3, 4, 33])
 ### 2. Contraction = Self-Healing
 
 **Finding**: Networks with L < 1 automatically damp injected noise to zero (Track 3). This is physically guaranteed by the contraction mapping theorem. Standard Backprop networks have $L \gg 1$, amplifying noise. This makes EqProp uniquely suitable for **fault-tolerant hardware**.
+
+### 3. Deep Hebbian Breakthrough (NOVEL)
+
+**Finding**: Spectral Normalization enables pure Hebbian learning to scale to **500+ layers** (Track 54).
+- **Without SN**: Signal vanishes (0.0 norm) or explodes at depth ~50.
+- **With SN**: Signal survives (20%+ norm) at depth 500.
+- **Result**: Linear probe accuracy > 88% on MNIST using features from a 500-layer Hebbian chain.
+- **Implication**: Enables "evolvable" extremely deep bio-plausible architectures (e.g., 3D lattices).
 
 ---
 

@@ -62,16 +62,26 @@ class HebbianLayer(nn.Module):
         # x: [batch, in], y: [batch, out]
         hebbian_term = y.T @ x / batch_size  # [out, in]
         
+        if hasattr(self, 'weight_orig'):
+            # Spectral norm is applied, update the original weights
+            # We need to access the underlying parameter
+            target_weight = self.weight_orig
+        else:
+            target_weight = self.weight
+
         if self.use_oja:
             # Oja's normalization term
             y_sq = (y ** 2).mean(dim=0, keepdim=True).T  # [out, 1]
+            # Use the effective weight for the normalization calculation
+            # consistent with Oja's rule derivation y * (x - y*w)
+            # strictly speaking Oja uses the current weights
             normalization = y_sq * self.weight  # [out, in]
             delta_W = self.learning_rate * (hebbian_term - normalization)
         else:
             delta_W = self.learning_rate * hebbian_term
         
         with torch.no_grad():
-            self.weight.add_(delta_W)
+            target_weight.add_(delta_W)
 
 
 @register_nebc('hebbian_chain')
@@ -113,15 +123,18 @@ class DeepHebbianChain(NEBCBase):
         # Deep Hebbian chain
         self.chain = nn.ModuleList()
         for i in range(self.num_layers):
+            # Always use HebbianLayer
+            layer = HebbianLayer(
+                self.hidden_dim, self.hidden_dim,
+                learning_rate=self.hebbian_lr,
+                use_oja=self.use_oja
+            )
+            
             if self.use_spectral_norm:
-                layer = nn.Linear(self.hidden_dim, self.hidden_dim)
+                # Apply spectral norm to the Hebbian layer
+                # This renames 'weight' to 'weight_orig' and adds a hook
                 layer = spectral_norm(layer, n_power_iterations=5)
-            else:
-                layer = HebbianLayer(
-                    self.hidden_dim, self.hidden_dim,
-                    learning_rate=self.hebbian_lr,
-                    use_oja=self.use_oja
-                )
+                
             self.chain.append(layer)
         
         # Output projection
