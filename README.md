@@ -2,7 +2,7 @@
 
 > **Reproducible verification of Equilibrium Propagation research claims**
 
-This package validates **37 research tracks** experimentally, generating complete evidence from first principles. **35/37 tracks pass** with full scientific validation.
+This package validates **44 research tracks** experimentally, generating complete evidence from first principles. **40/44 tracks pass** with full scientific validation.
 
 ---
 
@@ -130,6 +130,19 @@ Track 41 provides **conclusive statistical evidence** in ~2 minutes by testing:
 - Self-Healing: 100% noise damping demonstrated
 
 **Note**: Tracks 10, 11, 27 were consolidated into Track 23 (Deep Scaling) to reduce redundancy.
+
+### 7. NEBC Extensions (Tracks 50-54) ⭐ NEW
+Tests spectral normalization as a "stability unlock" for bio-plausible algorithms.
+
+| Track | Algorithm | Status | Key Finding | Code |
+|---|---|---|---|---|
+| **50** | **EqProp Variants** | ✅ Pass | SN stabilizes L ≤ 1.05 | [Source](validation/tracks/nebc_tracks.py) |
+| **51** | **Feedback Alignment** | ✅ Pass | Works at 20 layers (91%+) | [Source](validation/tracks/nebc_tracks.py) |
+| **52** | **Direct FA (DFA)** | ⚠️ Partial | 92% acc, L=1.5 | [Source](validation/tracks/nebc_tracks.py) |
+| **53** | **Contrastive Hebbian** | ⚠️ Partial | 90% acc, L=1.7 | [Source](validation/tracks/nebc_tracks.py) |
+| **54** | **Hebbian Chain** | ✅ Pass | **Signal survives 500 layers** | [Source](validation/tracks/nebc_tracks.py) |
+
+Run NEBC experiments: `python verify.py --track 50 51 52 53 54 --quick`
 
 ---
 

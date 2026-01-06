@@ -5,3 +5,5 @@ from . import engine_validation_tracks
 from . import enhanced_validation_tracks
 from . import new_tracks
 from . import rapid_validation
+from . import nebc_tracks  # NEBC experiments (Tracks 50-54)
+

@@ -24,6 +24,12 @@ from .eqprop_lm_variants import (
     HybridEqPropLM, LoopedMLPForLM
 )
 
+# NEBC (Nobody Ever Bothered Club) - Bio-plausible algorithms with SN
+from .nebc_base import NEBCBase, NEBCRegistry, register_nebc, train_nebc_model, evaluate_nebc_model, run_nebc_ablation
+from .dfa_eqprop import DirectFeedbackAlignmentEqProp, DeepDFAEqProp
+from .chl import ContrastiveHebbianLearning, CHLAutoencoder
+from .hebbian_chain import DeepHebbianChain, HebbianCube, HebbianLayer
+
 __all__ = [
     'LoopedMLP', 'BackpropMLP',
     'TernaryEqProp',
@@ -43,5 +49,13 @@ __all__ = [
     'get_eqprop_lm', 'list_eqprop_lm_variants', 'create_eqprop_lm',
     'FullEqPropLM', 'EqPropAttentionOnlyLM', 'RecurrentEqPropLM',
     'HybridEqPropLM', 'LoopedMLPForLM',
+    # NEBC models
+    'NEBCBase', 'NEBCRegistry', 'register_nebc', 'train_nebc_model', 
+    'evaluate_nebc_model', 'run_nebc_ablation',
+    'DirectFeedbackAlignmentEqProp', 'DeepDFAEqProp',
+    'ContrastiveHebbianLearning', 'CHLAutoencoder',
+    'DeepHebbianChain', 'HebbianCube', 'HebbianLayer',
 ]
+
+
 

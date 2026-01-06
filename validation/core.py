@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Optional, List, Dict, Callable
 
 from .notebook import VerificationNotebook, TrackResult
-from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks, engine_validation_tracks, enhanced_validation_tracks, new_tracks, rapid_validation, framework_validation
+from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks, engine_validation_tracks, enhanced_validation_tracks, new_tracks, rapid_validation, framework_validation, nebc_tracks
 
 class Verifier:
     """Complete verification suite for all research tracks."""
@@ -93,6 +93,12 @@ class Verifier:
             39: ("EqProp Diffusion", new_tracks.track_39_eqprop_diffusion),
             40: ("Hardware Analysis", new_tracks.track_40_hardware_analysis),
             41: ("Rapid Rigorous Validation", rapid_validation.track_41_rapid_rigorous_validation),
+            # NEBC (Nobody Ever Bothered Club) - Bio-plausible algorithms + Spectral Norm
+            50: ("NEBC EqProp Variants", nebc_tracks.track_50_nebc_eqprop_variants),
+            51: ("NEBC Feedback Alignment", nebc_tracks.track_51_nebc_feedback_alignment),
+            52: ("NEBC Direct Feedback Alignment", nebc_tracks.track_52_nebc_direct_feedback_alignment),
+            53: ("NEBC Contrastive Hebbian", nebc_tracks.track_53_nebc_contrastive_hebbian),
+            54: ("NEBC Deep Hebbian Chain", nebc_tracks.track_54_nebc_deep_hebbian_chain),
         }
     
     def print_header(self):
