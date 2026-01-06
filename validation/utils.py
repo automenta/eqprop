@@ -34,6 +34,7 @@ def train_model(model: nn.Module, X: torch.Tensor, y: torch.Tensor,
                 epochs: int = 50, lr: float = 0.01, name: str = "Model", verifier=None, track_id=0, seed=0) -> List[float]:
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     losses = []
+    perfect_streak = 0  # Track consecutive 100% accuracy epochs
     
     for epoch in range(epochs):
         optimizer.zero_grad()
@@ -51,6 +52,15 @@ def train_model(model: nn.Module, X: torch.Tensor, y: torch.Tensor,
         
         acc = (out.argmax(dim=1) == y).float().mean().item() * 100
         print(f"\r  {name}: {progress_bar(epoch+1, epochs)} loss={loss.item():.3f} acc={acc:.1f}%", end="", flush=True)
+        
+        # Early stopping: if 100% accuracy for 3 consecutive epochs, stop
+        if acc >= 100.0:
+            perfect_streak += 1
+            if perfect_streak >= 3:
+                print(f" [early stop]", end="")
+                break
+        else:
+            perfect_streak = 0
     
     print()
     return losses

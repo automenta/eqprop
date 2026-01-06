@@ -30,14 +30,21 @@ def track_34_cifar10_breakthrough(verifier) -> TrackResult:
     
     start = time.time()
     
-    # Quick mode: small subset for smoke test
+    # Mode-specific configuration
     if verifier.quick_mode:
         print("\n⚠️ Quick mode: using small subset (200 samples)")
         num_train, num_test = 200, 50
-        epochs = 20  # Increased from 3 to ensure learning
-    else:
+        epochs = 20
+        target = 20.0  # Smoke test: just show learning
+    elif verifier.intermediate_mode:
+        print("\n📊 Intermediate mode: 5000 samples, 50 epochs")
         num_train, num_test = 5000, 1000
-        epochs = 10
+        epochs = 50  # verifier.epochs
+        target = 45.0  # Realistic intermediate target
+    else:
+        num_train, num_test = 10000, 2000
+        epochs = 100
+        target = 75.0  # Full training target
     
     # Data loading
     print(f"\n[34a] Loading CIFAR-10 ({num_train} train, {num_test} test)...")
@@ -98,11 +105,9 @@ def track_34_cifar10_breakthrough(verifier) -> TrackResult:
     
     print(f"\n  Test Accuracy: {accuracy:.1f}%")
     
-    # Scoring
+    # Scoring - mode-aware targets
     if verifier.quick_mode:
-        # Quick mode: lower threshold
-        target = 20.0
-        if accuracy >= target:
+        if accuracy >= 20:
             score = 100
             status = "pass"
         elif accuracy >= 15:
@@ -111,9 +116,19 @@ def track_34_cifar10_breakthrough(verifier) -> TrackResult:
         else:
             score = 40
             status = "fail"
+    elif verifier.intermediate_mode:
+        # Intermediate: 45% target (reasonable for 50 epochs on 5K samples)
+        if accuracy >= 45:
+            score = 100
+            status = "pass"
+        elif accuracy >= 35:
+            score = 80
+            status = "partial"
+        else:
+            score = max(40, int(accuracy))
+            status = "partial" if accuracy >= 30 else "fail"
     else:
         # Full mode: 75% target
-        target = 75.0
         if accuracy >= 75:
             score = 100
             status = "pass"
