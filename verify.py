@@ -21,7 +21,8 @@ def main():
         description="TorEqProp Comprehensive Verification Suite",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("--quick", "-q", action="store_true", help="Quick mode (fewer epochs, 1 seed)")
+    parser.add_argument("--quick", "-q", action="store_true", help="Quick mode (~2 min, smoke test)")
+    parser.add_argument("--intermediate", "-i", action="store_true", help="Intermediate mode (~1 hr, directional validation)")
     parser.add_argument("--track", "-t", type=int, nargs="+", help="Run specific track(s)")
     parser.add_argument("--list", "-l", action="store_true", help="List all tracks")
     parser.add_argument("--seed", "-s", type=int, default=42, help="Random seed")
@@ -30,7 +31,7 @@ def main():
     
     args = parser.parse_args()
     
-    verifier = Verifier(quick_mode=args.quick, seed=args.seed, n_seeds_override=args.seeds, export_data=args.export)
+    verifier = Verifier(quick_mode=args.quick, intermediate_mode=args.intermediate, seed=args.seed, n_seeds_override=args.seeds, export_data=args.export)
     
     if args.list:
         verifier.list_tracks()

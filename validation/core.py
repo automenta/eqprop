@@ -12,8 +12,9 @@ from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks
 class Verifier:
     """Complete verification suite for all research tracks."""
     
-    def __init__(self, quick_mode: bool = False, seed: int = 42, n_seeds_override: Optional[int] = None, export_data: bool = False):
+    def __init__(self, quick_mode: bool = False, intermediate_mode: bool = False, seed: int = 42, n_seeds_override: Optional[int] = None, export_data: bool = False):
         self.quick_mode = quick_mode
+        self.intermediate_mode = intermediate_mode
         self.seed = seed
         self.export_data = export_data
         self.notebook = VerificationNotebook()
@@ -21,16 +22,29 @@ class Verifier:
         torch.manual_seed(seed)
         np.random.seed(seed)
         
-        self.epochs = 5 if quick_mode else 15 # Optimized for ~10min run
-        self.n_samples = 200 if quick_mode else 400 # Sufficient for stats
-        
-        # Redundancy Configuration
+        # Validation Mode Configuration
+        # Quick:        ~2 min - mechanics only (smoke test)
+        # Intermediate: ~1 hour - directional validation
+        # Full:         ~4+ hr  - statistically significant claims
         if quick_mode:
+            self.epochs = 5
+            self.n_samples = 200
             self.n_seeds = 1
-        elif n_seeds_override is not None:
-            self.n_seeds = n_seeds_override
+            self.evidence_level = "smoke"
+        elif intermediate_mode:
+            self.epochs = 50
+            self.n_samples = 5000
+            self.n_seeds = 3
+            self.evidence_level = "intermediate"
         else:
-            self.n_seeds = 3 # Default standard redundancy
+            self.epochs = 100
+            self.n_samples = 10000
+            self.n_seeds = 5
+            self.evidence_level = "full"
+        
+        # Allow override of seeds
+        if n_seeds_override is not None:
+            self.n_seeds = n_seeds_override
             
         self.data_records = [] # For CSV export
         self.current_seed = seed # Track current seed for logging
@@ -80,16 +94,25 @@ class Verifier:
         }
     
     def print_header(self):
+        evidence_labels = {
+            "smoke": "🧪 Smoke Test (mechanics only)",
+            "intermediate": "📊 Intermediate (directional)",
+            "full": "✅ Full Validation (statistically significant)"
+        }
+        mode_name = "Quick" if self.quick_mode else ("Intermediate" if self.intermediate_mode else "Full")
+        mode_icon = "⚡" if self.quick_mode else ("📊" if self.intermediate_mode else "🔬")
+        
         print("=" * 70)
         print("       TOREQPROP COMPREHENSIVE VERIFICATION SUITE")
         print("       Undeniable Evidence for All Research Claims")
         print("=" * 70)
-        print(f"\n📋 Configuration:")
+        print(f"\\n📋 Configuration:")
         print(f"   Seed: {self.seed}")
-        print(f"   Mode: {'⚡ Quick' if self.quick_mode else '🔬 Full'}")
+        print(f"   Mode: {mode_icon} {mode_name}")
+        print(f"   Evidence: {evidence_labels[self.evidence_level]}")
         print(f"   Epochs: {self.epochs}")
         print(f"   Samples: {self.n_samples}")
-        print(f"   Seeds: {self.n_seeds} {'(Override)' if self.n_seeds != 3 and not self.quick_mode else ''}")
+        print(f"   Seeds: {self.n_seeds}")
         print(f"   Tracks: {len(self.tracks)}")
         if self.export_data:
             print(f"   Export: Enabled (results/data.csv)")
@@ -152,19 +175,30 @@ class Verifier:
         mean_score = np.mean(scores)
         std_score = np.std(scores) if len(scores) > 1 else 0.0
         
-        # Aggregate metrics
+        # Calculate 95% Confidence Interval
+        n = len(scores)
+        se = std_score / np.sqrt(n) if n > 1 else 0.0
+        ci_95 = 1.96 * se
+        
+        # Aggregate metrics with confidence intervals
         agg_metrics = {}
         if metrics_list:
             keys = metrics_list[0].keys()
             for k in keys:
                 vals = [m[k] for m in metrics_list if k in m and isinstance(m[k], (int, float))]
                 if vals:
-                    agg_metrics[f"{k}_mean"] = np.mean(vals)
-                    agg_metrics[f"{k}_std"] = np.std(vals) if len(vals) > 1 else 0.0
+                    m_mean = np.mean(vals)
+                    m_std = np.std(vals) if len(vals) > 1 else 0.0
+                    m_se = m_std / np.sqrt(len(vals)) if len(vals) > 1 else 0.0
+                    m_ci = 1.96 * m_se
+                    agg_metrics[f"{k}_mean"] = m_mean
+                    agg_metrics[f"{k}_std"] = m_std
+                    agg_metrics[f"{k}_ci95"] = m_ci  # New: CI for each metric
                     
         return {
             "mean_score": mean_score,
             "std_score": std_score,
+            "ci_95": ci_95,  # New: 95% CI half-width
             "metrics": agg_metrics,
             "all_scores": scores
         }
