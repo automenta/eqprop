@@ -1,0 +1,225 @@
+nohup: ignoring input
+============================================================
+LANGUAGE MODELING COMPARISON: EqProp vs Backprop
+============================================================
+Device: cuda
+Dataset: shakespeare
+Epochs: 50
+EqProp variants: ['full', 'attention_only', 'recurrent_core', 'hybrid', 'looped_mlp']
+Parameter scales: [1.0, 0.9, 0.75, 0.5]
+
+Loading shakespeare...
+  Vocab: 65, Train: 1,003,854, Val: 111,540
+
+Base Backprop params: 2,175,041
+
+[Backprop @ 100%] hidden=256, params=2,175,041
+    Epoch 10/50: loss=1.667, ppl=5.60, acc=48.5%
+    Epoch 20/50: loss=1.465, ppl=4.74, acc=53.3%
+    Epoch 30/50: loss=1.380, ppl=4.55, acc=54.9%
+    Epoch 40/50: loss=1.329, ppl=4.50, acc=55.5%
+    Epoch 50/50: loss=1.294, ppl=4.37, acc=56.4%
+
+[Backprop @ 90%] hidden=240, params=1,916,225
+    Epoch 10/50: loss=1.690, ppl=5.60, acc=48.5%
+    Epoch 20/50: loss=1.475, ppl=4.86, acc=52.8%
+    Epoch 30/50: loss=1.390, ppl=4.52, acc=54.8%
+    Epoch 40/50: loss=1.339, ppl=4.41, acc=55.9%
+    Epoch 50/50: loss=1.307, ppl=4.39, acc=56.0%
+
+[Backprop @ 75%] hidden=220, params=1,615,745
+    Epoch 10/50: loss=1.725, ppl=5.83, acc=47.3%
+    Epoch 20/50: loss=1.495, ppl=4.92, acc=52.1%
+    Epoch 30/50: loss=1.407, ppl=4.61, acc=54.4%
+    Epoch 40/50: loss=1.354, ppl=4.42, acc=55.4%
+    Epoch 50/50: loss=1.319, ppl=4.37, acc=56.2%
+
+[Backprop @ 50%] hidden=180, params=1,091,585
+    Epoch 10/50: loss=1.827, ppl=6.41, acc=44.5%
+    Epoch 20/50: loss=1.574, ppl=5.24, acc=50.5%
+    Epoch 30/50: loss=1.470, ppl=4.73, acc=53.2%
+    Epoch 40/50: loss=1.419, ppl=4.64, acc=54.1%
+    Epoch 50/50: loss=1.377, ppl=4.52, acc=54.9%
+
+[EqProp full @ 100%] params=2,174,529
+    Epoch 10/50: loss=2.216, ppl=9.05, acc=34.8%
+    Epoch 20/50: loss=1.978, ppl=7.60, acc=39.8%
+    Epoch 30/50: loss=1.822, ppl=6.79, acc=43.0%
+    Epoch 40/50: loss=1.708, ppl=6.26, acc=45.6%
+    Epoch 50/50: loss=1.628, ppl=5.80, acc=47.4%
+
+[EqProp full @ 90%] params=1,915,745
+    Epoch 10/50: loss=2.246, ppl=9.36, acc=34.3%
+    Epoch 20/50: loss=2.025, ppl=7.78, acc=39.1%
+    Epoch 30/50: loss=1.854, ppl=6.92, acc=42.3%
+    Epoch 40/50: loss=1.732, ppl=6.37, acc=45.0%
+    Epoch 50/50: loss=1.640, ppl=5.91, acc=47.2%
+
+[EqProp full @ 75%] params=1,615,305
+    Epoch 10/50: loss=2.254, ppl=9.46, acc=33.7%
+    Epoch 20/50: loss=2.048, ppl=7.95, acc=38.6%
+    Epoch 30/50: loss=1.899, ppl=7.06, acc=41.8%
+    Epoch 40/50: loss=1.781, ppl=6.58, acc=43.7%
+    Epoch 50/50: loss=1.690, ppl=6.22, acc=45.5%
+
+[EqProp full @ 50%] params=1,091,225
+    Epoch 10/50: loss=2.295, ppl=9.84, acc=32.8%
+    Epoch 20/50: loss=2.110, ppl=8.33, acc=37.4%
+    Epoch 30/50: loss=1.980, ppl=7.56, acc=40.2%
+    Epoch 40/50: loss=1.872, ppl=7.04, acc=41.9%
+    Epoch 50/50: loss=1.788, ppl=6.70, acc=43.4%
+
+[EqProp attention_only @ 100%] params=2,174,529
+    Epoch 10/50: loss=1.813, ppl=6.76, acc=43.4%
+    Epoch 20/50: loss=1.552, ppl=5.63, acc=48.8%
+    Epoch 30/50: loss=1.429, ppl=5.08, acc=52.0%
+    Epoch 40/50: loss=1.348, ppl=4.88, acc=53.6%
+    Epoch 50/50: loss=1.291, ppl=4.77, acc=54.6%
+
+[EqProp attention_only @ 90%] params=1,915,745
+    Epoch 10/50: loss=1.833, ppl=6.76, acc=43.0%
+    Epoch 20/50: loss=1.575, ppl=5.73, acc=48.4%
+    Epoch 30/50: loss=1.446, ppl=5.13, acc=51.7%
+    Epoch 40/50: loss=1.370, ppl=4.94, acc=53.1%
+    Epoch 50/50: loss=1.304, ppl=4.76, acc=54.3%
+
+[EqProp attention_only @ 75%] params=1,615,305
+    Epoch 10/50: loss=1.903, ppl=7.14, acc=41.5%
+    Epoch 20/50: loss=1.618, ppl=5.90, acc=47.1%
+    Epoch 30/50: loss=1.479, ppl=5.26, acc=50.8%
+    Epoch 40/50: loss=1.394, ppl=4.91, acc=52.9%
+    Epoch 50/50: loss=1.335, ppl=4.77, acc=54.0%
+
+[EqProp attention_only @ 50%] params=1,091,225
+    Epoch 10/50: loss=1.988, ppl=7.65, acc=39.3%
+    Epoch 20/50: loss=1.704, ppl=6.23, acc=45.5%
+    Epoch 30/50: loss=1.554, ppl=5.62, acc=48.9%
+    Epoch 40/50: loss=1.465, ppl=5.18, acc=51.4%
+    Epoch 50/50: loss=1.400, ppl=5.00, acc=52.5%
+
+[EqProp recurrent_core @ 100%] params=593,217
+    Epoch 10/50: loss=2.290, ppl=9.91, acc=32.4%
+    Epoch 20/50: loss=2.080, ppl=8.22, acc=37.8%
+    Epoch 30/50: loss=1.931, ppl=7.32, acc=41.0%
+    Epoch 40/50: loss=1.814, ppl=6.80, acc=43.2%
+    Epoch 50/50: loss=1.724, ppl=6.42, acc=44.8%
+
+[EqProp recurrent_core @ 90%] params=525,425
+    Epoch 10/50: loss=2.309, ppl=10.09, acc=32.0%
+    Epoch 20/50: loss=2.139, ppl=8.70, acc=36.3%
+    Epoch 30/50: loss=1.973, ppl=7.68, acc=39.7%
+    Epoch 40/50: loss=1.854, ppl=7.02, acc=42.2%
+    Epoch 50/50: loss=1.759, ppl=6.58, acc=44.0%
+
+[EqProp recurrent_core @ 75%] params=446,445
+    Epoch 10/50: loss=2.328, ppl=10.23, acc=31.6%
+    Epoch 20/50: loss=2.164, ppl=8.84, acc=36.0%
+    Epoch 30/50: loss=2.017, ppl=7.87, acc=38.9%
+    Epoch 40/50: loss=1.903, ppl=7.40, acc=41.0%
+    Epoch 50/50: loss=1.815, ppl=6.93, acc=42.7%
+
+[EqProp recurrent_core @ 50%] params=307,685
+    Epoch 10/50: loss=2.390, ppl=10.80, acc=30.2%
+    Epoch 20/50: loss=2.251, ppl=9.60, acc=32.9%
+    Epoch 30/50: loss=2.130, ppl=8.64, acc=36.4%
+    Epoch 40/50: loss=2.014, ppl=7.86, acc=39.1%
+    Epoch 50/50: loss=1.916, ppl=7.37, acc=40.6%
+
+[EqProp hybrid @ 100%] params=2,174,529
+    Epoch 10/50: loss=1.895, ppl=6.95, acc=42.1%
+    Epoch 20/50: loss=1.613, ppl=5.61, acc=48.3%
+    Epoch 30/50: loss=1.495, ppl=5.17, acc=50.8%
+    Epoch 40/50: loss=1.426, ppl=4.88, acc=52.8%
+    Epoch 50/50: loss=1.373, ppl=4.73, acc=53.7%
+
+[EqProp hybrid @ 90%] params=1,915,745
+    Epoch 10/50: loss=1.913, ppl=7.03, acc=41.7%
+    Epoch 20/50: loss=1.643, ppl=5.75, acc=47.4%
+    Epoch 30/50: loss=1.521, ppl=5.25, acc=50.3%
+    Epoch 40/50: loss=1.447, ppl=5.00, acc=52.1%
+    Epoch 50/50: loss=1.398, ppl=4.90, acc=52.8%
+
+[EqProp hybrid @ 75%] params=1,615,305
+    Epoch 10/50: loss=1.956, ppl=7.30, acc=40.9%
+    Epoch 20/50: loss=1.675, ppl=5.96, acc=46.9%
+    Epoch 30/50: loss=1.554, ppl=5.43, acc=49.3%
+    Epoch 40/50: loss=1.473, ppl=5.09, acc=51.1%
+    Epoch 50/50: loss=1.420, ppl=4.88, acc=52.7%
+
+[EqProp hybrid @ 50%] params=1,091,225
+    Epoch 10/50: loss=2.080, ppl=7.97, acc=38.3%
+    Epoch 20/50: loss=1.773, ppl=6.40, acc=44.3%
+    Epoch 30/50: loss=1.628, ppl=5.75, acc=47.9%
+    Epoch 40/50: loss=1.541, ppl=5.36, acc=49.7%
+    Epoch 50/50: loss=1.480, ppl=5.08, acc=51.4%
+
+[EqProp looped_mlp @ 100%] params=197,697
+    Epoch 10/50: loss=2.468, ppl=12.06, acc=26.8%
+    Epoch 20/50: loss=2.459, ppl=12.08, acc=26.7%
+    Epoch 30/50: loss=2.456, ppl=11.93, acc=27.2%
+    Epoch 40/50: loss=2.456, ppl=11.96, acc=27.1%
+    Epoch 50/50: loss=2.455, ppl=11.94, acc=27.0%
+
+[EqProp looped_mlp @ 90%] params=177,665
+    Epoch 10/50: loss=2.470, ppl=12.11, acc=26.8%
+    Epoch 20/50: loss=2.460, ppl=11.95, acc=27.0%
+    Epoch 30/50: loss=2.460, ppl=12.01, acc=26.9%
+    Epoch 40/50: loss=2.457, ppl=11.93, acc=27.1%
+    Epoch 50/50: loss=2.454, ppl=11.92, acc=27.0%
+
+[EqProp looped_mlp @ 75%] params=154,065
+    Epoch 10/50: loss=2.468, ppl=12.01, acc=26.9%
+    Epoch 20/50: loss=2.461, ppl=11.91, acc=27.0%
+    Epoch 30/50: loss=2.458, ppl=11.94, acc=26.9%
+    Epoch 40/50: loss=2.455, ppl=12.01, acc=26.9%
+    Epoch 50/50: loss=2.457, ppl=11.92, acc=27.1%
+
+[EqProp looped_mlp @ 50%] params=111,665
+    Epoch 10/50: loss=2.474, ppl=12.07, acc=27.2%
+    Epoch 20/50: loss=2.463, ppl=12.02, acc=26.9%
+    Epoch 30/50: loss=2.459, ppl=11.99, acc=26.9%
+    Epoch 40/50: loss=2.458, ppl=12.00, acc=26.9%
+    Epoch 50/50: loss=2.457, ppl=11.95, acc=26.9%
+
+============================================================
+RESULTS
+============================================================
+# Language Modeling Comparison: EqProp vs Backprop
+
+**Dataset**: shakespeare
+
+## Results Summary
+
+| Model | Variant | Scale | Params | Perplexity | Accuracy | BPC | Time |
+|-------|---------|-------|--------|------------|----------|-----|------|
+| backprop | standard | 90% | 1,916,225 | 4.34 | 56.0% | 2.13 | 105.0s |
+| backprop | standard | 75% | 1,615,745 | 4.35 | 56.2% | 2.13 | 98.1s |
+| backprop | standard | 100% | 2,175,041 | 4.37 | 56.4% | 2.13 | 108.5s |
+| backprop | standard | 50% | 1,091,585 | 4.50 | 54.9% | 2.18 | 86.8s |
+| eqprop | attention_only | 100% | 2,174,529 | 4.69 | 54.6% | 2.25 | 971.2s |
+| eqprop | hybrid | 100% | 2,174,529 | 4.73 | 53.7% | 2.24 | 410.3s |
+| eqprop | attention_only | 90% | 1,915,745 | 4.74 | 54.3% | 2.25 | 963.8s |
+| eqprop | attention_only | 75% | 1,615,305 | 4.75 | 54.0% | 2.25 | 936.8s |
+| eqprop | hybrid | 90% | 1,915,745 | 4.80 | 52.8% | 2.29 | 408.4s |
+| eqprop | hybrid | 75% | 1,615,305 | 4.87 | 52.7% | 2.29 | 400.1s |
+| eqprop | attention_only | 50% | 1,091,225 | 4.90 | 52.5% | 2.32 | 911.9s |
+| eqprop | hybrid | 50% | 1,091,225 | 5.08 | 51.4% | 2.34 | 376.0s |
+| eqprop | full | 100% | 2,174,529 | 5.80 | 47.4% | 2.54 | 2069.0s |
+| eqprop | full | 90% | 1,915,745 | 5.91 | 47.2% | 2.56 | 2046.2s |
+| eqprop | full | 75% | 1,615,305 | 6.19 | 45.5% | 2.64 | 2010.2s |
+| eqprop | recurrent_core | 100% | 593,217 | 6.42 | 44.8% | 2.68 | 688.3s |
+| eqprop | recurrent_core | 90% | 525,425 | 6.58 | 44.0% | 2.72 | 692.8s |
+| eqprop | full | 50% | 1,091,225 | 6.70 | 43.4% | 2.74 | 1902.9s |
+| eqprop | recurrent_core | 75% | 446,445 | 6.93 | 42.7% | 2.79 | 678.4s |
+| eqprop | recurrent_core | 50% | 307,685 | 7.37 | 40.6% | 2.88 | 638.2s |
+| eqprop | looped_mlp | 90% | 177,665 | 11.89 | 27.0% | 3.58 | 108.4s |
+| eqprop | looped_mlp | 100% | 197,697 | 11.89 | 27.0% | 3.58 | 107.9s |
+| eqprop | looped_mlp | 75% | 154,065 | 11.91 | 27.1% | 3.58 | 108.9s |
+| eqprop | looped_mlp | 50% | 111,665 | 11.92 | 26.9% | 3.58 | 107.3s |
+
+## Parameter Efficiency Analysis
+
+**Backprop baseline (100%)**: 4.37 perplexity
+
+
+Results saved to: results/track_37_comparison
