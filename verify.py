@@ -6,29 +6,11 @@ Complete validation of ALL research tracks from first principles.
 Generates an undeniable evidence notebook with reproducible results.
 
 RESEARCH TRACKS COVERED:
-  1. Core: Spectral Normalization Stability
-  2. Core: EqProp vs Backprop Parity  
-  3. Track 1: Adversarial Self-Healing (Score: 88.0)
-  15. Special: PyTorch vs Kernel (Score: 100.0)
-  16. Hardware: FPGA Bit Precision (INT8)
-  17. Hardware: Analog/Photonics Noise
-  18. Hardware: DNA/Thermodynamic Constraints
-  19. Analysis: Criticality (Edge of Chaos)
-  20. App: Transfer Learning
-  21. App: Continual Learning
-  22. Engine: Golden Reference Harness (TODO7 Stage 1.1)
-  23. Engine: Extreme Depth Signal Probe (TODO7 Stage 2.1)
-  24. Engine: Lazy Updates Wall-Clock (TODO7 Stage 1.3)
-  5. Track 3: Neural Cube 3D Topology (Score: 86.5)
-  6. Track 4: Feedback Alignment (Score: 86.5)
-  7. Track 5: Temporal Resonance (Score: 61.2)
-  8. Track 6: Homeostatic Stability (Score: 59.0)
-  9. Track 7: Gradient Alignment (Score: 36.5)
-  10. Scaling: O(1) Memory Training
-  11. Scaling: Deep Network (100+ layers)
-  12. Scaling: Lazy/Event-Driven Updates
-  13. Advanced: Convolutional EqProp (CIFAR-10)
-  14. Advanced: Transformer EqProp
+  - Core Validation (Tracks 1-3): Stability, Parity, Healing
+  - Advanced Models (Tracks 4-9, 13-14): Ternary, FA, Conv, Transformer
+  - Scaling & Efficiency (Tracks 12, 16-18, 23-26, 35): Memory, Quantization, Energy
+  - Applications & Analysis (Tracks 19-22, 28-32, 36-40): Criticality, OOD, Diffusion
+  - CIFAR-10 Breakthrough (Tracks 33-34)
 """
 
 import argparse
