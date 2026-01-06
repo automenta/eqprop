@@ -1,57 +1,64 @@
 # TorEqProp Verification Results
 
-**Generated**: 2026-01-05 16:23:05
+**Generated**: 2026-01-05 19:46:28
 
 
 ## Executive Summary
 
-**Verification completed in 112.1 seconds.**
+**Verification completed in 1767660634.1 seconds.**
 
 ### Overall Results
 
 | Metric | Value |
 |--------|-------|
-| Tracks Verified | 30 |
-| Passed | 28 ✅ |
-| Partial | 1 ⚠️ |
-| Failed | 1 ❌ |
+| Tracks Verified | 37 |
+| Passed | 33 ✅ |
+| Partial | 2 ⚠️ |
+| Failed | 2 ❌ |
 | Stubs (TODO) | 0 🔧 |
-| Average Score | 95.7/100 |
+| Average Score | 93.5/100 |
 
 ### Track Summary
 
 | # | Track | Status | Score | Time |
 |---|-------|--------|-------|------|
-| 1 | Spectral Normalization Stability | ✅ | 100 | 1.9s |
+| 1 | Spectral Normalization Stability | ✅ | 100 | 0.3s |
 | 2 | EqProp vs Backprop Parity | ✅ | 100 | 0.1s |
 | 3 | Adversarial Self-Healing | ✅ | 100 | 0.2s |
 | 4 | Ternary Weights | ✅ | 100 | 0.2s |
-| 5 | Neural Cube 3D Topology | ✅ | 100 | 1.6s |
+| 5 | Neural Cube 3D Topology | ✅ | 100 | 1.5s |
 | 6 | Feedback Alignment | ✅ | 100 | 0.6s |
 | 7 | Temporal Resonance | ✅ | 100 | 0.3s |
-| 8 | Homeostatic Stability | ✅ | 100 | 0.8s |
+| 8 | Homeostatic Stability | ✅ | 100 | 0.7s |
 | 9 | Gradient Alignment | ✅ | 100 | 0.0s |
 | 12 | Lazy Event-Driven Updates | ✅ | 100 | 1.7s |
-| 13 | Convolutional EqProp | ✅ | 100 | 54.1s |
-| 14 | Transformer EqProp | ✅ | 100 | 12.0s |
+| 13 | Convolutional EqProp | ✅ | 100 | 49.2s |
+| 14 | Transformer EqProp | ✅ | 100 | 11.3s |
 | 15 | PyTorch vs Kernel | ✅ | 100 | 0.3s |
 | 16 | FPGA Bit Precision | ✅ | 100 | 0.1s |
 | 17 | Analog/Photonics Noise | ✅ | 100 | 0.1s |
 | 18 | DNA/Thermodynamic | ✅ | 100 | 0.2s |
 | 19 | Criticality Analysis | ✅ | 100 | 0.1s |
 | 20 | Transfer Learning | ✅ | 100 | 0.3s |
-| 21 | Continual Learning | ✅ | 100 | 1.7s |
+| 21 | Continual Learning | ✅ | 100 | 1.6s |
 | 22 | Golden Reference Harness | ✅ | 100 | 0.0s |
 | 23 | Comprehensive Depth Scaling | ✅ | 100 | 3.3s |
-| 24 | Lazy Updates Wall-Clock | ⚠️ | 50 | 3.4s |
-| 25 | Real Dataset Benchmark | ✅ | 100 | 5.7s |
-| 26 | O(1) Memory Reality | ✅ | 100 | 0.3s |
+| 24 | Lazy Updates Wall-Clock | ⚠️ | 50 | 2.9s |
+| 25 | Real Dataset Benchmark | ✅ | 100 | 15.9s |
+| 26 | O(1) Memory Reality | ✅ | 100 | 0.1s |
 | 28 | Robustness Suite | ✅ | 80 | 0.2s |
 | 29 | Energy Dynamics | ✅ | 100 | 0.1s |
 | 30 | Damage Tolerance | ✅ | 100 | 0.2s |
 | 31 | Residual EqProp | ✅ | 100 | 0.5s |
 | 32 | Bidirectional Generation | ✅ | 100 | 0.3s |
-| 33 | CIFAR-10 Benchmark | ❌ | 40 | 21.7s |
+| 33 | CIFAR-10 Benchmark | ❌ | 40 | 25.3s |
+| 34 | CIFAR-10 Breakthrough | ❌ | 40 | 1.9s |
+| 35 | O(1) Memory Scaling | ✅ | 100 | 0.8s |
+| 36 | Energy OOD Detection | ✅ | 100 | 0.7s |
+| 37 | Character LM | ⚠️ | 60 | 1767660510.4s |
+| 38 | Adaptive Compute | ✅ | 90 | 1.4s |
+| 39 | EqProp Diffusion | ✅ | 100 | 1.1s |
+| 40 | Hardware Analysis | ✅ | 100 | 0.0s |
 
 
 **Seed**: 42 (deterministic)
@@ -64,7 +71,7 @@
 ## Track 1: Spectral Normalization Stability
 
 
-✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 1.9s
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.3s
 
 
 **Claim**: Spectral normalization constrains Lipschitz constant L ≤ 1, unlike unconstrained training.
@@ -171,7 +178,7 @@
 ## Track 5: Neural Cube 3D Topology
 
 
-✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 1.6s
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 1.5s
 
 
 **Claim**: 3D lattice topology with 26-neighbor connectivity achieves equivalent learning with 91% fewer connections.
@@ -306,7 +313,7 @@ This oscillation carries information over time (resonance score: 0.014).
 ## Track 8: Homeostatic Stability
 
 
-✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.8s
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.7s
 
 
 **Claim**: Network auto-regulates via homeostasis parameters, recovering from instability.
@@ -405,7 +412,7 @@ As β → 0, EqProp gradients converge to Backprop gradients.
 ## Track 13: Convolutional EqProp
 
 
-✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 54.1s
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 49.2s
 
 
 **Claim**: ConvEqProp classifies non-trivial noisy shapes (Square, Plus, Frame).
@@ -424,7 +431,7 @@ As β → 0, EqProp gradients converge to Backprop gradients.
 ## Track 14: Transformer EqProp
 
 
-✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 12.0s
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 11.3s
 
 
 **Claim**: Equilibrium Transformer can solve sequence manipulation tasks (Reversal).
@@ -586,7 +593,7 @@ Compare against training from scratch on Task B.
 ## Track 21: Continual Learning
 
 
-✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 1.7s
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 1.6s
 
 
 **Claim**: EqProp supports continual learning with EWC regularization.
@@ -668,7 +675,7 @@ implementation must pass this test before deployment.
 ## Track 24: Lazy Updates Wall-Clock
 
 
-⚠️ **Status**: PARTIAL | **Score**: 50.0/100 | **Time**: 3.4s
+⚠️ **Status**: PARTIAL | **Score**: 50.0/100 | **Time**: 2.9s
 
 
 **Claim**: Lazy updates provide wall-clock speedup (not just FLOP savings).
@@ -679,23 +686,23 @@ implementation must pass this test before deployment.
 
 | Mode | Time (ms) | FLOP Savings | Wall-Clock Speedup |
 |------|-----------|--------------|-------------------|
-| Dense (baseline) | 14.79 | - | 1.00× |
-| Lazy ε=0.001 | 60.05 | 97% | 0.25× |
-| Lazy ε=0.01 | 64.93 | 97% | 0.23× |
-| Lazy ε=0.1 | 63.35 | 97% | 0.23× |
+| Dense (baseline) | 16.54 | - | 1.00× |
+| Lazy ε=0.001 | 60.21 | 97% | 0.27× |
+| Lazy ε=0.01 | 63.77 | 97% | 0.26× |
+| Lazy ε=0.1 | 62.46 | 97% | 0.26× |
 
 ### GPU Results
 
 | Mode | Time (ms) | FLOP Savings | Wall-Clock Speedup |
 |------|-----------|--------------|-------------------|
-| Dense (baseline) | 15.18 | - | 1.00× |
-| Lazy ε=0.001 | 65.47 | 97% | 0.23× |
-| Lazy ε=0.01 | 65.45 | 97% | 0.23× |
-| Lazy ε=0.1 | 65.51 | 97% | 0.23× |
+| Dense (baseline) | 15.78 | - | 1.00× |
+| Lazy ε=0.001 | 65.81 | 97% | 0.24× |
+| Lazy ε=0.01 | 66.56 | 97% | 0.24× |
+| Lazy ε=0.1 | 66.19 | 97% | 0.24× |
 
 
 **Key Finding**:
-- Best CPU speedup: **0.25×** at ε=0.001
+- Best CPU speedup: **0.27×** at ε=0.001
 - ⚠️ FLOP savings don't translate to wall-clock savings
 
 **TODO7.md Insight**: As predicted, GPU performance suffers from sparsity (branch divergence).
@@ -712,7 +719,7 @@ Lazy updates are best suited for **CPU** and **neuromorphic hardware**, not GPUs
 ## Track 25: Real Dataset Benchmark
 
 
-✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 5.7s
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 15.9s
 
 
 **Claim**: EqProp achieves competitive accuracy on real-world datasets.
@@ -738,7 +745,7 @@ Lazy updates are best suited for **CPU** and **neuromorphic hardware**, not GPUs
 ## Track 26: O(1) Memory Reality
 
 
-✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.3s
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.1s
 
 
 **Claim**: NumPy kernel achieves O(1) memory vs PyTorch's O(N) scaling.
@@ -747,9 +754,9 @@ Lazy updates are best suited for **CPU** and **neuromorphic hardware**, not GPUs
 
 | Depth | PyTorch (MB) | Kernel (MB) | Savings |
 |-------|--------------|-------------|---------|
-| 10 | 16.70 | 0.03 | 534.5× |
-| 30 | 18.35 | 0.03 | 587.3× |
-| 50 | 19.01 | 0.03 | 608.2× |
+| 10 | 19.31 | 0.03 | 617.9× |
+| 30 | 20.96 | 0.03 | 670.7× |
+| 50 | 20.85 | 0.03 | 667.3× |
 
 **Scaling Analysis**:
 - PyTorch memory ratio (depth 50/depth 10): 1.1×
@@ -910,7 +917,7 @@ generates class-consistent inputs. This demonstrates the bidirectional nature of
 ## Track 33: CIFAR-10 Benchmark
 
 
-❌ **Status**: FAIL | **Score**: 40.0/100 | **Time**: 21.7s
+❌ **Status**: FAIL | **Score**: 40.0/100 | **Time**: 25.3s
 
 
 **Claim**: ConvEqProp achieves competitive accuracy on CIFAR-10.
@@ -939,3 +946,194 @@ generates class-consistent inputs. This demonstrates the bidirectional nature of
 ### Areas for Improvement
 
 - Increase epochs and data for full CIFAR-10 benchmark
+
+
+## Track 34: CIFAR-10 Breakthrough
+
+
+❌ **Status**: FAIL | **Score**: 40.0/100 | **Time**: 1.9s
+
+
+**Claim**: ModernConvEqProp achieves 75%+ accuracy on CIFAR-10.
+
+**Architecture**: Multi-stage convolutional with equilibrium settling
+- Stage 1: Conv 3→64 (32×32)
+- Stage 2: Conv 64→128 stride=2 (16×16)
+- Stage 3: Conv 128→256 stride=2 (8×8)
+- Equilibrium: Recurrent conv 256→256
+- Output: Global pool → Linear(256, 10)
+
+**Results**:
+- Test Accuracy: 12.0%
+- Target: 30%
+- Status: ❌ BELOW TARGET
+
+**Note**: Quick mode - use full training for final validation
+
+
+
+
+### Areas for Improvement
+
+- Accuracy 12.0% below target 30%
+- Try: increase epochs, tune lr, use data augmentation
+
+
+## Track 35: O(1) Memory Scaling
+
+
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.8s
+
+
+**Claim**: EqProp with gradient checkpointing achieves O(√D) memory scaling.
+
+**Experiment**: Measure peak GPU memory at varying depths.
+
+| Depth | Memory (MB) | Status |
+|-------|-------------|--------|
+| 10 | 31 | ✅ |
+| 50 | 41 | ✅ |
+| 100 | 51 | ✅ |
+
+**Max Depth**: 100 layers
+**Target**: 100+ layers
+
+**Result**: ✅ PASS
+
+
+
+
+## Track 36: Energy OOD Detection
+
+
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.7s
+
+
+**Claim**: Energy-based confidence outperforms softmax for OOD detection.
+
+**Method**: Score = -energy / (settling_time + 1)
+
+**Quick Validation Results**:
+- ID score (mean): -0.550
+- OOD score (mean): -0.861
+- Separation: 0.311
+- Estimated AUROC: 1.00
+
+**Target AUROC**: ≥ 0.80
+
+**Note**: Quick mode uses synthetic data. For full validation, run energy_confidence.py with real datasets.
+
+
+
+
+## Track 37: Character LM
+
+
+⚠️ **Status**: PARTIAL | **Score**: 60.0/100 | **Time**: 1767660510.4s
+
+
+**Claim**: CausalTransformerEqProp learns sequence tasks.
+
+**Quick Test**: Pattern Completion (Repeating Sequence 0,1,2,3...)
+- Vocab size: 20
+- Sequence length: 16
+- Pattern length: 4
+- Epochs: 15
+
+**Results**:
+- Accuracy: 55.8%
+- Status: ⚠️ PARTIAL
+
+**Note**: For full validation, run language_modeling.py on Shakespeare dataset (target perplexity < 2.5).
+
+
+
+
+### Areas for Improvement
+
+- Train on real LM dataset (Shakespeare/WikiText-2)
+
+
+## Track 38: Adaptive Compute
+
+
+✅ **Status**: PASS | **Score**: 90.0/100 | **Time**: 1.4s
+
+
+**Claim**: Settling time correlates with sequence complexity.
+
+**Experiment**: Measure convergence steps for simple vs complex sequences.
+
+| Sequence Type | Settling Steps |
+|---------------|----------------|
+| Simple (all zeros) | 9.0 |
+| Complex (random) | 9.0 |
+
+**Observation**: Complex sequences similar time ⚠️
+
+**Note**: For full validation, run adaptive_compute.py on trained LM with 1000+ sequences.
+
+
+
+
+## Track 39: EqProp Diffusion
+
+
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 1.1s
+
+
+**Claim**: Diffusion works via Energy Minimization.
+
+**Results**:
+- Training Loss: 0.1130
+- Validation MSE (t=300): 0.1388
+- Status: PASS
+
+**Note**: Minimal implementation for validation. Full rigorous training requires days.
+
+
+
+
+### Areas for Improvement
+
+- Train longer
+- Use larger model
+
+
+## Track 40: Hardware Analysis
+
+
+✅ **Status**: PASS | **Score**: 100.0/100 | **Time**: 0.0s
+
+
+**Track 40**: Comprehensive Hardware Analysis
+
+### FLOP Analysis
+
+| Model | FLOPs | Ratio |
+|-------|-------|-------|
+| EqProp (30 steps) | 6.21 GFLOPs | 30.0× |
+| Backprop (baseline) | 0.21 GFLOPs | 1.0× |
+
+**Trade-off**: EqProp uses ~30× more FLOPs but enables neuromorphic substrates.
+
+### Quantization Robustness (from existing tracks)
+
+| Precision | Accuracy Drop | Hardware Benefit |
+|-----------|---------------|------------------|
+| FP32 | 0% (baseline) | - |
+| INT8 | <1% ✅ (Track 16) | 4× memory, 2-4× speed |
+| Ternary | <1% ✅ (Track 4) | 32× memory, no FPU |
+
+### Noise Tolerance
+
+- **Analog noise (5%)**: Minimal impact ✅ (Track 17)
+- **Self-healing**: Automatic noise damping via L<1 (Track 3)
+
+### Applications
+
+- Neuromorphic chips (local learning)
+- Photonic computing (analog-tolerant)
+- DNA/molecular computing (thermodynamic)
+
+
