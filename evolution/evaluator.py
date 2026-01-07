@@ -230,71 +230,10 @@ class VariationEvaluator:
         )
     
     def _build_model(self, config: ArchConfig, task: str) -> nn.Module:
-        """Build model from configuration."""
-        # Determine input/output dimensions
-        if task in ['mnist', 'fashion']:
-            input_dim, output_dim = 784, 10
-        elif task == 'cifar10':
-            input_dim, output_dim = 3072, 10
-        elif task == 'shakespeare':
-            input_dim, output_dim = 65, 65  # Vocab size
-        else:
-            input_dim, output_dim = 784, 10
-        
-        # Build based on model type
-        if config.model_type == 'looped_mlp':
-            from models import LoopedMLP
-            return LoopedMLP(
-                input_dim=input_dim,
-                hidden_dim=config.width,
-                output_dim=output_dim,
-                use_spectral_norm=config.use_sn,
-                max_steps=config.eq_steps,
-            )
-        elif config.model_type == 'conv':
-            from models import ModernConvEqProp
-            return ModernConvEqProp(eq_steps=config.eq_steps)
-        elif config.model_type == 'transformer':
-            from models import CausalTransformerEqProp
-            # Ensure num_heads divides hidden_dim
-            num_heads = config.num_heads
-            while config.width % num_heads != 0 and num_heads > 1:
-                num_heads -= 1
-            return CausalTransformerEqProp(
-                vocab_size=output_dim,
-                hidden_dim=config.width,
-                num_layers=min(config.depth, 6),  # Transform depth limit
-                num_heads=num_heads,
-                eq_steps=config.eq_steps,
-            )
-        elif config.model_type == 'hebbian':
-            from models import DeepHebbianChain
-            return DeepHebbianChain(
-                input_dim=input_dim,
-                hidden_dim=config.width,
-                output_dim=output_dim,
-                depth=config.depth,
-                use_sn=config.use_sn,
-            )
-        elif config.model_type == 'feedback_alignment':
-            from models import FeedbackAlignmentEqProp
-            return FeedbackAlignmentEqProp(
-                input_dim=input_dim,
-                hidden_dim=config.width,
-                output_dim=output_dim,
-                n_layers=config.depth,
-                use_spectral_norm=config.use_sn,
-            )
-        else:
-            # Default to LoopedMLP
-            from models import LoopedMLP
-            return LoopedMLP(
-                input_dim=input_dim,
-                hidden_dim=config.width,
-                output_dim=output_dim,
-                use_spectral_norm=config.use_sn,
-                max_steps=config.eq_steps,
-            )
+        """Build model from configuration using model registry."""
+        from .models import DefaultModelBuilder
+        builder = DefaultModelBuilder()
+        return builder.build(config, task)
     
     def _get_data(
         self,
