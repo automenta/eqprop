@@ -6,37 +6,62 @@ Two approaches:
 2. Implicit Differentiation - true O(1) memory but requires solving linear system
 
 This implements BOTH for comparison and validation.
+
+Now with CuPy GPU support for fair performance comparison.
 """
 
 import numpy as np
 from typing import Dict, Tuple
 
+# Try to import CuPy for GPU acceleration
+try:
+    import cupy as cp
+    HAS_CUPY = True
+except ImportError:
+    cp = None
+    HAS_CUPY = False
 
-def softmax(x: np.ndarray) -> np.ndarray:
+
+def get_backend(use_gpu: bool):
+    """Return appropriate array library (CuPy or NumPy)."""
+    if use_gpu and HAS_CUPY:
+        return cp
+    return np
+
+
+def to_numpy(arr):
+    """Convert array to NumPy (handles both NumPy and CuPy arrays)."""
+    if HAS_CUPY and isinstance(arr, cp.ndarray):
+        return cp.asnumpy(arr)
+    return arr
+
+
+def softmax(x, xp=np):
     """Numerically stable softmax."""
-    x_max = np.max(x, axis=-1, keepdims=True)
-    exp_x = np.exp(x - x_max)
-    return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
+    x_max = xp.max(x, axis=-1, keepdims=True)
+    exp_x = xp.exp(x - x_max)
+    return exp_x / xp.sum(exp_x, axis=-1, keepdims=True)
 
 
-def cross_entropy(logits: np.ndarray, targets: np.ndarray) -> float:
+def cross_entropy(logits, targets, xp=np):
     """Cross-entropy loss from logits."""
-    probs = softmax(logits)
+    probs = softmax(logits, xp)
     batch_size = logits.shape[0]
-    log_probs = np.log(probs[np.arange(batch_size), targets] + 1e-8)
-    return -np.mean(log_probs)
+    log_probs = xp.log(probs[xp.arange(batch_size), targets] + 1e-8)
+    return -xp.mean(log_probs)
 
 
-def tanh_deriv(x: np.ndarray) -> np.ndarray:
+def tanh_deriv(x, xp=np):
     """Derivative of tanh: 1 - tanh(x)^2"""
-    return 1 - np.tanh(x) ** 2
+    return 1 - xp.tanh(x) ** 2
 
 
 class EqPropKernelBPTT:
     """
-    NumPy kernel that exactly replicates PyTorch's BPTT through equilibrium iterations.
+    NumPy/CuPy kernel that exactly replicates PyTorch's BPTT through equilibrium iterations.
     
     This is O(steps) memory but gives IDENTICAL gradients to PyTorch.
+    Now with optional GPU acceleration via CuPy.
     """
     
     def __init__(
@@ -46,39 +71,52 @@ class EqPropKernelBPTT:
         output_dim: int,
         max_steps: int = 30,
         lr: float = 0.01,
+        use_gpu: bool = False,
     ):
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.output_dim = output_dim
         self.max_steps = max_steps
         self.lr = lr
+        self.use_gpu = use_gpu and HAS_CUPY
+        
+        # Get array backend
+        self.xp = get_backend(self.use_gpu)
         
         # Xavier initialization with gain=0.5
         scale = 0.5
-        self.W_in = np.random.randn(hidden_dim, input_dim).astype(np.float32) * scale * np.sqrt(2.0 / input_dim)
-        self.W_rec = np.random.randn(hidden_dim, hidden_dim).astype(np.float32) * scale * np.sqrt(2.0 / hidden_dim)
-        self.W_out = np.random.randn(output_dim, hidden_dim).astype(np.float32) * scale * np.sqrt(2.0 / hidden_dim)
+        xp = self.xp
+        self.W_in = xp.random.randn(hidden_dim, input_dim).astype(xp.float32) * scale * xp.sqrt(2.0 / input_dim)
+        self.W_rec = xp.random.randn(hidden_dim, hidden_dim).astype(xp.float32) * scale * xp.sqrt(2.0 / hidden_dim)
+        self.W_out = xp.random.randn(output_dim, hidden_dim).astype(xp.float32) * scale * xp.sqrt(2.0 / hidden_dim)
         
-        self.b_in = np.zeros(hidden_dim, dtype=np.float32)
-        self.b_rec = np.zeros(hidden_dim, dtype=np.float32)
-        self.b_out = np.zeros(output_dim, dtype=np.float32)
+        self.b_in = xp.zeros(hidden_dim, dtype=xp.float32)
+        self.b_rec = xp.zeros(hidden_dim, dtype=xp.float32)
+        self.b_out = xp.zeros(output_dim, dtype=xp.float32)
+
     
-    def forward(self, x: np.ndarray) -> Tuple[np.ndarray, list]:
+    def forward(self, x):
         """Forward pass storing trajectory for BPTT."""
+        xp = self.xp
+        
+        # Convert input to GPU if needed
+        if self.use_gpu and not isinstance(x, xp.ndarray):
+            x = xp.asarray(x)
+        
         batch_size = x.shape[0]
         
         # Compute x_proj once
         x_proj = x @ self.W_in.T + self.b_in
         
         # Initialize h
-        h = np.zeros((batch_size, self.hidden_dim), dtype=np.float32)
+        h = xp.zeros((batch_size, self.hidden_dim), dtype=xp.float32)
         
         # Store trajectory (pre-activations) for backprop
         trajectory = []  # List of (pre_act, h) pairs
         
         for _ in range(self.max_steps):
             pre_act = x_proj + h @ self.W_rec.T + self.b_rec
-            h = np.tanh(pre_act)
+            h = xp.tanh(pre_act)
             trajectory.append((pre_act.copy(), h.copy()))
         
         # Output
@@ -86,12 +124,17 @@ class EqPropKernelBPTT:
         
         return logits, trajectory
     
-    def backward(self, x: np.ndarray, trajectory: list, d_logits: np.ndarray) -> Dict:
+    def backward(self, x, trajectory, d_logits):
         """
         Backprop through time - exactly matches PyTorch.
         
         Returns gradients for all parameters.
         """
+        xp = self.xp
+        
+        if self.use_gpu and not isinstance(x, xp.ndarray):
+            x = xp.asarray(x)
+        
         batch_size = x.shape[0]
         
         # Gradient w.r.t. output layer
@@ -103,22 +146,22 @@ class EqPropKernelBPTT:
         dh = d_logits @ self.W_out  # [batch, hidden]
         
         # Initialize gradient accumulators
-        dW_rec = np.zeros_like(self.W_rec)
-        dW_in = np.zeros_like(self.W_in)
-        db_rec = np.zeros_like(self.b_rec)
+        dW_rec = xp.zeros_like(self.W_rec)
+        dW_in = xp.zeros_like(self.W_in)
+        db_rec = xp.zeros_like(self.b_rec)
         
         # BPTT: backprop through all timesteps
         for t in reversed(range(self.max_steps)):
             pre_act, h = trajectory[t]
             
             # Gradient through tanh
-            dtanh = dh * tanh_deriv(pre_act)  # [batch, hidden]
+            dtanh = dh * tanh_deriv(pre_act, xp)  # [batch, hidden]
             
             # Accumulate gradients
             if t > 0:
                 h_prev = trajectory[t-1][1]
             else:
-                h_prev = np.zeros_like(h)
+                h_prev = xp.zeros_like(h)
             
             dW_rec += dtanh.T @ h_prev / batch_size
             dW_in += dtanh.T @ x / batch_size
@@ -133,17 +176,26 @@ class EqPropKernelBPTT:
             'dW_in': dW_in,
         }
     
-    def train_step(self, x: np.ndarray, y: np.ndarray) -> Dict:
+    def train_step(self, x, y):
         """Complete training step with BPTT."""
+        xp = self.xp
+        
+        # Convert input to GPU if needed
+        if self.use_gpu:
+            if not isinstance(x, xp.ndarray):
+                x = xp.asarray(x)
+            if not isinstance(y, xp.ndarray):
+                y = xp.asarray(y)
+        
         batch_size = x.shape[0]
         
         # Forward
         logits, trajectory = self.forward(x)
         
         # Loss gradient
-        probs = softmax(logits)
-        one_hot = np.zeros_like(probs)
-        one_hot[np.arange(batch_size), y] = 1.0
+        probs = softmax(logits, xp)
+        one_hot = xp.zeros_like(probs)
+        one_hot[xp.arange(batch_size), y] = 1.0
         d_logits = probs - one_hot
         
         # Backward
@@ -157,19 +209,27 @@ class EqPropKernelBPTT:
         self.b_rec -= self.lr * grads['db_rec']
         
         # Metrics
-        loss = cross_entropy(logits, y)
-        preds = np.argmax(logits, axis=1)
-        acc = np.mean(preds == y)
+        loss = cross_entropy(logits, y, xp)
+        preds = xp.argmax(logits, axis=1)
+        acc = xp.mean(preds == y)
         
-        return {'loss': loss, 'accuracy': acc}
+        return {'loss': float(to_numpy(loss)), 'accuracy': float(to_numpy(acc))}
     
-    def evaluate(self, x: np.ndarray, y: np.ndarray) -> Dict:
+    def evaluate(self, x, y):
         """Evaluate accuracy."""
+        xp = self.xp
+        
+        if self.use_gpu:
+            if not isinstance(x, xp.ndarray):
+                x = xp.asarray(x)
+            if not isinstance(y, xp.ndarray):
+                y = xp.asarray(y)
+        
         logits, _ = self.forward(x)
-        preds = np.argmax(logits, axis=1)
-        acc = np.mean(preds == y)
-        loss = cross_entropy(logits, y)
-        return {'accuracy': acc, 'loss': loss}
+        preds = xp.argmax(logits, axis=1)
+        acc = xp.mean(preds == y)
+        loss = cross_entropy(logits, y, xp)
+        return {'accuracy': float(to_numpy(acc)), 'loss': float(to_numpy(loss))}
 
 
 def compare_memory_autograd_vs_kernel(hidden_dim: int, depth: int) -> Dict:
@@ -185,3 +245,4 @@ def compare_memory_autograd_vs_kernel(hidden_dim: int, depth: int) -> Dict:
 
 # Alias for backward compatibility
 EqPropKernel = EqPropKernelBPTT
+
