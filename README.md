@@ -311,6 +311,14 @@ verifier.run_tracks([3, 4, 33])
 - **Result**: Linear probe accuracy > 88% on MNIST using features from a 500-layer Hebbian chain.
 - **Implication**: Enables "evolvable" extremely deep bio-plausible architectures (e.g., 3D lattices).
 
+### 4. The Regularization Discovery (Track 37 vs Scale Study)
+
+**Finding**: EqProp acts as an **implicit regularizer**.
+- **Short Training** (Scale Study): Backprop wins (11.3 PPL vs 13.0) because it learns faster.
+- **Long Training** (Track 37): Backprop **overfits** (12.4 -> 13.5 PPL), while EqProp **improves** (21.2 -> 10.1 PPL), preventing overfitting on small datasets.
+
+**Conclusion**: EqProp trades initial speed for **robustness/regularization**. Use it for **Few-Shot Learning** or small datasets where overfitting is the main risk.
+
 ---
 
 ## 2025 EqProp Research Landscape
