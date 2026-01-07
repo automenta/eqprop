@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Optional, List, Dict, Callable
 
 from .notebook import VerificationNotebook, TrackResult
-from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks, engine_validation_tracks, enhanced_validation_tracks, new_tracks, rapid_validation, framework_validation, nebc_tracks, negative_results, architecture_comparison, honest_tradeoff
+from .tracks import core_tracks, advanced_tracks, scaling_tracks, special_tracks, hardware_tracks, analysis_tracks, application_tracks, engine_validation_tracks, enhanced_validation_tracks, new_tracks, rapid_validation, framework_validation, nebc_tracks, negative_results, architecture_comparison, honest_tradeoff, evolution_tracks
 
 class Verifier:
     """Complete verification suite for all research tracks."""
@@ -104,6 +104,8 @@ class Verifier:
             56: ("Depth Architecture Comparison", architecture_comparison.track_56_depth_architecture_comparison),
             # Reality Check - Should we continue?
             57: ("Honest Trade-off Analysis", honest_tradeoff.track_57_honest_tradeoff_analysis),
+            # Evolution System
+            60: ("Evolution vs Random Search", evolution_tracks.track_60_evolution_validation),
         }
     
     def print_header(self):
