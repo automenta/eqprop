@@ -20,6 +20,7 @@ from .acceleration import (
     enable_tf32,
 )
 from .datasets import get_vision_dataset, get_lm_dataset, CharDataset, create_data_loaders
+from .generation import generate_text, generate_from_dataset
 from .utils import (
     export_to_onnx,
     count_parameters,
@@ -94,6 +95,8 @@ __all__ = [
     "get_vision_dataset",
     "get_lm_dataset",
     "CharDataset",
+    "generate_text",
+    "generate_from_dataset",
     "create_data_loaders",
     # Utils
     "export_to_onnx",

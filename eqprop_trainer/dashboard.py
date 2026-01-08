@@ -13,10 +13,64 @@ from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QPushButton, QLabel, QComboBox, QSpinBox, QDoubleSpinBox,
     QGroupBox, QTabWidget, QTextEdit, QProgressBar, QSlider,
-    QSplitter, QFrame, QCheckBox, QMessageBox
+    QSplitter, QFrame, QCheckBox, QMessageBox, QApplication
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QFont
+
+# Monkeypatch pyparsing for matplotlib compatibility (snake_case -> camelCase)
+try:
+    import pyparsing
+    
+    # helper to alias method if missing
+    def alias_method(cls, snake, camel):
+        if hasattr(cls, camel) and not hasattr(cls, snake):
+            setattr(cls, snake, getattr(cls, camel))
+
+    # Alias one_of -> oneOf, nested_expr -> nestedExpr
+    alias_method(pyparsing, 'one_of', 'oneOf')
+    alias_method(pyparsing, 'nested_expr', 'nestedExpr')
+    
+    # Generic alias for common snake_case -> camelCase mismatches in pyparsing
+    for snake, camel in [
+        ('delimited_list', 'delimitedList'),
+        ('counted_array', 'countedArray'),
+        ('infix_notation', 'infixNotation'),
+        ('one_of', 'oneOf'),
+    ]:
+        alias_method(pyparsing, snake, camel)
+    
+    # Alias ParserElement methods (parse_string, reset_cache, enable_packrat)
+    if hasattr(pyparsing, 'ParserElement'):
+        PE = pyparsing.ParserElement
+        alias_method(PE, 'parse_string', 'parseString')
+        
+        # fix for static methods (resetCache, enablePackrat) being called as instance methods
+        if hasattr(PE, 'resetCache') and not hasattr(PE, 'reset_cache'):
+            PE.reset_cache = lambda *args, **kwargs: PE.resetCache()
+            
+        if hasattr(PE, 'enablePackrat') and not hasattr(PE, 'enable_packrat'):
+            PE.enable_packrat = lambda *args, **kwargs: PE.enablePackrat(*args, **kwargs)
+            
+    # Alias pyparsing_common attributes (convert_to_float -> convertToFloat, etc)
+    if hasattr(pyparsing, 'pyparsing_common'):
+        PC = pyparsing.pyparsing_common
+        for snake, camel in [
+            ('convert_to_float', 'convertToFloat'),
+            ('convert_to_integer', 'convertToInteger'),
+            ('html_entity', 'htmlEntity'),
+            ('common_html_entity', 'commonHTMLEntity'),
+            ('signed_integer', 'signedInteger'),
+            ('grouped', 'grouped'),
+        ]:
+            alias_method(PC, snake, camel)
+        
+    # Alias ParseException
+    if hasattr(pyparsing, 'ParseException'):
+        alias_method(pyparsing.ParseException, 'mark_input_line', 'markInputLine')
+
+except ImportError:
+    pass
 
 try:
     import pyqtgraph as pg
@@ -24,8 +78,21 @@ try:
 except ImportError:
     HAS_PYQTGRAPH = False
 
+# Feature flags
+ENABLE_WEIGHT_VIZ = False  # Disabled due to pyqtgraph/matplotlib/pyparsing version conflicts
+
 from .themes import CYBERPUNK_DARK, PLOT_COLORS
 from .worker import TrainingWorker
+from .generation import UniversalGenerator, SimpleCharTokenizer, count_parameters, format_parameter_count
+from .hyperparams import get_hyperparams_for_model, HyperparamSpec
+from .viz_utils import extract_weights, format_weight_for_display, normalize_weights_for_display, get_layer_description
+from .dashboard_helpers import (
+    generate_text_universal, 
+    update_hyperparams_generic, 
+    get_current_hyperparams_generic,
+    create_weight_viz_widgets_generic,
+    update_weight_visualization_generic
+)
 
 
 class EqPropDashboard(QMainWindow):
@@ -44,6 +111,8 @@ class EqPropDashboard(QMainWindow):
         self.worker: Optional[TrainingWorker] = None
         self.model = None
         self.train_loader = None
+        self.current_hyperparams: Dict = {}  # Model-specific hyperparameters
+        self.generator: Optional[UniversalGenerator] = None
         
         # Plot data
         self.loss_history: List[float] = []
@@ -72,16 +141,16 @@ class EqPropDashboard(QMainWindow):
         layout.addWidget(header)
         
         # Main content area with tabs
-        tabs = QTabWidget()
-        layout.addWidget(tabs, stretch=1)
+        self.tabs = QTabWidget()
+        layout.addWidget(self.tabs, stretch=1)
         
         # Tab 1: Language Modeling
         lm_tab = self._create_lm_tab()
-        tabs.addTab(lm_tab, "🔤 Language Model")
+        self.tabs.addTab(lm_tab, "🔤 Language Model")
         
         # Tab 2: Vision
         vision_tab = self._create_vision_tab()
-        tabs.addTab(vision_tab, "📷 Vision")
+        self.tabs.addTab(vision_tab, "📷 Vision")
         
         # Status bar
         self.status_label = QLabel("Ready. Select a model and dataset to begin training.")
@@ -104,13 +173,27 @@ class EqPropDashboard(QMainWindow):
         
         model_layout.addWidget(QLabel("Architecture:"), 0, 0)
         self.lm_model_combo = QComboBox()
-        self.lm_model_combo.addItems([
+        
+        # LM-specific models
+        lm_items = [
             "FullEqProp Transformer",
             "Attention-Only EqProp", 
             "Recurrent Core EqProp",
             "Hybrid EqProp",
             "LoopedMLP LM",
-        ])
+        ]
+        
+        # Add bioplausible research algorithms
+        try:
+            from eqprop_torch import HAS_BIOPLAUSIBLE, ALGORITHM_REGISTRY
+            if HAS_BIOPLAUSIBLE:
+                lm_items.append("--- Bio-Plausible Research Models ---")
+                for key, desc in ALGORITHM_REGISTRY.items():
+                    lm_items.append(f"{key} - {desc}")
+        except:
+            pass
+        
+        self.lm_model_combo.addItems(lm_items)
         model_layout.addWidget(self.lm_model_combo, 0, 1)
         
         model_layout.addWidget(QLabel("Hidden Dim:"), 1, 0)
@@ -122,7 +205,7 @@ class EqPropDashboard(QMainWindow):
         
         model_layout.addWidget(QLabel("Layers:"), 2, 0)
         self.lm_layers_spin = QSpinBox()
-        self.lm_layers_spin.setRange(1, 12)
+        self.lm_layers_spin.setRange(1, 100)  # Support deep architectures
         self.lm_layers_spin.setValue(4)
         model_layout.addWidget(self.lm_layers_spin, 2, 1)
         
@@ -133,6 +216,16 @@ class EqPropDashboard(QMainWindow):
         model_layout.addWidget(self.lm_steps_spin, 3, 1)
         
         left_panel.addWidget(model_group)
+        
+        # Dynamic Hyperparameters Group
+        self.lm_hyperparam_group = QGroupBox("⚙️ Model Hyperparameters")
+        self.lm_hyperparam_layout = QGridLayout(self.lm_hyperparam_group)
+        self.lm_hyperparam_widgets = {}  # Store widgets for cleanup
+        left_panel.addWidget(self.lm_hyperparam_group)
+        self.lm_hyperparam_group.setVisible(False)  # Hidden by default
+        
+        # Connect model selection to update hyperparameters
+        self.lm_model_combo.currentTextChanged.connect(self._update_lm_hyperparams)
         
         # Dataset Selection
         data_group = QGroupBox("📚 Dataset")
@@ -228,8 +321,18 @@ class EqPropDashboard(QMainWindow):
             self.lm_loss_plot.setLabel('bottom', 'Epoch')
             self.lm_loss_plot.showGrid(x=True, y=True, alpha=0.2)
             self.lm_loss_curve = self.lm_loss_plot.plot(pen=pg.mkPen(PLOT_COLORS['loss'], width=2))
-            self.lm_acc_curve = self.lm_loss_plot.plot(pen=pg.mkPen(PLOT_COLORS['accuracy'], width=2))
             metrics_layout.addWidget(self.lm_loss_plot)
+            
+            # Accuracy plot
+            self.lm_acc_plot = pg.PlotWidget()
+            self.lm_acc_plot.setBackground('#0a0a0f')
+            self.lm_acc_plot.setLabel('left', 'Accuracy', color=PLOT_COLORS['accuracy'])
+            self.lm_acc_plot.setLabel('bottom', 'Epoch')
+            self.lm_acc_plot.showGrid(x=True, y=True, alpha=0.2)
+            self.lm_acc_plot.setYRange(0, 1.0)
+            self.lm_acc_curve = self.lm_acc_plot.plot(pen=pg.mkPen(PLOT_COLORS['accuracy'], width=2))
+            metrics_layout.addWidget(self.lm_acc_plot)
+
             
             # Lipschitz plot
             self.lm_lip_plot = pg.PlotWidget()
@@ -275,6 +378,25 @@ class EqPropDashboard(QMainWindow):
         
         right_panel.addWidget(gen_group, stretch=1)
         
+        # Parameter count display
+        self.lm_param_label = QLabel("Parameters: --")
+        self.lm_param_label.setStyleSheet("color: #00d4ff; font-weight: bold; padding: 5px;")
+        left_panel.insertWidget(left_panel.count() - 1, self.lm_param_label)
+        
+        # Weight Visualization (if pyqtgraph available)
+        if HAS_PYQTGRAPH and ENABLE_WEIGHT_VIZ:
+            viz_group = QGroupBox("🎞️ Weight Matrices")
+            viz_layout = QVBoxLayout(viz_group)
+            
+            self.lm_weight_widgets = []
+            self.lm_weight_labels = []
+            
+            self.lm_weights_container = QWidget()
+            self.lm_weights_layout = QVBoxLayout(self.lm_weights_container)
+            viz_layout.addWidget(self.lm_weights_container)
+            
+            right_panel.addWidget(viz_group)
+
         return tab
     
     def _create_vision_tab(self) -> QWidget:
@@ -329,6 +451,16 @@ class EqPropDashboard(QMainWindow):
         model_layout.addWidget(self.vis_steps_spin, 2, 1)
         
         left_panel.addWidget(model_group)
+        
+        # Dynamic Hyperparameters Group
+        self.vis_hyperparam_group = QGroupBox("⚙️ Model Hyperparameters")
+        self.vis_hyperparam_layout = QGridLayout(self.vis_hyperparam_group)
+        self.vis_hyperparam_widgets = {}  # Store widgets for cleanup
+        left_panel.addWidget(self.vis_hyperparam_group)
+        self.vis_hyperparam_group.setVisible(False)  # Hidden by default
+        
+        # Connect model selection to update hyperparameters
+        self.vis_model_combo.currentTextChanged.connect(self._update_vis_hyperparams)
         
         # Dataset
         data_group = QGroupBox("📚 Dataset")
@@ -395,6 +527,11 @@ class EqPropDashboard(QMainWindow):
         self.vis_progress.setFormat("Epoch %v / %m")
         left_panel.addWidget(self.vis_progress)
         
+        # Parameter count display
+        self.vis_param_label = QLabel("Parameters: --")
+        self.vis_param_label.setStyleSheet("color: #00d4ff; font-weight: bold; padding: 5px;")
+        left_panel.addWidget(self.vis_param_label)
+        
         left_panel.addStretch()
         
         # Right panel: Plots
@@ -407,12 +544,22 @@ class EqPropDashboard(QMainWindow):
             
             self.vis_loss_plot = pg.PlotWidget()
             self.vis_loss_plot.setBackground('#0a0a0f')
-            self.vis_loss_plot.setLabel('left', 'Loss / Accuracy')
+            self.vis_loss_plot.setLabel('left', 'Loss', color=PLOT_COLORS['loss'])
             self.vis_loss_plot.setLabel('bottom', 'Epoch')
             self.vis_loss_plot.showGrid(x=True, y=True, alpha=0.2)
             self.vis_loss_curve = self.vis_loss_plot.plot(pen=pg.mkPen(PLOT_COLORS['loss'], width=2), name='Loss')
-            self.vis_acc_curve = self.vis_loss_plot.plot(pen=pg.mkPen(PLOT_COLORS['accuracy'], width=2), name='Accuracy')
             metrics_layout.addWidget(self.vis_loss_plot)
+            
+            # Accuracy plot
+            self.vis_acc_plot = pg.PlotWidget()
+            self.vis_acc_plot.setBackground('#0a0a0f')
+            self.vis_acc_plot.setLabel('left', 'Accuracy', color=PLOT_COLORS['accuracy'])
+            self.vis_acc_plot.setLabel('bottom', 'Epoch')
+            self.vis_acc_plot.showGrid(x=True, y=True, alpha=0.2)
+            self.vis_acc_plot.setYRange(0, 1.0)
+            self.vis_acc_curve = self.vis_acc_plot.plot(pen=pg.mkPen(PLOT_COLORS['accuracy'], width=2), name='Accuracy')
+            metrics_layout.addWidget(self.vis_acc_plot)
+
             
             self.vis_lip_plot = pg.PlotWidget()
             self.vis_lip_plot.setBackground('#0a0a0f')
@@ -443,6 +590,23 @@ class EqPropDashboard(QMainWindow):
         stats_layout.addWidget(self.vis_lip_label, 2, 1)
         
         right_panel.addWidget(stats_group)
+        
+        # Weight Visualization (if pyqtgraph available)
+        if HAS_PYQTGRAPH and ENABLE_WEIGHT_VIZ:
+            viz_group = QGroupBox("🎞️ Weight Matrices")
+            viz_layout = QVBoxLayout(viz_group)
+            
+            # Create container for weight heatmaps
+            self.vis_weight_widgets = []  # Store ImageView widgets
+            self.vis_weight_labels = []   # Store labels
+            
+            # We'll create these dynamically when model is available
+            self.vis_weights_container = QWidget()
+            self.vis_weights_layout = QVBoxLayout(self.vis_weights_container)
+            viz_layout.addWidget(self.vis_weights_container)
+            
+            right_panel.addWidget(viz_group)
+        
         right_panel.addStretch()
         
         return tab
@@ -521,16 +685,27 @@ class EqPropDashboard(QMainWindow):
         self.lipschitz_history.clear()
         
         # Create and start worker
+        # Create and start worker
+        # Get hyperparameters
+        hyperparams = self._get_current_hyperparams(self.vis_hyperparam_widgets)
+        
+        # Update parameter count
+        if hasattr(self, 'vis_param_label'):
+            count = count_parameters(self.model)
+            self.vis_param_label.setText(f"Parameters: {format_parameter_count(count)}")
+        
         self.worker = TrainingWorker(
             self.model,
             self.train_loader,
             epochs=self.vis_epochs_spin.value(),
             lr=self.vis_lr_spin.value(),
             use_compile=self.vis_compile_check.isChecked(),
+            hyperparams=hyperparams,
         )
         self.worker.progress.connect(self._on_progress)
         self.worker.finished.connect(self._on_finished)
         self.worker.error.connect(self._on_error)
+        self.worker.weights_updated.connect(self._update_weight_visualization)
         
         # Update UI
         self.vis_train_btn.setEnabled(False)
@@ -544,7 +719,123 @@ class EqPropDashboard(QMainWindow):
     
     def _start_lm_training(self):
         """Start language model training."""
-        self.status_label.setText("LM training coming soon...")
+        import torch
+        from eqprop_torch import HAS_LM_VARIANTS, HAS_BIOPLAUSIBLE
+        from eqprop_torch.datasets import get_lm_dataset
+        from torch.utils.data import DataLoader
+        
+        model_name = self.lm_model_combo.currentText()
+        
+        # Check if it's a bioplausible algorithm
+        if ' - ' in model_name:
+            algorithm_key = model_name.split(' - ')[0]
+            try:
+                from algorithms import create_model
+                
+                # Get dataset to determine vocab size
+                dataset_name = self.lm_dataset_combo.currentText()
+                seq_len = self.lm_seqlen_spin.value()
+                
+                # Load dataset
+                dataset = get_lm_dataset(dataset_name, seq_len=seq_len, split='train')
+                vocab_size = dataset.vocab_size if hasattr(dataset, 'vocab_size') else 256
+                
+                # Create algorithm model
+                hidden = self.lm_hidden_spin.value()
+                self.model = create_model(
+                    algorithm_key,
+                    vocab_size,  # Input = vocab
+                    [hidden],
+                    vocab_size   # Output = vocab (next token prediction)
+                )
+                
+                self.train_loader = DataLoader(dataset, batch_size=self.lm_batch_spin.value(), shuffle=True)
+                
+            except Exception as e:
+                QMessageBox.warning(self, "Model Creation Failed", 
+                                   f"Could not create {algorithm_key}: {e}")
+                return
+        
+        # LM variant models
+        elif HAS_LM_VARIANTS:
+            try:
+                from eqprop_torch import get_eqprop_lm
+                
+                # Map UI names to variant keys
+                variant_map = {
+                    "FullEqProp Transformer": "full",
+                    "Attention-Only EqProp": "attention_only",
+                    "Recurrent Core EqProp": "recurrent_core",
+                    "Hybrid EqProp": "hybrid",
+                    "LoopedMLP LM": "looped_mlp"
+                }
+                
+                variant = variant_map.get(model_name, "full")
+                
+                # Get dataset
+                dataset_name = self.lm_dataset_combo.currentText()
+                seq_len = self.lm_seqlen_spin.value()
+                
+                dataset = get_lm_dataset(dataset_name, seq_len=seq_len, split='train')
+                vocab_size = dataset.vocab_size if hasattr(dataset, 'vocab_size') else 256
+                
+                # Create LM model
+                self.model = get_eqprop_lm(
+                    variant,
+                    vocab_size=vocab_size,
+                    hidden_dim=self.lm_hidden_spin.value(),
+                    num_layers=self.lm_layers_spin.value(),
+                    max_seq_len=seq_len,
+                    eq_steps=self.lm_steps_spin.value()
+                )
+                
+                self.train_loader = DataLoader(dataset, batch_size=self.lm_batch_spin.value(), shuffle=True)
+                
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to create LM model:\n{e}")
+                return
+        else:
+            QMessageBox.warning(self, "Not Available", "LM variants not available")
+            return
+        
+        # Clear history
+        self.loss_history.clear()
+        self.acc_history.clear()
+        self.lipschitz_history.clear()
+        
+        # Create and start worker
+        # Create and start worker
+        # Get hyperparameters
+        hyperparams = self._get_current_hyperparams(self.lm_hyperparam_widgets)
+        
+        # Update parameter count
+        if hasattr(self, 'lm_param_label'):
+            count = count_parameters(self.model)
+            self.lm_param_label.setText(f"Parameters: {format_parameter_count(count)}")
+
+        self.worker = TrainingWorker(
+            self.model,
+            self.train_loader,
+            epochs=self.lm_epochs_spin.value(),
+            lr=self.lm_lr_spin.value(),
+            use_compile=self.lm_compile_check.isChecked(),
+            hyperparams=hyperparams,
+        )
+        self.worker.progress.connect(self._on_progress)
+        self.worker.finished.connect(self._on_finished)
+        self.worker.error.connect(self._on_error)
+        self.worker.weights_updated.connect(self._update_weight_visualization)
+        
+        # Update UI
+        self.lm_train_btn.setEnabled(False)
+        self.lm_stop_btn.setEnabled(True)
+        self.lm_progress.setMaximum(self.lm_epochs_spin.value())
+        self.lm_progress.setValue(0)
+        
+        self.status_label.setText(f"Training {model_name} on {dataset_name}...")
+        self.plot_timer.start(100)
+        self.worker.start()
+
     
     def _stop_training(self):
         """Stop training."""
@@ -581,9 +872,24 @@ class EqPropDashboard(QMainWindow):
         
         if self.loss_history:
             epochs = list(range(1, len(self.loss_history) + 1))
-            self.vis_loss_curve.setData(epochs, self.loss_history)
-            self.vis_acc_curve.setData(epochs, self.acc_history)
-            self.vis_lip_curve.setData(epochs, self.lipschitz_history)
+            
+            # Update vision plots
+            if hasattr(self, 'vis_loss_curve'):
+                self.vis_loss_curve.setData(epochs, self.loss_history)
+                # Check for separate acc plot
+                if hasattr(self, 'vis_acc_curve'):
+                    self.vis_acc_curve.setData(epochs, self.acc_history)
+                self.vis_lip_curve.setData(epochs, self.lipschitz_history)
+            
+            # Update LM plots
+            if hasattr(self, 'lm_loss_curve'):
+                self.lm_loss_curve.setData(epochs, self.loss_history)
+                # Check for separate acc plot
+                if hasattr(self, 'lm_acc_curve'):
+                    self.lm_acc_curve.setData(epochs, self.acc_history)
+                self.lm_lip_curve.setData(epochs, self.lipschitz_history)
+
+
     
     def _on_finished(self, result: dict):
         """Handle training completion."""
@@ -607,12 +913,78 @@ class EqPropDashboard(QMainWindow):
         QMessageBox.critical(self, "Training Error", error)
     
     def _generate_text(self):
-        """Generate text from the model."""
-        if self.model is None or not hasattr(self.model, 'generate'):
-            self.gen_output.setText("No model loaded or model doesn't support generation.")
+        """Generate text from the model (works even with untrained models)."""
+        generate_text_universal(self)
+
+    def _update_lm_hyperparams(self, model_name: str):
+        """Update LM hyperparameter widgets based on selected model."""
+        update_hyperparams_generic(self, model_name, self.lm_hyperparam_layout, self.lm_hyperparam_widgets, self.lm_hyperparam_group)
+    
+    def _update_vis_hyperparams(self, model_name: str):
+        """Update Vision hyperparameter widgets based on selected model."""
+        update_hyperparams_generic(self, model_name, self.vis_hyperparam_layout, self.vis_hyperparam_widgets, self.vis_hyperparam_group)
+    
+    def _get_current_hyperparams(self, widgets: dict) -> dict:
+        """Extract current values from hyperparameter widgets."""
+        return get_current_hyperparams_generic(widgets)
+    
+    def _update_weight_visualization(self, weights: dict):
+        """Update weight visualization heatmaps."""
+        if not HAS_PYQTGRAPH or not ENABLE_WEIGHT_VIZ:
             return
+            
+        # Determine which tab is active to update correct widgets
+        active_idx = self.tabs.currentIndex()
         
-        temperature = self.temp_slider.value() / 10.0
-        self.gen_output.setText("Generating...")
-        # In a real implementation, this would use the GenerationWorker
-        self.gen_output.setText("Generation requires a trained LM model.")
+        # 0 = LM Tab, 1 = Vision Tab
+        if active_idx == 0:
+            layout = self.lm_weights_layout
+            widgets = self.lm_weight_widgets
+            labels = self.lm_weight_labels
+        else:
+            layout = self.vis_weights_layout
+            widgets = self.vis_weight_widgets
+            labels = self.vis_weight_labels
+            
+        # If widgets list is empty, create them
+        if not widgets:
+            # Clear existing items in layout
+            while layout.count():
+                item = layout.takeAt(0)
+                if item.widget():
+                    item.widget().deleteLater()
+            
+            widgets.clear()
+            labels.clear()
+            
+            # Create widgets
+            for name, W in list(weights.items())[:3]:
+                # Label
+                label = QLabel(get_layer_description(name))
+                label.setStyleSheet("color: #00d4ff; font-weight: bold;")
+                layout.addWidget(label)
+                labels.append(label)
+                
+                # Image View
+                img_view = pg.ImageView()
+                img_view.setFixedHeight(150)
+                img_view.ui.histogram.hide()
+                img_view.ui.roiBtn.hide()
+                img_view.ui.menuBtn.hide()
+                layout.addWidget(img_view)
+                widgets.append(img_view)
+        
+        # Update content
+        for i, (name, W) in enumerate(weights.items()):
+            if i >= len(widgets):
+                break
+            
+            W_display = format_weight_for_display(W)
+            W_norm = normalize_weights_for_display(W_display)
+            
+            try:
+                widgets[i].setImage(W_norm.T, levels=(0, 1))
+                labels[i].setText(get_layer_description(name))
+            except Exception:
+                pass
+

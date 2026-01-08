@@ -7,6 +7,11 @@ Demonstrates the high-level EqPropTrainer API with torch.compile acceleration.
 
 import torch
 from torch.utils.data import DataLoader
+import sys
+from pathlib import Path
+
+# Add parent directory to path to allow importing without installation
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import from eqprop_torch library
 from eqprop_torch import EqPropTrainer, LoopedMLP

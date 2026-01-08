@@ -103,24 +103,23 @@ class CharDataset(Dataset):
 def get_lm_dataset(
     name: str = "tiny_shakespeare",
     seq_len: int = 128,
-    batch_size: int = 64,
     split: str = "train",
-) -> Tuple[DataLoader, Dict[str, Any]]:
+) -> CharDataset:
     """
-    Load a language modeling dataset with CharDataset wrapper.
+    Load a language modeling dataset as a CharDataset.
     
     Args:
         name: Dataset name ('tiny_shakespeare', 'wikitext-2', 'ptb')
         seq_len: Sequence length for training
-        batch_size: Batch size for DataLoader
         split: 'train', 'validation', or 'test'
         
     Returns:
-        (DataLoader, vocab_info) where vocab_info contains char_to_idx, idx_to_char, vocab_size
+        CharDataset with vocab_size attribute
         
     Example:
-        >>> train_loader, vocab = get_lm_dataset('tiny_shakespeare', seq_len=128)
-        >>> print(f"Vocab size: {vocab['vocab_size']}")
+        >>> dataset = get_lm_dataset('tiny_shakespeare', seq_len=128)
+        >>> print(f"Vocab size: {dataset.vocab_size}")
+        >>> loader = DataLoader(dataset, batch_size=64, shuffle=True)
     """
     try:
         from datasets import load_dataset
@@ -133,18 +132,22 @@ def get_lm_dataset(
     if name == "tiny_shakespeare":
         # Shakespeare from HuggingFace
         try:
-            dataset = load_dataset("tiny_shakespeare", trust_remote_code=True)
-            text_key = "text"
-            if split == "train":
-                text = dataset["train"][text_key]
-            elif split == "validation":
-                text = dataset["validation"][text_key]
-            else:
-                text = dataset["test"][text_key]
+            dataset = load_dataset("tiny_shakespeare")
+            # tiny_shakespeare has 'train', 'validation', 'test' splits
+            # Each row has a 'text' field containing a line
+            split_data = dataset[split]
             
-            # tiny_shakespeare returns list, join it
-            if isinstance(text, list):
-                text = "\n".join(text)
+            # Collect all text from the split
+            texts = []
+            for item in split_data:
+                if isinstance(item['text'], str):
+                    texts.append(item['text'])
+            
+            text = "\n".join(texts)
+            
+            if not text or len(text) == 0:
+                raise ValueError("Empty text after loading")
+                
         except Exception as e:
             # Fallback: load from URL
             warnings.warn(f"HuggingFace dataset failed, using fallback: {e}")
@@ -165,25 +168,10 @@ def get_lm_dataset(
     else:
         raise ValueError(f"Unknown LM dataset: {name}. Available: tiny_shakespeare, wikitext-2, ptb")
     
-    # Create CharDataset
+    # Create and return CharDataset (not DataLoader)
     char_dataset = CharDataset(text, seq_len=seq_len)
     
-    # Create DataLoader
-    loader = DataLoader(
-        char_dataset, 
-        batch_size=batch_size, 
-        shuffle=(split == "train"),
-        drop_last=True,
-    )
-    
-    vocab_info = {
-        'vocab_size': char_dataset.vocab_size,
-        'char_to_idx': char_dataset.char_to_idx,
-        'idx_to_char': char_dataset.idx_to_char,
-        'decode': char_dataset.decode,
-    }
-    
-    return loader, vocab_info
+    return char_dataset
 
 
 # =============================================================================
