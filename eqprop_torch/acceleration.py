@@ -24,6 +24,26 @@ def get_optimal_backend() -> str:
     return 'cpu'
 
 
+def enable_tf32(enable: bool = True):
+    """
+    Enable TensorFloat-32 (TF32) for significant speedup on Ampere+ GPUs.
+    
+    TF32 reduces precision slightly (19 bits vs 24 bits significand) 
+    but maintains full range, usually providing 2-3x speedup for 
+    matmul and convolutions with negligible accuracy loss.
+    
+    Args:
+        enable: Whether to enable TF32
+    """
+    if torch.cuda.is_available():
+        # High precision = TF32 enabled
+        # Highest precision = TF32 disabled (slow)
+        precision = 'high' if enable else 'highest'
+        torch.backends.cuda.matmul.allow_tf32 = enable
+        torch.backends.cudnn.allow_tf32 = enable
+        torch.set_float32_matmul_precision(precision)
+
+
 def check_cupy_available() -> Tuple[bool, str]:
     """
     Check if CuPy is available with proper CUDA configuration.

@@ -9,12 +9,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from typing import Optional, Dict, Any, Callable, Union
+from typing import Optional, Callable, Dict, Any, List, Tuple
 import time
+from pathlib import Path
 import warnings
 
-from .acceleration import compile_model, get_optimal_backend
-
+from .acceleration import compile_model, get_optimal_backend, enable_tf32
+from .kernel import EqPropKernel
 
 class EqPropTrainer:
     """
@@ -45,6 +46,7 @@ class EqPropTrainer:
         use_kernel: bool = False,
         device: Optional[str] = None,
         compile_mode: str = "reduce-overhead",
+        allow_tf32: bool = True,
     ):
         """
         Initialize trainer.
@@ -58,11 +60,15 @@ class EqPropTrainer:
             use_kernel: If True, use CuPy kernel (NVIDIA only, O(1) memory)
             device: Device to train on (auto-detected if None)
             compile_mode: torch.compile mode ('default', 'reduce-overhead', 'max-autotune')
+            allow_tf32: If True, enable TensorFloat-32 on Ampere+ GPUs (default: True)
         
         Raises:
             ValueError: If invalid optimizer or compile_mode
             RuntimeError: If use_kernel=True but model incompatible
         """
+        # Enable TF32 by default for performance
+        enable_tf32(allow_tf32)
+        
         # Validate inputs
         if optimizer not in ["adam", "adamw", "sgd"]:
             raise ValueError(
@@ -377,15 +383,26 @@ class EqPropTrainer:
         """Return training history."""
         return self._history
     
-    def compute_lipschitz(self) -> Optional[float]:
-        """Compute Lipschitz constant if model supports it."""
-        model = self.model
-        if hasattr(self.model, '_orig_mod'):
-            model = self.model._orig_mod
+    @property
+    def current_epoch(self) -> int:
+        """Return current epoch number."""
+        return self._epoch
+
+    def compute_lipschitz(self) -> float:
+        """
+        Compute Lipschitz constant if model supports it.
         
-        if hasattr(model, 'compute_lipschitz'):
-            return model.compute_lipschitz()
-        return None
+        Returns:
+            Lipschitz constant L (or 0.0 if not supported)
+        """
+        if hasattr(self.model, 'compute_lipschitz'):
+            return self.model.compute_lipschitz()
+        
+        # Try to find underlying model (e.g. if compiled)
+        if hasattr(self.model, '_orig_mod') and hasattr(self.model._orig_mod, 'compute_lipschitz'):
+            return self.model._orig_mod.compute_lipschitz()
+            
+        return 0.0
 
 
 __all__ = ['EqPropTrainer']

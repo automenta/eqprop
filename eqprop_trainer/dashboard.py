@@ -293,11 +293,27 @@ class EqPropDashboard(QMainWindow):
         
         model_layout.addWidget(QLabel("Architecture:"), 0, 0)
         self.vis_model_combo = QComboBox()
-        self.vis_model_combo.addItems([
+        
+        # Core EqProp models
+        model_items = [
             "LoopedMLP",
             "ConvEqProp",
             "BackpropMLP (baseline)",
-        ])
+        ]
+        
+        # Try to add bio-plausible algorithms from research codebase
+        try:
+            from eqprop_torch import HAS_BIOPLAUSIBLE, ALGORITHM_REGISTRY
+            if HAS_BIOPLAUSIBLE:
+                model_items.append("--- Bio-Plausible Research Models ---")
+                # Add algorithms with descriptions
+                for key, desc in ALGORITHM_REGISTRY.items():
+                    # Format: "algorithm_key - Description"
+                    model_items.append(f"{key} - {desc}")
+        except:
+            pass  # Bio-plausible models not available
+        
+        self.vis_model_combo.addItems(model_items)
         model_layout.addWidget(self.vis_model_combo, 0, 1)
         
         model_layout.addWidget(QLabel("Hidden Dim:"), 1, 0)
@@ -463,13 +479,39 @@ class EqPropDashboard(QMainWindow):
         hidden = self.vis_hidden_spin.value()
         model_name = self.vis_model_combo.currentText()
         
-        if 'LoopedMLP' in model_name:
+        # Check if it's a bio-plausible research algorithm
+        if ' - ' in model_name:  # Bio-plausible models are formatted as "key - description"
+            algorithm_key = model_name.split(' - ')[0]
+            try:
+                from eqprop_torch import HAS_BIOPLAUSIBLE
+                from algorithms import create_model, AlgorithmConfig
+                
+                if not HAS_BIOPLAUSIBLE:
+                    raise ImportError("Research algorithms not available")
+                
+                # Determine input_dim based on dataset
+                if 'MNIST' in self.vis_dataset_combo.currentText():
+                    input_dim = 784
+                else:  # CIFAR-10
+                    input_dim = 3072
+                
+                # Create research algorithm model directly (first-class nn.Module)
+                self.model = create_model(
+                    algorithm_key,
+                    input_dim,
+                    [hidden],  # Single hidden layer
+                    10  # 10 classes
+                )
+            except Exception as e:
+                QMessageBox.warning(self, "Model Creation Failed", 
+                                   f"Could not create {algorithm_key}: {e}")
+        elif 'LoopedMLP' in model_name:
             input_dim = 784 if 'MNIST' in self.vis_dataset_combo.currentText() else 3072
             self.model = LoopedMLP(input_dim, hidden, 10, max_steps=self.vis_steps_spin.value())
         elif 'ConvEqProp' in model_name:
             channels = 1 if 'MNIST' in self.vis_dataset_combo.currentText() else 3
             self.model = ConvEqProp(channels, hidden // 4, 10)
-        else:
+        else:  # BackpropMLP
             input_dim = 784 if 'MNIST' in self.vis_dataset_combo.currentText() else 3072
             self.model = BackpropMLP(input_dim, hidden, 10)
         

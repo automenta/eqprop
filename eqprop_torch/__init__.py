@@ -13,7 +13,12 @@ from .models import (
     TransformerEqProp,
 )
 from .kernel import EqPropKernel, HAS_CUPY
-from .acceleration import compile_model, get_optimal_backend, check_cupy_available
+from .acceleration import (
+    compile_model,
+    get_optimal_backend,
+    check_cupy_available,
+    enable_tf32,
+)
 from .datasets import get_vision_dataset, get_lm_dataset, CharDataset, create_data_loaders
 from .utils import (
     export_to_onnx,
@@ -37,6 +42,37 @@ except ImportError:
     get_eqprop_lm = None
     list_eqprop_lm_variants = None
 
+# Bio-plausible research algorithms (optional - from research codebase)
+# These are first-class PyTorch nn.Module models, same status as LoopedMLP
+try:
+    from .bioplausible import (
+        # Base class
+        BaseAlgorithm,
+        # Core algorithms
+        BackpropBaseline,
+        StandardEqProp,
+        StandardFA,
+        # Hybrid algorithms
+        EquilibriumAlignment,
+        AdaptiveFeedbackAlignment,
+        ContrastiveFeedbackAlignment,
+        LayerwiseEquilibriumFA,
+        PredictiveCodingHybrid,
+        EnergyGuidedFA,
+        SparseEquilibrium,
+        MomentumEquilibrium,
+        StochasticFA,
+        EnergyMinimizingFA,
+        # Registry
+        HAS_BIOPLAUSIBLE,
+        ALGORITHM_REGISTRY,
+    )
+except ImportError:
+    HAS_BIOPLAUSIBLE = False
+    BaseAlgorithm = None
+    ALGORITHM_REGISTRY = {}
+
+
 __version__ = "0.1.0"
 __all__ = [
     # Trainer
@@ -53,6 +89,7 @@ __all__ = [
     "compile_model",
     "get_optimal_backend",
     "check_cupy_available",
+    "enable_tf32",
     # Datasets
     "get_vision_dataset",
     "get_lm_dataset",
@@ -69,6 +106,21 @@ __all__ = [
     "list_eqprop_lm_variants",
     "create_eqprop_lm",
     "HAS_LM_VARIANTS",
+    # Bio-plausible research algorithms (if available) - first-class models
+    "BaseAlgorithm",
+    "BackpropBaseline",
+    "StandardEqProp",
+    "StandardFA",
+    "EquilibriumAlignment",
+    "AdaptiveFeedbackAlignment",
+    "ContrastiveFeedbackAlignment",
+    "LayerwiseEquilibriumFA",
+    "PredictiveCodingHybrid",
+    "EnergyGuidedFA",
+    "SparseEquilibrium",
+    "MomentumEquilibrium",
+    "StochasticFA",
+    "EnergyMinimizingFA",
+    "HAS_BIOPLAUSIBLE",
+    "ALGORITHM_REGISTRY",
 ]
-
-
