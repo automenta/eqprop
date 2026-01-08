@@ -1,0 +1,128 @@
+{
+  "generation": 1,
+  "population": [
+    {
+      "config": {
+        "model_type": "looped_mlp",
+        "depth": 77,
+        "width": 256,
+        "activation": "gelu",
+        "normalization": "layernorm",
+        "eq_steps": 86,
+        "beta": 0.36381561307671373,
+        "alpha": 0.17534187831011963,
+        "use_sn": true,
+        "n_power_iterations": 7,
+        "use_residual": true,
+        "residual_scale": 0.12811363267554587,
+        "lr": 0.0002244697452509409,
+        "num_heads": 8,
+        "generation": 0,
+        "parent_ids": [],
+        "mutations_applied": []
+      },
+      "fitness": null,
+      "evaluated": false,
+      "id": 2
+    },
+    {
+      "config": {
+        "model_type": "looped_mlp",
+        "depth": 77,
+        "width": 256,
+        "activation": "gelu",
+        "normalization": "layernorm",
+        "eq_steps": 86,
+        "beta": 0.36381561307671373,
+        "alpha": 0.21792661315438755,
+        "use_sn": true,
+        "n_power_iterations": 7,
+        "use_residual": true,
+        "residual_scale": 0.12811363267554587,
+        "lr": 0.0002244697452509409,
+        "num_heads": 8,
+        "generation": 1,
+        "parent_ids": [
+          140732839447904
+        ],
+        "mutations_applied": [
+          "alpha\u21920.22",
+          "n_power_iter\u21927"
+        ]
+      },
+      "fitness": null,
+      "evaluated": false,
+      "id": 3
+    }
+  ],
+  "best_fitness": 1.0663864763598356,
+  "best_individual": {
+    "config": {
+      "model_type": "looped_mlp",
+      "depth": 77,
+      "width": 256,
+      "activation": "gelu",
+      "normalization": "layernorm",
+      "eq_steps": 86,
+      "beta": 0.36381561307671373,
+      "alpha": 0.17534187831011963,
+      "use_sn": true,
+      "n_power_iterations": 7,
+      "use_residual": true,
+      "residual_scale": 0.12811363267554587,
+      "lr": 0.0002244697452509409,
+      "num_heads": 8,
+      "generation": 0,
+      "parent_ids": [],
+      "mutations_applied": []
+    },
+    "fitness": {
+      "accuracy": 0.6512,
+      "perplexity": NaN,
+      "speed": 3.9331488181950744,
+      "memory_mb": 55.796736,
+      "train_time_sec": 3.050990581512451,
+      "lipschitz": 1.1608421802520752,
+      "lipschitz_trajectory": [],
+      "stability": 100.0,
+      "train_accuracy": 0.772,
+      "generalization": 0.8435233160621761,
+      "config": {
+        "model_type": "looped_mlp",
+        "depth": 77,
+        "width": 256,
+        "activation": "gelu",
+        "normalization": "layernorm",
+        "eq_steps": 86,
+        "beta": 0.36381561307671373,
+        "alpha": 0.17534187831011963,
+        "use_sn": true,
+        "n_power_iterations": 7,
+        "use_residual": true,
+        "residual_scale": 0.12811363267554587,
+        "lr": 0.0002244697452509409,
+        "num_heads": 8,
+        "generation": 0,
+        "parent_ids": [],
+        "mutations_applied": []
+      },
+      "task": "mnist",
+      "seed": 42
+    },
+    "evaluated": true,
+    "id": 0
+  },
+  "history": [
+    {
+      "generation": 0,
+      "time_sec": 4.894119501113892,
+      "n_evaluated": 2,
+      "best_accuracy": 0.6512,
+      "mean_accuracy": 0.3256,
+      "std_accuracy": 0.3256,
+      "best_lipschitz": 1.1608421802520752,
+      "mean_lipschitz": 1.1608421802520752
+    }
+  ],
+  "start_time": "2026-01-07T15:23:07.978101"
+}

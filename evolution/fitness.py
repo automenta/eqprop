@@ -26,6 +26,7 @@ class FitnessScore:
     speed: float = 0.0              # Iterations/second
     memory_mb: float = float('inf')  # Peak GPU memory in MB
     train_time_sec: float = 0.0     # Total training time
+    parameter_count: int = 0        # Total trainable parameters
     
     # Stability metrics
     lipschitz: float = float('inf')  # Final Lipschitz constant (target: ≤ 1.0)

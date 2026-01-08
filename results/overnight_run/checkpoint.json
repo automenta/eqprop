@@ -1,0 +1,1891 @@
+{
+  "config": {
+    "max_hours": 8.0,
+    "checkpoint_interval_min": 10,
+    "population_size": 30,
+    "min_per_model_type": 3,
+    "max_per_model_type": 8,
+    "diversity_pressure": 0.3,
+    "model_types": [
+      "looped_mlp",
+      "transformer",
+      "conv",
+      "hebbian",
+      "feedback_alignment"
+    ],
+    "explore_algorithms": true,
+    "eval_tier": 2,
+    "tasks": [
+      "fashion",
+      "cartpole",
+      "shakespeare",
+      "mnist",
+      "cifar10",
+      "acrobot"
+    ],
+    "mutation_rate": 0.3,
+    "crossover_rate": 0.6,
+    "elite_fraction": 0.15,
+    "base_seed": 42,
+    "output_dir": "results/overnight_run"
+  },
+  "generation": 63,
+  "population": {
+    "individuals": [
+      {
+        "id": 1642,
+        "arch_config": {
+          "model_type": "feedback_alignment",
+          "depth": 35,
+          "width": 763,
+          "activation": "gelu",
+          "normalization": "spectral",
+          "eq_steps": 49,
+          "beta": 0.48512104760387564,
+          "alpha": 0.17602781923420488,
+          "use_sn": true,
+          "n_power_iterations": 3,
+          "use_residual": true,
+          "residual_scale": 0.5587757411990408,
+          "lr": 0.00015515762984131485,
+          "num_heads": 1,
+          "generation": 94,
+          "parent_ids": [
+            140732834011120
+          ],
+          "mutations_applied": [
+            "depth\u219235",
+            "eq_steps\u219249",
+            "alpha\u21920.18"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "contrastive_hebbian",
+          "equilibrium_dynamics": "synchronous",
+          "gradient_approx": "direct_feedback",
+          "sn_strategy": "soft",
+          "activation": "softplus",
+          "eq_steps": 31,
+          "beta": 0.21939223872832903,
+          "alpha": 0.7236164791955606,
+          "momentum": 0.05501705826040087,
+          "damping": 0.864335238982048,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": false,
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 94,
+          "parent_ids": [
+            140732833785488
+          ],
+          "mutations_applied": [
+            "gradient\u2192direct_feedback",
+            "alpha\u21920.72"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1642,
+        "arch_config": {
+          "model_type": "feedback_alignment",
+          "depth": 25,
+          "width": 763,
+          "activation": "gelu",
+          "normalization": "spectral",
+          "eq_steps": 43,
+          "beta": 0.48512104760387564,
+          "alpha": 0.1756952020037353,
+          "use_sn": true,
+          "n_power_iterations": 5,
+          "use_residual": true,
+          "residual_scale": 0.5914933529032411,
+          "lr": 0.00016530881887905473,
+          "num_heads": 1,
+          "generation": 93,
+          "parent_ids": [
+            140732833772528
+          ],
+          "mutations_applied": [
+            "eq_steps\u219243",
+            "n_power_iter\u21925",
+            "res_scale\u21920.59"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "asymmetric_nudge",
+          "equilibrium_dynamics": "synchronous",
+          "gradient_approx": "weight_perturbation",
+          "sn_strategy": "soft",
+          "activation": "softplus",
+          "eq_steps": 33,
+          "beta": 0.25814103700577884,
+          "alpha": 0.8722653100275272,
+          "momentum": 0.05501705826040087,
+          "damping": 0.8679597910637592,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "True",
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 93,
+          "parent_ids": [
+            140732833782896
+          ],
+          "mutations_applied": [
+            "eq_steps\u219233",
+            "beta\u21920.258",
+            "alpha\u21920.87"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1642,
+        "arch_config": {
+          "model_type": "looped_mlp",
+          "depth": 38,
+          "width": 993,
+          "activation": "silu",
+          "normalization": "layernorm",
+          "eq_steps": 16,
+          "beta": 0.4171869156879157,
+          "alpha": 0.8955887711780632,
+          "use_sn": true,
+          "n_power_iterations": 8,
+          "use_residual": false,
+          "residual_scale": 0.3913506539788819,
+          "lr": 0.00799617718092497,
+          "num_heads": 1,
+          "generation": 100,
+          "parent_ids": [
+            140732833771632
+          ],
+          "mutations_applied": [
+            "width\u2192993",
+            "n_power_iter\u21928"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "asymmetric_nudge",
+          "equilibrium_dynamics": "adaptive_step",
+          "gradient_approx": "bptt",
+          "sn_strategy": "layerwise",
+          "activation": "softplus",
+          "eq_steps": 34,
+          "beta": 0.3464151555495004,
+          "alpha": 0.5119360354721139,
+          "momentum": 0.004296737781813768,
+          "damping": 0.9187669439594303,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 100,
+          "parent_ids": [
+            140732833788944
+          ],
+          "mutations_applied": [
+            "update_rule\u2192asymmetric_nudge",
+            "beta\u21920.346"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1642,
+        "arch_config": {
+          "model_type": "looped_mlp",
+          "depth": 48,
+          "width": 1024,
+          "activation": "silu",
+          "normalization": "layernorm",
+          "eq_steps": 34,
+          "beta": 0.40966670453715087,
+          "alpha": 0.9,
+          "use_sn": true,
+          "n_power_iterations": 8,
+          "use_residual": false,
+          "residual_scale": 0.3913506539788819,
+          "lr": 0.005314248017384047,
+          "num_heads": 1,
+          "generation": 103,
+          "parent_ids": [
+            140732834011120
+          ],
+          "mutations_applied": [
+            "width\u21921024",
+            "eq_steps\u219234",
+            "beta\u21920.410"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "contrastive_hebbian",
+          "equilibrium_dynamics": "synchronous",
+          "gradient_approx": "one_sided",
+          "sn_strategy": "layerwise",
+          "activation": "gelu",
+          "eq_steps": 23,
+          "beta": 0.2888723175935523,
+          "alpha": 0.41174696690597123,
+          "momentum": 0.002148368890906884,
+          "damping": 0.9187669439594303,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "True",
+          "bidirectional": true,
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 103,
+          "parent_ids": [
+            140732833785488
+          ],
+          "mutations_applied": [
+            "eq_steps\u219223",
+            "bidirectional\u2192True"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1642,
+        "arch_config": {
+          "model_type": "hebbian",
+          "depth": 7,
+          "width": 239,
+          "activation": "silu",
+          "normalization": "layernorm",
+          "eq_steps": 72,
+          "beta": 0.317632440048791,
+          "alpha": 0.9,
+          "use_sn": true,
+          "n_power_iterations": 5,
+          "use_residual": true,
+          "residual_scale": 0.0,
+          "lr": 0.0032699404790692043,
+          "num_heads": 2,
+          "generation": 119,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "eq_steps\u219272",
+            "beta\u21920.318",
+            "alpha\u21920.90"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "contrastive_hebbian",
+          "equilibrium_dynamics": "momentum",
+          "gradient_approx": "bptt",
+          "sn_strategy": "all_layers",
+          "activation": "softplus",
+          "eq_steps": 7,
+          "beta": 0.21281888809733823,
+          "alpha": 0.7048127404053924,
+          "momentum": 0.09029801256621817,
+          "damping": 0.9116937862314367,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "True",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 119,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "activation\u2192softplus",
+            "eq_steps\u21927",
+            "alpha\u21920.70",
+            "momentum\u21920.09"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1643,
+        "arch_config": {
+          "model_type": "feedback_alignment",
+          "depth": 28,
+          "width": 915,
+          "activation": "gelu",
+          "normalization": "spectral",
+          "eq_steps": 45,
+          "beta": 0.43319540701666115,
+          "alpha": 0.17602781923420488,
+          "use_sn": true,
+          "n_power_iterations": 4,
+          "use_residual": true,
+          "residual_scale": 0.5480255167991419,
+          "lr": 0.0001417905239848416,
+          "num_heads": 1,
+          "generation": 96,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "width\u2192915",
+            "beta\u21920.433",
+            "res_scale\u21920.55",
+            "lr\u21920.000142"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "contrastive_hebbian",
+          "equilibrium_dynamics": "synchronous",
+          "gradient_approx": "weight_perturbation",
+          "sn_strategy": "soft",
+          "activation": "silu",
+          "eq_steps": 30,
+          "beta": 0.15865464997902304,
+          "alpha": 0.7751617453720718,
+          "momentum": 0.05501705802141521,
+          "damping": 0.8642526462215102,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 96,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "gradient\u2192weight_perturbation",
+            "alpha\u21920.78"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1644,
+        "arch_config": {
+          "model_type": "conv",
+          "depth": 46,
+          "width": 36,
+          "activation": "tanh",
+          "normalization": "none",
+          "eq_steps": 55,
+          "beta": 0.3437462802314375,
+          "alpha": 0.7804069866831207,
+          "use_sn": true,
+          "n_power_iterations": 1,
+          "use_residual": false,
+          "residual_scale": 0.9619379938184592,
+          "lr": 0.003784544221059107,
+          "num_heads": 2,
+          "generation": 124,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "eq_steps\u219255",
+            "alpha\u21920.78",
+            "n_power_iter\u21921",
+            "lr\u21920.003785"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "local_energy",
+          "equilibrium_dynamics": "fixed_point",
+          "gradient_approx": "symmetric",
+          "sn_strategy": "soft",
+          "activation": "tanh",
+          "eq_steps": 8,
+          "beta": 0.14118148013681991,
+          "alpha": 0.6734889075930718,
+          "momentum": 0.045694057163814084,
+          "damping": 0.9298378499151696,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": false,
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 124,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "dynamics\u2192fixed_point",
+            "eq_steps\u21928",
+            "bidirectional\u2192False"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1645,
+        "arch_config": {
+          "model_type": "hebbian",
+          "depth": 2,
+          "width": 239,
+          "activation": "silu",
+          "normalization": "layernorm",
+          "eq_steps": 46,
+          "beta": 0.3368633253518481,
+          "alpha": 0.8730965499555352,
+          "use_sn": true,
+          "n_power_iterations": 5,
+          "use_residual": false,
+          "residual_scale": 0.0,
+          "lr": 0.0027970677919179196,
+          "num_heads": 2,
+          "generation": 118,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "depth\u21922",
+            "eq_steps\u219246"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "contrastive_hebbian",
+          "equilibrium_dynamics": "momentum",
+          "gradient_approx": "bptt",
+          "sn_strategy": "all_layers",
+          "activation": "gelu",
+          "eq_steps": 7,
+          "beta": 0.24045176345484856,
+          "alpha": 0.604025509486171,
+          "momentum": 0.050109045171018135,
+          "damping": 0.9184218670283771,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": true,
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 118,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": []
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1646,
+        "arch_config": {
+          "model_type": "looped_mlp",
+          "depth": 38,
+          "width": 913,
+          "activation": "silu",
+          "normalization": "layernorm",
+          "eq_steps": 12,
+          "beta": 0.4171869156879157,
+          "alpha": 0.8955887711780632,
+          "use_sn": true,
+          "n_power_iterations": 8,
+          "use_residual": false,
+          "residual_scale": 0.3913506539788819,
+          "lr": 0.00799617718092497,
+          "num_heads": 1,
+          "generation": 102,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "width\u2192913",
+            "eq_steps\u219212"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "asymmetric_nudge",
+          "equilibrium_dynamics": "damped_oscillation",
+          "gradient_approx": "bptt",
+          "sn_strategy": "layerwise",
+          "activation": "softplus",
+          "eq_steps": 25,
+          "beta": 0.3464151555495004,
+          "alpha": 0.47469029834108234,
+          "momentum": 0.004296737781813768,
+          "damping": 0.9187669439594303,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 102,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "dynamics\u2192damped_oscillation"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1647,
+        "arch_config": {
+          "model_type": "conv",
+          "depth": 2,
+          "width": 68,
+          "activation": "relu",
+          "normalization": "none",
+          "eq_steps": 76,
+          "beta": 0.3259104169079215,
+          "alpha": 0.8902260120305617,
+          "use_sn": true,
+          "n_power_iterations": 2,
+          "use_residual": true,
+          "residual_scale": 0.7734187399867586,
+          "lr": 0.0029883061342797293,
+          "num_heads": 2,
+          "generation": 124,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "activation\u2192relu",
+            "res_scale\u21920.77"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "symmetric_diff",
+          "equilibrium_dynamics": "asynchronous",
+          "gradient_approx": "symmetric",
+          "sn_strategy": "soft",
+          "activation": "gelu",
+          "eq_steps": 12,
+          "beta": 0.1186728038047828,
+          "alpha": 0.8071487073134604,
+          "momentum": 0.04571661763334968,
+          "damping": 0.9297806562144428,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": true,
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 124,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "gradient\u2192symmetric",
+            "alpha\u21920.81",
+            "homeostatic\u2192True"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1648,
+        "arch_config": {
+          "model_type": "transformer",
+          "depth": 86,
+          "width": 32,
+          "activation": "relu",
+          "normalization": "groupnorm",
+          "eq_steps": 27,
+          "beta": 0.12395520190519782,
+          "alpha": 0.4465702174963297,
+          "use_sn": true,
+          "n_power_iterations": 5,
+          "use_residual": true,
+          "residual_scale": 0.778011876415434,
+          "lr": 2.015656545633181e-05,
+          "num_heads": 1,
+          "generation": 125,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "depth\u219286",
+            "width\u219232",
+            "n_power_iter\u21925",
+            "lr\u21920.000020"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "local_energy",
+          "equilibrium_dynamics": "momentum",
+          "gradient_approx": "bptt",
+          "sn_strategy": "recurrent_only",
+          "activation": "relu",
+          "eq_steps": 18,
+          "beta": 0.1521977217464081,
+          "alpha": 0.7369516644621843,
+          "momentum": 0.10098402112354926,
+          "damping": 0.9178673424564618,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "True",
+          "bidirectional": "True",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 125,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "alpha\u21920.74",
+            "momentum\u21920.10"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1649,
+        "arch_config": {
+          "model_type": "hebbian",
+          "depth": 2,
+          "width": 318,
+          "activation": "gelu",
+          "normalization": "layernorm",
+          "eq_steps": 54,
+          "beta": 0.3368633253518481,
+          "alpha": 0.733170356703469,
+          "use_sn": true,
+          "n_power_iterations": 5,
+          "use_residual": false,
+          "residual_scale": 0.0,
+          "lr": 0.003456717765480813,
+          "num_heads": 2,
+          "generation": 120,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "alpha\u21920.73",
+            "residual\u2192False"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "local_energy",
+          "equilibrium_dynamics": "damped_oscillation",
+          "gradient_approx": "symmetric",
+          "sn_strategy": "all_layers",
+          "activation": "gelu",
+          "eq_steps": 8,
+          "beta": 0.22938868748438412,
+          "alpha": 0.5268029710320995,
+          "momentum": 0.04974301614563935,
+          "damping": 0.8867826985371885,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "True",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 120,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "beta\u21920.229"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1650,
+        "arch_config": {
+          "model_type": "conv",
+          "depth": 42,
+          "width": 32,
+          "activation": "tanh",
+          "normalization": "none",
+          "eq_steps": 69,
+          "beta": 0.3437462802314375,
+          "alpha": 0.9,
+          "use_sn": true,
+          "n_power_iterations": 1,
+          "use_residual": true,
+          "residual_scale": 0.8181686866057291,
+          "lr": 0.004646348156841219,
+          "num_heads": 2,
+          "generation": 125,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "width\u219232",
+            "n_power_iter\u21921",
+            "res_scale\u21920.82",
+            "lr\u21920.004646"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "local_energy",
+          "equilibrium_dynamics": "synchronous",
+          "gradient_approx": "symmetric",
+          "sn_strategy": "soft",
+          "activation": "tanh",
+          "eq_steps": 6,
+          "beta": 0.11445935751198233,
+          "alpha": 0.42832606109986027,
+          "momentum": 0.04570652479171534,
+          "damping": 0.9297727404679195,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "True",
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 125,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "alpha\u21920.43"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1651,
+        "arch_config": {
+          "model_type": "transformer",
+          "depth": 59,
+          "width": 32,
+          "activation": "relu",
+          "normalization": "groupnorm",
+          "eq_steps": 33,
+          "beta": 0.05,
+          "alpha": 0.4957556182735533,
+          "use_sn": true,
+          "n_power_iterations": 6,
+          "use_residual": true,
+          "residual_scale": 0.8602689082498894,
+          "lr": 3.065486608259528e-05,
+          "num_heads": 1,
+          "generation": 125,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "n_power_iter\u21926",
+            "res_scale\u21920.86",
+            "lr\u21920.000031"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "finite_diff",
+          "equilibrium_dynamics": "fixed_point",
+          "gradient_approx": "one_sided",
+          "sn_strategy": "all_layers",
+          "activation": "relu",
+          "eq_steps": 20,
+          "beta": 0.15189665093690444,
+          "alpha": 0.7201460772248547,
+          "momentum": 0.0,
+          "damping": 0.9178673424564618,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "True",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 125,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "activation\u2192relu",
+            "eq_steps\u219220",
+            "beta\u21920.152"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1652,
+        "arch_config": {
+          "model_type": "transformer",
+          "depth": 59,
+          "width": 115,
+          "activation": "relu",
+          "normalization": "groupnorm",
+          "eq_steps": 15,
+          "beta": 0.12395520190519782,
+          "alpha": 0.4213950737136344,
+          "use_sn": true,
+          "n_power_iterations": 6,
+          "use_residual": true,
+          "residual_scale": 0.5105699794477617,
+          "lr": 2.6574900827481115e-05,
+          "num_heads": 1,
+          "generation": 125,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "n_power_iter\u21926"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "local_energy",
+          "equilibrium_dynamics": "fixed_point",
+          "gradient_approx": "bptt",
+          "sn_strategy": "all_layers",
+          "activation": "sigmoid",
+          "eq_steps": 20,
+          "beta": 0.17790375847467169,
+          "alpha": 0.7487831334501138,
+          "momentum": 0.0,
+          "damping": 0.9178673439529789,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "True",
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 125,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "beta\u21920.178"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1653,
+        "arch_config": {
+          "model_type": "looped_mlp",
+          "depth": 40,
+          "width": 993,
+          "activation": "relu",
+          "normalization": "layernorm",
+          "eq_steps": 16,
+          "beta": 0.4171869156879157,
+          "alpha": 0.8955887711780632,
+          "use_sn": true,
+          "n_power_iterations": 8,
+          "use_residual": false,
+          "residual_scale": 0.3913506539788819,
+          "lr": 0.00799617718092497,
+          "num_heads": 1,
+          "generation": 103,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "depth\u219240",
+            "activation\u2192relu"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "contrastive_hebbian",
+          "equilibrium_dynamics": "adaptive_step",
+          "gradient_approx": "bptt",
+          "sn_strategy": "layerwise",
+          "activation": "silu",
+          "eq_steps": 29,
+          "beta": 0.31191865445311573,
+          "alpha": 0.3909707116228065,
+          "momentum": 0.002148368890906884,
+          "damping": 0.9187669439594303,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 103,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "activation\u2192silu"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1654,
+        "arch_config": {
+          "model_type": "looped_mlp",
+          "depth": 48,
+          "width": 1017,
+          "activation": "silu",
+          "normalization": "layernorm",
+          "eq_steps": 26,
+          "beta": 0.40966670453715087,
+          "alpha": 0.9,
+          "use_sn": true,
+          "n_power_iterations": 8,
+          "use_residual": true,
+          "residual_scale": 0.3913506539788819,
+          "lr": 0.004855424926151591,
+          "num_heads": 1,
+          "generation": 104,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "width\u21921017",
+            "eq_steps\u219226",
+            "alpha\u21920.90",
+            "residual\u2192True",
+            "lr\u21920.004855"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "predictive_coding",
+          "equilibrium_dynamics": "synchronous",
+          "gradient_approx": "direct_feedback",
+          "sn_strategy": "layerwise",
+          "activation": "gelu",
+          "eq_steps": 23,
+          "beta": 0.31840300084936773,
+          "alpha": 0.41174696690597123,
+          "momentum": 0.002148368890906884,
+          "damping": 0.9187669439594303,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "True",
+          "bidirectional": true,
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 104,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "update_rule\u2192predictive_coding",
+            "gradient\u2192direct_feedback",
+            "beta\u21920.318"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1655,
+        "arch_config": {
+          "model_type": "conv",
+          "depth": 2,
+          "width": 68,
+          "activation": "tanh",
+          "normalization": "none",
+          "eq_steps": 81,
+          "beta": 0.39427680528197856,
+          "alpha": 0.9,
+          "use_sn": true,
+          "n_power_iterations": 2,
+          "use_residual": false,
+          "residual_scale": 0.9619379938184592,
+          "lr": 0.0029883061342797293,
+          "num_heads": 2,
+          "generation": 125,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "width\u219268",
+            "eq_steps\u219281"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "symmetric_diff",
+          "equilibrium_dynamics": "damped_oscillation",
+          "gradient_approx": "symmetric",
+          "sn_strategy": "soft",
+          "activation": "gelu",
+          "eq_steps": 5,
+          "beta": 0.07529866342240346,
+          "alpha": 0.6479901738610951,
+          "momentum": 0.0457100869711157,
+          "damping": 0.9297692936172794,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "True",
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 125,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "eq_steps\u21925",
+            "beta\u21920.075"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1656,
+        "arch_config": {
+          "model_type": "feedback_alignment",
+          "depth": 28,
+          "width": 892,
+          "activation": "silu",
+          "normalization": "spectral",
+          "eq_steps": 16,
+          "beta": 0.45165580137888844,
+          "alpha": 0.1,
+          "use_sn": true,
+          "n_power_iterations": 4,
+          "use_residual": true,
+          "residual_scale": 0.5571757457403724,
+          "lr": 0.00034706773605637097,
+          "num_heads": 1,
+          "generation": 97,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "width\u2192892",
+            "eq_steps\u219216",
+            "n_power_iter\u21924"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "symmetric_diff",
+          "equilibrium_dynamics": "damped_oscillation",
+          "gradient_approx": "symmetric",
+          "sn_strategy": "soft",
+          "activation": "softplus",
+          "eq_steps": 26,
+          "beta": 0.1683418495483855,
+          "alpha": 0.8906890020542771,
+          "momentum": 0.05501705802141521,
+          "damping": 0.8450623993256318,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": false,
+          "use_homeostatic_plasticity": false,
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 97,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "gradient\u2192symmetric",
+            "homeostatic\u2192False",
+            "lateral_inhib\u2192False",
+            "damping\u21920.85"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1657,
+        "arch_config": {
+          "model_type": "feedback_alignment",
+          "depth": 28,
+          "width": 594,
+          "activation": "silu",
+          "normalization": "spectral",
+          "eq_steps": 45,
+          "beta": 0.45165580137888844,
+          "alpha": 0.1756952020037353,
+          "use_sn": true,
+          "n_power_iterations": 4,
+          "use_residual": true,
+          "residual_scale": 0.38223262557553006,
+          "lr": 0.00034706773605637097,
+          "num_heads": 1,
+          "generation": 94,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "width\u2192594",
+            "res_scale\u21920.38"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "symmetric_diff",
+          "equilibrium_dynamics": "synchronous",
+          "gradient_approx": "bptt",
+          "sn_strategy": "soft",
+          "activation": "silu",
+          "eq_steps": 29,
+          "beta": 0.09791706122971706,
+          "alpha": 0.95,
+          "momentum": 0.05501705778242956,
+          "damping": 0.8641700534609724,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": true,
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 94,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "bidirectional\u2192True"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1658,
+        "arch_config": {
+          "model_type": "conv",
+          "depth": 48,
+          "width": 36,
+          "activation": "tanh",
+          "normalization": "none",
+          "eq_steps": 65,
+          "beta": 0.3437462802314375,
+          "alpha": 0.9,
+          "use_sn": true,
+          "n_power_iterations": 1,
+          "use_residual": false,
+          "residual_scale": 0.9619379938184592,
+          "lr": 0.004688903252343059,
+          "num_heads": 2,
+          "generation": 124,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "depth\u219248",
+            "eq_steps\u219265",
+            "n_power_iter\u21921"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "asymmetric_nudge",
+          "equilibrium_dynamics": "synchronous",
+          "gradient_approx": "symmetric",
+          "sn_strategy": "soft",
+          "activation": "tanh",
+          "eq_steps": 5,
+          "beta": 0.14118148013681991,
+          "alpha": 0.6734889075930718,
+          "momentum": 0.045694057163814084,
+          "damping": 0.9298378499151696,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "True",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 124,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "update_rule\u2192asymmetric_nudge"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1659,
+        "arch_config": {
+          "model_type": "conv",
+          "depth": 42,
+          "width": 32,
+          "activation": "gelu",
+          "normalization": "none",
+          "eq_steps": 61,
+          "beta": 0.3537177103422616,
+          "alpha": 0.9,
+          "use_sn": true,
+          "n_power_iterations": 1,
+          "use_residual": true,
+          "residual_scale": 1.0,
+          "lr": 0.007068573791756171,
+          "num_heads": 2,
+          "generation": 125,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "activation\u2192gelu",
+            "eq_steps\u219261",
+            "alpha\u21920.90"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "local_energy",
+          "equilibrium_dynamics": "synchronous",
+          "gradient_approx": "bptt",
+          "sn_strategy": "soft",
+          "activation": "sigmoid",
+          "eq_steps": 14,
+          "beta": 0.11445935751198233,
+          "alpha": 0.671663249637309,
+          "momentum": 0.04570652479171534,
+          "damping": 0.9297727404679195,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 125,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "gradient\u2192bptt",
+            "eq_steps\u219214"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1660,
+        "arch_config": {
+          "model_type": "hebbian",
+          "depth": 2,
+          "width": 318,
+          "activation": "silu",
+          "normalization": "layernorm",
+          "eq_steps": 48,
+          "beta": 0.42551700979575563,
+          "alpha": 0.7564019148088067,
+          "use_sn": true,
+          "n_power_iterations": 5,
+          "use_residual": false,
+          "residual_scale": 0.0,
+          "lr": 0.0014272848262013313,
+          "num_heads": 2,
+          "generation": 120,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "lr\u21920.001427"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "local_energy",
+          "equilibrium_dynamics": "fixed_point",
+          "gradient_approx": "direct_feedback",
+          "sn_strategy": "all_layers",
+          "activation": "tanh",
+          "eq_steps": 16,
+          "beta": 0.31943308452336044,
+          "alpha": 0.5240049725591657,
+          "momentum": 0.04992603065832874,
+          "damping": 0.8839483018335741,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "True",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 120,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "eq_steps\u219216",
+            "beta\u21920.319",
+            "alpha\u21920.52"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1661,
+        "arch_config": {
+          "model_type": "hebbian",
+          "depth": 3,
+          "width": 308,
+          "activation": "silu",
+          "normalization": "layernorm",
+          "eq_steps": 48,
+          "beta": 0.2914771828269845,
+          "alpha": 0.8730965499555352,
+          "use_sn": true,
+          "n_power_iterations": 5,
+          "use_residual": false,
+          "residual_scale": 0.0,
+          "lr": 0.002727348292801723,
+          "num_heads": 2,
+          "generation": 119,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "depth\u21923",
+            "beta\u21920.291"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "local_energy",
+          "equilibrium_dynamics": "fixed_point",
+          "gradient_approx": "random_feedback",
+          "sn_strategy": "all_layers",
+          "activation": "gelu",
+          "eq_steps": 9,
+          "beta": 0.2208685078215818,
+          "alpha": 0.5378525876663666,
+          "momentum": 0.04974301614563935,
+          "damping": 0.8961390238332703,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "True",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 119,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "gradient\u2192random_feedback"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1662,
+        "arch_config": {
+          "model_type": "hebbian",
+          "depth": 2,
+          "width": 318,
+          "activation": "relu",
+          "normalization": "layernorm",
+          "eq_steps": 54,
+          "beta": 0.4810920263137219,
+          "alpha": 0.9,
+          "use_sn": true,
+          "n_power_iterations": 3,
+          "use_residual": false,
+          "residual_scale": 0.0,
+          "lr": 0.003456717765480813,
+          "num_heads": 2,
+          "generation": 120,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "beta\u21920.481"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "asymmetric_nudge",
+          "equilibrium_dynamics": "fixed_point",
+          "gradient_approx": "one_sided",
+          "sn_strategy": "all_layers",
+          "activation": "gelu",
+          "eq_steps": 11,
+          "beta": 0.1878476859868981,
+          "alpha": 0.5762304655429726,
+          "momentum": 0.049560001632949956,
+          "damping": 0.8834186581387183,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "True",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 120,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "update_rule\u2192asymmetric_nudge",
+            "gradient\u2192one_sided",
+            "beta\u21920.188"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1663,
+        "arch_config": {
+          "model_type": "conv",
+          "depth": 66,
+          "width": 32,
+          "activation": "tanh",
+          "normalization": "none",
+          "eq_steps": 60,
+          "beta": 0.3537177103422616,
+          "alpha": 0.9,
+          "use_sn": true,
+          "n_power_iterations": 2,
+          "use_residual": true,
+          "residual_scale": 0.7941267836241117,
+          "lr": 0.0029883061342797293,
+          "num_heads": 2,
+          "generation": 125,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "depth\u219266"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "local_energy",
+          "equilibrium_dynamics": "synchronous",
+          "gradient_approx": "symmetric",
+          "sn_strategy": "recurrent_only",
+          "activation": "sigmoid",
+          "eq_steps": 12,
+          "beta": 0.0901142133545938,
+          "alpha": 0.6999480943087422,
+          "momentum": 0.04572077350931677,
+          "damping": 0.9297059075953493,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "True",
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 125,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": []
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1664,
+        "arch_config": {
+          "model_type": "transformer",
+          "depth": 59,
+          "width": 32,
+          "activation": "relu",
+          "normalization": "groupnorm",
+          "eq_steps": 27,
+          "beta": 0.055608204885723364,
+          "alpha": 0.5192001700405373,
+          "use_sn": true,
+          "n_power_iterations": 5,
+          "use_residual": true,
+          "residual_scale": 0.4847051332225658,
+          "lr": 2.4082340173083598e-05,
+          "num_heads": 1,
+          "generation": 125,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "width\u219232",
+            "alpha\u21920.52"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "symmetric_diff",
+          "equilibrium_dynamics": "fixed_point",
+          "gradient_approx": "direct_feedback",
+          "sn_strategy": "all_layers",
+          "activation": "relu",
+          "eq_steps": 18,
+          "beta": 0.1521977217464081,
+          "alpha": 0.7161268563180929,
+          "momentum": 0.0,
+          "damping": 0.9178673424564618,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "True",
+          "bidirectional": "True",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 125,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "update_rule\u2192symmetric_diff",
+            "gradient\u2192direct_feedback"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1665,
+        "arch_config": {
+          "model_type": "looped_mlp",
+          "depth": 47,
+          "width": 939,
+          "activation": "silu",
+          "normalization": "layernorm",
+          "eq_steps": 18,
+          "beta": 0.4171869156879157,
+          "alpha": 0.8238456903827772,
+          "use_sn": true,
+          "n_power_iterations": 8,
+          "use_residual": false,
+          "residual_scale": 0.3913506539788819,
+          "lr": 0.0033757941838462257,
+          "num_heads": 1,
+          "generation": 102,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "depth\u219247",
+            "width\u2192939",
+            "eq_steps\u219218",
+            "alpha\u21920.82",
+            "n_power_iter\u21928",
+            "lr\u21920.003376"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "asymmetric_nudge",
+          "equilibrium_dynamics": "adaptive_step",
+          "gradient_approx": "one_sided",
+          "sn_strategy": "layerwise",
+          "activation": "softplus",
+          "eq_steps": 25,
+          "beta": 0.3484340676817208,
+          "alpha": 0.47469029834108234,
+          "momentum": 0.004296737781813768,
+          "damping": 0.9187669439594303,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": true,
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": "False",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 102,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "gradient\u2192one_sided",
+            "beta\u21920.348",
+            "lateral_inhib\u2192True"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1666,
+        "arch_config": {
+          "model_type": "conv",
+          "depth": 62,
+          "width": 32,
+          "activation": "tanh",
+          "normalization": "none",
+          "eq_steps": 71,
+          "beta": 0.41787990110134904,
+          "alpha": 0.9,
+          "use_sn": true,
+          "n_power_iterations": 2,
+          "use_residual": true,
+          "residual_scale": 0.7941267836241117,
+          "lr": 0.005652334330125484,
+          "num_heads": 2,
+          "generation": 124,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "beta\u21920.418",
+            "lr\u21920.005652"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "local_energy",
+          "equilibrium_dynamics": "fixed_point",
+          "gradient_approx": "symmetric",
+          "sn_strategy": "recurrent_only",
+          "activation": "gelu",
+          "eq_steps": 17,
+          "beta": 0.14461766981460905,
+          "alpha": 0.7762644577516608,
+          "momentum": 0.045722554599016946,
+          "damping": 0.9297041841700293,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "True",
+          "use_homeostatic_plasticity": "True",
+          "bidirectional": "True",
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 124,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "dynamics\u2192fixed_point",
+            "activation\u2192gelu",
+            "beta\u21920.145",
+            "alpha\u21920.78"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      },
+      {
+        "id": 1667,
+        "arch_config": {
+          "model_type": "looped_mlp",
+          "depth": 47,
+          "width": 1024,
+          "activation": "silu",
+          "normalization": "layernorm",
+          "eq_steps": 12,
+          "beta": 0.4171869156879157,
+          "alpha": 0.9,
+          "use_sn": true,
+          "n_power_iterations": 8,
+          "use_residual": true,
+          "residual_scale": 0.3913506539788819,
+          "lr": 0.01,
+          "num_heads": 1,
+          "generation": 105,
+          "parent_ids": [
+            140732793970864
+          ],
+          "mutations_applied": [
+            "eq_steps\u219212",
+            "alpha\u21920.90",
+            "residual\u2192True"
+          ]
+        },
+        "algo_config": {
+          "update_rule": "contrastive_hebbian",
+          "equilibrium_dynamics": "momentum",
+          "gradient_approx": "one_sided",
+          "sn_strategy": "layerwise",
+          "activation": "gelu",
+          "eq_steps": 28,
+          "beta": 0.28314723547514165,
+          "alpha": 0.35949904590525095,
+          "momentum": 0.06180364023762179,
+          "damping": 0.9187669439594303,
+          "use_sn": true,
+          "sn_strength": 1.0,
+          "n_power_iterations": 1,
+          "beta_negative": true,
+          "perturbation_scale": 0.01,
+          "use_local_energy": false,
+          "use_lateral_inhibition": "False",
+          "use_homeostatic_plasticity": "False",
+          "bidirectional": false,
+          "skip_connections": false,
+          "layer_sharing": false,
+          "generation": 105,
+          "parent_ids": [
+            140732833783472
+          ],
+          "mutations_applied": [
+            "bidirectional\u2192False",
+            "momentum\u21920.06"
+          ]
+        },
+        "fitness": null,
+        "evaluated": false,
+        "generation": 63
+      }
+    ],
+    "next_id": 1668
+  },
+  "total_evaluations": 1890,
+  "successful_evaluations": 1713,
+  "timestamp": "2026-01-08T09:33:04.356459"
+}

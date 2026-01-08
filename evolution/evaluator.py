@@ -73,11 +73,15 @@ class VariationEvaluator:
         Args:
             config: Architecture configuration
             tier: Evaluation tier (1-4)
-            task: Task name ('mnist', 'fashion', 'shakespeare', 'cifar10')
+            task: Task name ('mnist', 'fashion', 'shakespeare', 'cifar10', 'cartpole', etc.)
             
         Returns:
             FitnessScore with all metrics
         """
+        # Check if RL task
+        if task in ['cartpole', 'acrobot', 'mountaincar']:
+            return self._evaluate_rl(config, tier, task)
+        
         tier_cfg = TIER_CONFIGS[tier]
         
         if self.verbose:
@@ -109,14 +113,67 @@ class VariationEvaluator:
         # Aggregate results
         return self._aggregate_results(seed_results, config, task)
     
-    def quick_eval(self, config: ArchConfig, task: str = 'mnist') -> FitnessScore:
-        """Tier 1-2: Fast screening."""
-        return self.evaluate(config, tier=EvalTier.TIER_2_QUICK, task=task)
-    
-    def full_eval(self, config: ArchConfig, task: str = 'mnist') -> FitnessScore:
-        """Tier 3-4: Statistical validation."""
-        tier = EvalTier.TIER_4_BREAKTHROUGH if task == 'cifar10' else EvalTier.TIER_3_FULL
-        return self.evaluate(config, tier=tier, task=task)
+    def _evaluate_rl(
+        self,
+        config: ArchConfig,
+        tier: EvalTier,
+        task: str,
+    ) -> FitnessScore:
+        """Evaluate on RL environment."""
+        try:
+            from .rl_adapter import train_rl_model, get_env_name
+        except ImportError:
+            return FitnessScore(
+                accuracy=0.0,
+                config=config.to_dict(),
+                task=task,
+            )
+        
+        tier_cfg = TIER_CONFIGS[tier]
+        env_name = get_env_name(task)
+        
+        # Build model
+        model = self._build_model(config, task)
+        model = model.to(self.device)
+        
+        # Train on RL task
+        start_time = time.time()
+        n_episodes = min(tier_cfg.epochs * 10, 200)  # Scale epochs to episodes
+        
+        try:
+            success_rate = train_rl_model(
+                model,
+                env_name,
+                n_episodes=n_episodes,
+                device=self.device,
+                lr=config.lr,
+            )
+        except Exception as e:
+            if self.verbose:
+                print(f"  RL training failed: {e}")
+            success_rate = 0.0
+        
+        train_time = time.time() - start_time
+        
+        # Count parameters
+        param_count = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        
+        # Compute Lipschitz
+        L = self._compute_lipschitz(model)
+        
+        return FitnessScore(
+            accuracy=success_rate,
+            train_accuracy=success_rate,
+            speed=n_episodes / max(train_time, 0.01),
+            memory_mb=0,  # Not tracking for RL
+            train_time_sec=train_time,
+            parameter_count=param_count,  # NEW
+            lipschitz=L,
+            generalization=1.0,
+            stability=1.0,
+            config=config.to_dict(),
+            task=task,
+        )
     
     def _single_evaluation(
         self,
@@ -187,6 +244,9 @@ class VariationEvaluator:
         else:
             peak_memory = 0
         
+        # Count parameters
+        param_count = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        
         # Compute metrics
         gen_gap = 1.0 - abs(train_acc - test_acc) / max(train_acc, 0.01)
         
@@ -197,6 +257,7 @@ class VariationEvaluator:
             speed=iterations / max(train_time, 0.01),
             memory_mb=peak_memory,
             train_time_sec=train_time,
+            parameter_count=param_count,  # NEW
             lipschitz=lipschitz_values[-1] if lipschitz_values else float('inf'),
             lipschitz_trajectory=lipschitz_values,
             generalization=gen_gap,
@@ -222,6 +283,7 @@ class VariationEvaluator:
             speed=np.mean([r.speed for r in results]),
             memory_mb=np.max([r.memory_mb for r in results]),
             train_time_sec=np.sum([r.train_time_sec for r in results]),
+            parameter_count=int(np.mean([r.parameter_count for r in results])),  # NEW
             lipschitz=np.mean([r.lipschitz for r in results if r.lipschitz < float('inf')]) or float('inf'),
             generalization=np.mean([r.generalization for r in results]),
             stability=1.0 / (np.std(accs) + 0.01),  # Higher variance = lower stability

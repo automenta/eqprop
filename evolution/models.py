@@ -144,8 +144,8 @@ def build_hebbian(config: ArchConfig, input_dim: int, output_dim: int) -> nn.Mod
         input_dim=input_dim,
         hidden_dim=config.width,
         output_dim=output_dim,
-        depth=config.depth,
-        use_sn=config.use_sn,
+        num_layers=min(config.depth, 500),  # Limit depth
+        use_spectral_norm=config.use_sn,
     )
 
 
@@ -157,6 +157,6 @@ def build_feedback_alignment(config: ArchConfig, input_dim: int, output_dim: int
         input_dim=input_dim,
         hidden_dim=config.width,
         output_dim=output_dim,
-        n_layers=config.depth,
+        num_layers=min(config.depth, 20),  # Limit depth
         use_spectral_norm=config.use_sn,
     )

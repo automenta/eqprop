@@ -1,0 +1,94 @@
+{
+  "backprop": {
+    "train_acc": 0.68,
+    "test_acc": 0.5329,
+    "epochs": 11,
+    "time": 1.3517563343048096,
+    "params": 351402,
+    "success": true
+  },
+  "eqprop": {
+    "train_acc": 0.115,
+    "test_acc": 0.1012,
+    "epochs": 6,
+    "time": 1.4508686065673828,
+    "params": 351402,
+    "success": true
+  },
+  "feedback_alignment": {
+    "train_acc": 0.085,
+    "test_acc": 0.0997,
+    "epochs": 12,
+    "time": 1.4051785469055176,
+    "params": 351402,
+    "success": true
+  },
+  "eq_align": {
+    "train_acc": 0.08,
+    "test_acc": 0.125,
+    "epochs": 8,
+    "time": 1.421457290649414,
+    "params": 351402,
+    "success": true
+  },
+  "ada_fa": {
+    "train_acc": 0.055,
+    "test_acc": 0.0403,
+    "epochs": 12,
+    "time": 1.3744115829467773,
+    "params": 702162,
+    "success": true
+  },
+  "cf_align": {
+    "train_acc": 0.1,
+    "test_acc": 0.0984,
+    "epochs": 6,
+    "time": 1.4043700695037842,
+    "params": 351402,
+    "success": true
+  },
+  "leq_fa": {
+    "train_acc": 0.13,
+    "test_acc": 0.0888,
+    "epochs": 12,
+    "time": 1.3685383796691895,
+    "params": 351402,
+    "success": true
+  },
+  "pc_hybrid": {
+    "train_acc": 0.66,
+    "test_acc": 0.5264,
+    "epochs": 11,
+    "time": 1.4487059116363525,
+    "params": 703578,
+    "success": true
+  },
+  "eg_fa": {
+    "success": false,
+    "error": "Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu! (when checking argument for argument mat2 in method wrapper_CUDA_mm)"
+  },
+  "sparse_eq": {
+    "train_acc": 0.065,
+    "test_acc": 0.0673,
+    "epochs": 5,
+    "time": 1.5666680335998535,
+    "params": 351402,
+    "success": true
+  },
+  "mom_eq": {
+    "train_acc": 0.155,
+    "test_acc": 0.1197,
+    "epochs": 6,
+    "time": 1.4358296394348145,
+    "params": 351402,
+    "success": true
+  },
+  "sto_fa": {
+    "success": false,
+    "error": "Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu! (when checking argument for argument mat2 in method wrapper_CUDA_mm)"
+  },
+  "em_fa": {
+    "success": false,
+    "error": "Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu! (when checking argument for argument mat2 in method wrapper_CUDA_mm)"
+  }
+}

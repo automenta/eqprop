@@ -1,0 +1,26 @@
+{
+  "timestamp": "20260108_104226",
+  "duration_hours": 0.003,
+  "algorithms": [
+    "backprop",
+    "eqprop",
+    "feedback_alignment",
+    "eq_align",
+    "ada_fa",
+    "cf_align",
+    "leq_fa",
+    "pc_hybrid",
+    "eg_fa",
+    "sparse_eq",
+    "mom_eq",
+    "sto_fa",
+    "em_fa"
+  ],
+  "param_budgets": [
+    50000,
+    100000,
+    200000
+  ],
+  "dataset": "mnist",
+  "n_samples": 200
+}

@@ -1,0 +1,106 @@
+{
+  "backprop": {
+    "train_acc": 0.69,
+    "test_acc": 0.575,
+    "epochs": 4,
+    "time": 1.514164686203003,
+    "params": 150742,
+    "success": true
+  },
+  "eqprop": {
+    "train_acc": 0.095,
+    "test_acc": 0.1065,
+    "epochs": 6,
+    "time": 1.475252389907837,
+    "params": 150742,
+    "success": true
+  },
+  "feedback_alignment": {
+    "train_acc": 0.11,
+    "test_acc": 0.1135,
+    "epochs": 12,
+    "time": 1.4626686573028564,
+    "params": 150742,
+    "success": true
+  },
+  "eq_align": {
+    "train_acc": 0.1,
+    "test_acc": 0.1431,
+    "epochs": 8,
+    "time": 1.4533965587615967,
+    "params": 150742,
+    "success": true
+  },
+  "ada_fa": {
+    "train_acc": 0.105,
+    "test_acc": 0.1013,
+    "epochs": 12,
+    "time": 1.40704345703125,
+    "params": 301158,
+    "success": true
+  },
+  "cf_align": {
+    "train_acc": 0.125,
+    "test_acc": 0.116,
+    "epochs": 6,
+    "time": 1.4309420585632324,
+    "params": 150742,
+    "success": true
+  },
+  "leq_fa": {
+    "train_acc": 0.15,
+    "test_acc": 0.157,
+    "epochs": 12,
+    "time": 1.331998586654663,
+    "params": 150742,
+    "success": true
+  },
+  "pc_hybrid": {
+    "train_acc": 0.735,
+    "test_acc": 0.5816,
+    "epochs": 11,
+    "time": 1.3522779941558838,
+    "params": 302258,
+    "success": true
+  },
+  "eg_fa": {
+    "train_acc": 0.13,
+    "test_acc": 0.116,
+    "epochs": 12,
+    "time": 1.3798494338989258,
+    "params": 150742,
+    "success": true
+  },
+  "sparse_eq": {
+    "train_acc": 0.065,
+    "test_acc": 0.1071,
+    "epochs": 5,
+    "time": 1.6024434566497803,
+    "params": 150742,
+    "success": true
+  },
+  "mom_eq": {
+    "train_acc": 0.12,
+    "test_acc": 0.1007,
+    "epochs": 7,
+    "time": 1.4806544780731201,
+    "params": 150742,
+    "success": true
+  },
+  "sto_fa": {
+    "train_acc": 0.1,
+    "test_acc": 0.1058,
+    "epochs": 11,
+    "time": 1.4288756847381592,
+    "params": 150742,
+    "success": true
+  },
+  "em_fa": {
+    "train_acc": 0.11,
+    "test_acc": 0.1005,
+    "epochs": 10,
+    "time": 1.421250820159912,
+    "params": 150742,
+    "success": true
+  }
+}
