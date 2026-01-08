@@ -1,0 +1,106 @@
+{
+  "backprop": {
+    "train_acc": 0.8568,
+    "test_acc": 0.8624,
+    "epochs": 77,
+    "time": 94.52368187904358,
+    "params": 227247,
+    "success": true
+  },
+  "eqprop": {
+    "train_acc": 0.1047,
+    "test_acc": 0.1033,
+    "epochs": 43,
+    "time": 94.7432427406311,
+    "params": 227247,
+    "success": true
+  },
+  "feedback_alignment": {
+    "train_acc": 0.094,
+    "test_acc": 0.0936,
+    "epochs": 77,
+    "time": 94.50260972976685,
+    "params": 227247,
+    "success": true
+  },
+  "eq_align": {
+    "train_acc": 0.1061,
+    "test_acc": 0.1026,
+    "epochs": 57,
+    "time": 94.6846170425415,
+    "params": 227247,
+    "success": true
+  },
+  "ada_fa": {
+    "train_acc": 0.1021,
+    "test_acc": 0.0995,
+    "epochs": 79,
+    "time": 94.47163701057434,
+    "params": 454038,
+    "success": true
+  },
+  "cf_align": {
+    "train_acc": 0.1389,
+    "test_acc": 0.145,
+    "epochs": 46,
+    "time": 94.71081852912903,
+    "params": 227247,
+    "success": true
+  },
+  "leq_fa": {
+    "train_acc": 0.1254,
+    "test_acc": 0.123,
+    "epochs": 79,
+    "time": 94.45642876625061,
+    "params": 227247,
+    "success": true
+  },
+  "pc_hybrid": {
+    "train_acc": 0.8541,
+    "test_acc": 0.8642,
+    "epochs": 75,
+    "time": 94.52860379219055,
+    "params": 455268,
+    "success": true
+  },
+  "eg_fa": {
+    "train_acc": 0.1072,
+    "test_acc": 0.0936,
+    "epochs": 78,
+    "time": 94.43249869346619,
+    "params": 227247,
+    "success": true
+  },
+  "sparse_eq": {
+    "train_acc": 0.2327,
+    "test_acc": 0.2334,
+    "epochs": 40,
+    "time": 95.14214563369751,
+    "params": 227247,
+    "success": true
+  },
+  "mom_eq": {
+    "train_acc": 0.4668,
+    "test_acc": 0.4757,
+    "epochs": 47,
+    "time": 94.86234641075134,
+    "params": 227247,
+    "success": true
+  },
+  "sto_fa": {
+    "train_acc": 0.0697,
+    "test_acc": 0.0719,
+    "epochs": 79,
+    "time": 94.44560885429382,
+    "params": 227247,
+    "success": true
+  },
+  "em_fa": {
+    "train_acc": 0.1674,
+    "test_acc": 0.1744,
+    "epochs": 78,
+    "time": 94.48639178276062,
+    "params": 227247,
+    "success": true
+  }
+}
