@@ -58,7 +58,26 @@ class EqPropTrainer:
             use_kernel: If True, use CuPy kernel (NVIDIA only, O(1) memory)
             device: Device to train on (auto-detected if None)
             compile_mode: torch.compile mode ('default', 'reduce-overhead', 'max-autotune')
+        
+        Raises:
+            ValueError: If invalid optimizer or compile_mode
+            RuntimeError: If use_kernel=True but model incompatible
         """
+        # Validate inputs
+        if optimizer not in ["adam", "adamw", "sgd"]:
+            raise ValueError(
+                f"Invalid optimizer '{optimizer}'. Must be one of: adam, adamw, sgd"
+            )
+        
+        if compile_mode not in ["default", "reduce-overhead", "max-autotune"]:
+            raise ValueError(
+                f"Invalid compile_mode '{compile_mode}'. "
+                f"Must be one of: default, reduce-overhead, max-autotune"
+            )
+        
+        if lr <= 0:
+            raise ValueError(f"Learning rate must be positive, got {lr}")
+        
         self.device = device or get_optimal_backend()
         self.use_kernel = use_kernel
         self._epoch = 0
@@ -67,18 +86,38 @@ class EqPropTrainer:
         self._history = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
         
         # Move model to device
-        self.model = model.to(self.device)
+        try:
+            self.model = model.to(self.device)
+        except Exception as e:
+            raise RuntimeError(f"Failed to move model to device '{self.device}': {e}")
         
         # Apply torch.compile if requested
         if use_compile and not use_kernel:
-            self.model = compile_model(self.model, mode=compile_mode)
+            if not hasattr(torch, 'compile'):
+                warnings.warn(
+                    "torch.compile not available (requires PyTorch 2.0+). "
+                    "Model will run without compilation.",
+                    UserWarning
+                )
+            else:
+                try:
+                    self.model = compile_model(self.model, mode=compile_mode)
+                except Exception as e:
+                    warnings.warn(f"torch.compile failed: {e}. Using uncompiled model.", UserWarning)
         
         # Create optimizer
-        self.optimizer = self._create_optimizer(optimizer, lr, weight_decay)
+        try:
+            self.optimizer = self._create_optimizer(optimizer, lr, weight_decay)
+        except Exception as e:
+            raise RuntimeError(f"Failed to create optimizer: {e}")
         
         # Kernel mode initialization
         if use_kernel:
-            self._init_kernel_mode()
+            try:
+                self._init_kernel_mode()
+            except Exception as e:
+                warnings.warn(f"Kernel mode initialization failed: {e}", UserWarning)
+                self.use_kernel = False
     
     def _create_optimizer(self, name: str, lr: float, weight_decay: float) -> torch.optim.Optimizer:
         """Create optimizer by name."""
