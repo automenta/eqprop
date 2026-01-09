@@ -64,6 +64,12 @@ def _get_layer_weight(layer: nn.Module) -> Optional[torch.Tensor]:
     return None
 
 
+def _has_spectral_norm(layer: nn.Module) -> bool:
+    """Check if a module has spectral normalization."""
+    return (hasattr(layer, 'parametrizations') and
+            hasattr(layer.parametrizations, 'weight'))
+
+
 def _reshape_weight_for_power_iteration(weight: torch.Tensor) -> torch.Tensor:
     """Reshape weight tensor for power iteration (conv weights to 2D matrix)."""
     return weight.reshape(weight.shape[0], -1) if weight.dim() > 2 else weight
@@ -141,6 +147,14 @@ class LoopedMLP(nn.Module):
         if hasattr(layer, 'parametrizations') and hasattr(layer.parametrizations, 'weight'):
             return layer.parametrizations.weight.original
         return layer
+
+    def _get_layer_weight(self, layer: nn.Module) -> Optional[torch.Tensor]:
+        """Extract weight tensor from a layer."""
+        if hasattr(layer, 'parametrizations') and hasattr(layer.parametrizations, 'weight'):
+            return layer.weight
+        elif hasattr(layer, 'weight'):
+            return layer.weight
+        return None
     
     def forward(
         self,
@@ -162,22 +176,44 @@ class LoopedMLP(nn.Module):
         """
         steps = steps or self.max_steps
         batch_size = x.shape[0]
-        
-        h = torch.zeros(batch_size, self.hidden_dim, device=x.device, dtype=x.dtype)
+
+        h = self._initialize_hidden_state(batch_size, x)
         x_proj = self.W_in(x)
-        
+
         trajectory = [h] if return_trajectory else None
-        
+
+        h = self._iterate_to_equilibrium(h, x_proj, steps, return_trajectory, trajectory)
+
+        out = self.W_out(h)
+
+        if return_trajectory:
+            return out, trajectory
+        return out
+
+    def _initialize_hidden_state(self, batch_size: int, x: torch.Tensor) -> torch.Tensor:
+        """Initialize the hidden state tensor."""
+        return self._create_zeros_tensor((batch_size, self.hidden_dim), x)
+
+    def _create_zeros_tensor(self, shape: Tuple[int, ...], reference_tensor: torch.Tensor) -> torch.Tensor:
+        """Create a zeros tensor with the same device and dtype as reference tensor.
+
+        Args:
+            shape: Shape of the tensor to create
+            reference_tensor: Reference tensor to get device and dtype from
+
+        Returns:
+            Zeros tensor with specified shape and same device/dtype as reference
+        """
+        return torch.zeros(shape, device=reference_tensor.device, dtype=reference_tensor.dtype)
+
+    def _iterate_to_equilibrium(self, h: torch.Tensor, x_proj: torch.Tensor, steps: int,
+                               return_trajectory: bool, trajectory: Optional[List[torch.Tensor]]) -> torch.Tensor:
+        """Iterate the hidden state to equilibrium."""
         for _ in range(steps):
             h = torch.tanh(x_proj + self.W_rec(h))
             if return_trajectory:
                 trajectory.append(h)
-        
-        out = self.W_out(h)
-        
-        if return_trajectory:
-            return out, trajectory
-        return out
+        return h
     
     def compute_lipschitz(self) -> float:
         """
@@ -211,7 +247,7 @@ class LoopedMLP(nn.Module):
             Dictionary containing noise metrics and damping information
         """
         batch_size = x.shape[0]
-        h = torch.zeros(batch_size, self.hidden_dim, device=x.device, dtype=x.dtype)
+        h = self._create_zeros_tensor((batch_size, self.hidden_dim), x)
         x_proj = self.W_in(x)
 
         # Run to injection point
@@ -378,12 +414,26 @@ class ConvEqProp(nn.Module):
             Output logits [batch, output_dim]
         """
         B, _, H, W = x.shape
-        h = torch.zeros(B, self.hidden_channels, H, W, device=x.device)
-        
+        h = self._create_hidden_state_tensor(B, H, W, x)
+
         for _ in range(steps):
             h = self.forward_step(h, x)
-             
+
         return self.head(h)
+
+    def _create_hidden_state_tensor(self, batch_size: int, height: int, width: int, reference_tensor: torch.Tensor) -> torch.Tensor:
+        """Create the initial hidden state tensor for ConvEqProp.
+
+        Args:
+            batch_size: Size of the batch dimension
+            height: Height of the spatial dimensions
+            width: Width of the spatial dimensions
+            reference_tensor: Reference tensor to get device from
+
+        Returns:
+            Initialized hidden state tensor
+        """
+        return torch.zeros(batch_size, self.hidden_channels, height, width, device=reference_tensor.device)
 
 
 # =============================================================================

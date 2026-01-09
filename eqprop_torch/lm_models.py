@@ -60,14 +60,19 @@ def spectral_linear(in_features: int, out_features: int, use_sn: bool = True) ->
 class CausalMask:
     """Helper for causal masking."""
     _cache = {}
-    
+
     @classmethod
     def get(cls, seq_len: int, device: torch.device) -> torch.Tensor:
         key = (seq_len, device)
         if key not in cls._cache:
-            mask = torch.triu(torch.ones(seq_len, seq_len, device=device), diagonal=1).bool()
+            mask = cls._create_causal_mask(seq_len, device)
             cls._cache[key] = mask
         return cls._cache[key]
+
+    @classmethod
+    def _create_causal_mask(cls, seq_len: int, device: torch.device) -> torch.Tensor:
+        """Create a causal mask for the given sequence length and device."""
+        return torch.triu(torch.ones(seq_len, seq_len, device=device), diagonal=1).bool()
 
 
 class EqPropAttention(nn.Module):

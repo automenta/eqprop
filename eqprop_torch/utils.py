@@ -4,7 +4,6 @@ EqProp-Torch Utilities
 Helper functions for ONNX export, model verification, and training utilities.
 """
 
-import warnings
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torch
@@ -75,9 +74,8 @@ def count_parameters(model: nn.Module, trainable_only: bool = True) -> int:
     Returns:
         Number of parameters
     """
-    if hasattr(model, '_orig_mod'):
-        model = model._orig_mod
-    
+    model = _get_model_for_processing(model)
+
     if trainable_only:
         return sum(p.numel() for p in model.parameters() if p.requires_grad)
     return sum(p.numel() for p in model.parameters())
@@ -127,7 +125,14 @@ def _compute_spectral_norm(weight: torch.Tensor) -> float:
     # Reshape for 2D computation if needed
     W_flat = weight.reshape(weight.shape[0], -1) if weight.dim() > 2 else weight
     s = torch.linalg.svdvals(W_flat)
-    return s[0].item()
+    return s[0].item() if s.numel() > 0 else 0.0
+
+
+def _get_model_for_processing(model: nn.Module) -> nn.Module:
+    """Get the appropriate model for processing (handle compiled models)."""
+    if hasattr(model, '_orig_mod'):
+        return model._orig_mod
+    return model
 
 
 def compute_gradient_norm(model: nn.Module) -> float:
@@ -140,8 +145,7 @@ def compute_gradient_norm(model: nn.Module) -> float:
     Returns:
         Gradient norm
     """
-    if hasattr(model, '_orig_mod'):
-        model = model._orig_mod
+    model = _get_model_for_processing(model)
 
     squared_norms = []
     for p in model.parameters():

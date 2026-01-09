@@ -24,49 +24,60 @@ def get_vision_dataset(
 ) -> Dataset:
     """
     Load a vision dataset with standard transforms.
-    
+
     Args:
         name: Dataset name ('mnist', 'fashion_mnist', 'cifar10', 'kmnist', 'svhn')
         root: Data directory
         train: If True, load training set
         download: If True, download if not present
         flatten: If True, flatten images to 1D
-        
+
     Returns:
         PyTorch Dataset
-        
+
     Example:
         >>> train_data = get_vision_dataset('mnist', train=True)
         >>> test_data = get_vision_dataset('mnist', train=False)
     """
     from torchvision import datasets, transforms
-    
-    # Standard transforms
+
+    transform = _build_transforms(name, flatten)
+    dataset_class = _get_dataset_class(name)
+
+    return dataset_class(root, train=train, download=download, transform=transform)
+
+
+def _build_transforms(name: str, flatten: bool):
+    """Build the appropriate transforms for the given dataset."""
+    from torchvision import transforms
+
     transform_list = [transforms.ToTensor()]
-    
+
     if name in ['mnist', 'fashion_mnist', 'kmnist']:
         # Normalize grayscale to [-1, 1] range
         transform_list.append(transforms.Normalize((0.5,), (0.5,)))
     elif name == 'cifar10':
         transform_list.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
-    
+
     if flatten:
         transform_list.append(transforms.Lambda(lambda x: x.view(-1)))
-    
-    transform = transforms.Compose(transform_list)
-    
-    # Select dataset
+
+    return transforms.Compose(transform_list)
+
+
+def _get_dataset_class(name: str) -> type:
+    """Get the appropriate dataset class for the given name."""
     dataset_map = {
         'mnist': datasets.MNIST,
         'fashion_mnist': datasets.FashionMNIST,
         'cifar10': datasets.CIFAR10,
         'kmnist': datasets.KMNIST,
     }
-    
+
     if name not in dataset_map:
         raise ValueError(f"Unknown dataset: {name}. Available: {list(dataset_map.keys())}")
-    
-    return dataset_map[name](root, train=train, download=download, transform=transform)
+
+    return dataset_map[name]
 
 
 # =============================================================================

@@ -46,13 +46,15 @@ class BackendDetector:
     @staticmethod
     def detect_best_backend() -> str:
         """Detect the best available compute backend."""
-        cuda_backend = BackendDetector._get_cuda_backend()
-        if cuda_backend:
-            return cuda_backend
+        backends_priority = [
+            BackendDetector._get_cuda_backend,
+            BackendDetector._get_mps_backend,
+        ]
 
-        mps_backend = BackendDetector._get_mps_backend()
-        if mps_backend:
-            return mps_backend
+        for get_backend_func in backends_priority:
+            backend = get_backend_func()
+            if backend:
+                return backend
 
         return 'cpu'
 

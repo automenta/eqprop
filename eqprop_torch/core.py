@@ -7,7 +7,6 @@ checkpointing, and ONNX export.
 
 import time
 import warnings
-from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torch
@@ -99,7 +98,7 @@ class EqPropTrainer:
 
     def _validate_optimizer(self, optimizer: str) -> None:
         """Validate optimizer name."""
-        valid_optimizers = ["adam", "adamw", "sgd"]
+        valid_optimizers = self._get_valid_optimizers()
         if optimizer not in valid_optimizers:
             raise ValueError(
                 f"Invalid optimizer '{optimizer}'. Must be one of: {', '.join(valid_optimizers)}"
@@ -107,7 +106,7 @@ class EqPropTrainer:
 
     def _validate_compile_mode(self, compile_mode: str) -> None:
         """Validate compile mode."""
-        valid_compile_modes = ["default", "reduce-overhead", "max-autotune"]
+        valid_compile_modes = self._get_valid_compile_modes()
         if compile_mode not in valid_compile_modes:
             raise ValueError(
                 f"Invalid compile_mode '{compile_mode}'. "
@@ -123,6 +122,14 @@ class EqPropTrainer:
         """Validate weight decay."""
         if weight_decay < 0:
             raise ValueError(f"Weight decay must be non-negative, got {weight_decay}")
+
+    def _get_valid_optimizers(self) -> List[str]:
+        """Return list of valid optimizers."""
+        return ["adam", "adamw", "sgd"]
+
+    def _get_valid_compile_modes(self) -> List[str]:
+        """Return list of valid compile modes."""
+        return ["default", "reduce-overhead", "max-autotune"]
 
     def _setup_model(self, model: nn.Module, use_compile: bool, compile_mode: str) -> None:
         """Setup model on device and apply compilation if requested."""
@@ -166,12 +173,12 @@ class EqPropTrainer:
 
     def _get_optimizer_factory(self, name: str, lr: float, weight_decay: float) -> Optional[Callable[[], torch.optim.Optimizer]]:
         """Get optimizer factory function by name."""
-        optimizers = {
+        optimizer_factories = {
             "adam": lambda: torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay),
             "adamw": lambda: torch.optim.AdamW(self.model.parameters(), lr=lr, weight_decay=weight_decay),
             "sgd": lambda: torch.optim.SGD(self.model.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay)
         }
-        return optimizers.get(name)
+        return optimizer_factories.get(name)
     
     def _init_kernel_mode(self) -> None:
         """Initialize CuPy kernel for O(1) memory training."""
@@ -308,7 +315,7 @@ class EqPropTrainer:
     def _process_training_batch(self, x: torch.Tensor, y: torch.Tensor, loss_fn: Callable,
                               batch_idx: int, log_interval: int) -> Dict[str, float]:
         """Process a single training batch and return metrics."""
-        x, y = x.to(self.device), y.to(self.device)
+        x, y = self._move_to_device(x, y)
 
         # Flatten images if needed
         x = self._maybe_flatten_input(x)
@@ -325,6 +332,18 @@ class EqPropTrainer:
             'correct': batch_correct,
             'total': batch_total
         }
+
+    def _move_to_device(self, x: torch.Tensor, y: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Move tensors to the trainer's device.
+
+        Args:
+            x: Input tensor
+            y: Target tensor
+
+        Returns:
+            Tuple of tensors moved to the trainer's device
+        """
+        return x.to(self.device), y.to(self.device)
 
     def _maybe_flatten_input(self, x: torch.Tensor) -> torch.Tensor:
         """Flatten input tensor if it's 4D and model has input_dim attribute."""
@@ -399,7 +418,7 @@ class EqPropTrainer:
 
     def _evaluate_batch(self, x: torch.Tensor, y: torch.Tensor, loss_fn: Callable) -> Dict[str, float]:
         """Evaluate a single batch and return metrics."""
-        x, y = x.to(self.device), y.to(self.device)
+        x, y = self._move_to_device(x, y)
         x = self._maybe_flatten_input(x)
 
         output = self.model(x)

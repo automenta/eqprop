@@ -70,9 +70,14 @@ def spectral_normalize(W: np.ndarray, num_iters: int = 1, u: Optional[np.ndarray
         u = _compute_u_vector(W, v, xp)
 
     sigma = _compute_spectral_norm(W, u, v)
-    W_normalized = W / (sigma + 1e-12)
+    W_normalized = W / (_add_epsilon(sigma))
 
     return W_normalized, u, sigma
+
+
+def _add_epsilon(value: float, epsilon: float = 1e-12) -> float:
+    """Add small epsilon to prevent division by zero."""
+    return value + epsilon
 
 
 def _initialize_u_vector(u: Optional[np.ndarray], out_dim: int, dtype: np.dtype, xp) -> np.ndarray:
@@ -85,13 +90,15 @@ def _initialize_u_vector(u: Optional[np.ndarray], out_dim: int, dtype: np.dtype,
 def _compute_v_vector(W: np.ndarray, u: np.ndarray, xp) -> np.ndarray:
     """Compute v vector in power iteration: v = W.T @ u, normalized."""
     v = W.T @ u
-    return v / (xp.linalg.norm(v) + 1e-12)
+    norm = xp.linalg.norm(v)
+    return v / _add_epsilon(norm)
 
 
 def _compute_u_vector(W: np.ndarray, v: np.ndarray, xp) -> np.ndarray:
     """Compute u vector in power iteration: u = W @ v, normalized."""
     u = W @ v
-    return u / (xp.linalg.norm(u) + 1e-12)
+    norm = xp.linalg.norm(u)
+    return u / _add_epsilon(norm)
 
 
 def _compute_spectral_norm(W: np.ndarray, u: np.ndarray, v: np.ndarray) -> float:
@@ -241,6 +248,17 @@ class EqPropKernel:
 
         self.sn_state[sn_state_key] = new_u_state
         return normalized_weight
+
+    def _get_weight_by_key(self, weight_key: str) -> np.ndarray:
+        """Get a weight matrix by its key.
+
+        Args:
+            weight_key: Key identifying the weight matrix
+
+        Returns:
+            The corresponding weight matrix
+        """
+        return self.weights[weight_key]
     
     def forward_step(self, h: np.ndarray, x_emb: np.ndarray, weights: Dict[str, np.ndarray]) -> Tuple[np.ndarray, Dict[str, np.ndarray]]:
         """
