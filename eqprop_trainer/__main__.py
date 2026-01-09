@@ -25,8 +25,8 @@ def main():
                         help='Population size for evolutionary search (default: 10)')
     parser.add_argument('--generations', type=int, default=5,
                         help='Number of generations (default: 5)')
-    parser.add_argument('--pruning_threshold', type=float, default=20.0,
-                        help='Max seconds per epoch before pruning (default: 20.0)')
+    parser.add_argument('--max_trial_time', type=float, default=60.0,
+                        help='Total time budget per trial in seconds (default: 60.0)')
 
     args = parser.parse_args()
 
@@ -59,7 +59,7 @@ def main():
         quick_mode=args.quick,
         population_size=args.population,
         n_generations=args.generations,
-        pruning_threshold=args.pruning_threshold
+        max_trial_time=args.max_trial_time
     )
     window.show()
     sys.exit(app.exec())

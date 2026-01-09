@@ -127,10 +127,15 @@ class ExperimentScheduler:
                 if actual_epochs > 0:
                     current_rate = elapsed_time / actual_epochs
                     
-                    # HARD PRUNING: Strict limit (configurable)
-                    if current_rate > GLOBAL_CONFIG.max_epoch_time:
+                    
+                    # HARD PRUNING: Derived limit from total budget
+                    # e.g. 60s / 3 epochs = 20s/epoch
+                    # e.g. 60s / 5 epochs = 12s/epoch
+                    per_epoch_limit = GLOBAL_CONFIG.max_trial_time / max(GLOBAL_CONFIG.epochs, 1)
+                    
+                    if current_rate > per_epoch_limit:
                          experiment['allocated_epochs'] = actual_epochs
-                         print(f"PRUNED: Experiment {experiment_id} exceeded {GLOBAL_CONFIG.max_epoch_time}s/epoch limit ({current_rate:.1f}s/epoch)")
+                         print(f"PRUNED: Experiment {experiment_id} exceeded {per_epoch_limit:.1f}s/epoch limit (Budget: {GLOBAL_CONFIG.max_trial_time}s / {GLOBAL_CONFIG.epochs} epochs)")
                          try:
                              if hasattr(self, 'storage') and self.storage:
                                  self.storage.update_trial(experiment_id, status='pruned')

@@ -47,6 +47,20 @@ class EvolutionaryOptimizer:
         self.population: Dict[str, List[int]] = {name: [] for name in model_names}
         self.generation = 0
     
+    def _sanitize_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert numpy types to native Python types for JSON serialization."""
+        sanitized = {}
+        for k, v in config.items():
+            if isinstance(v, (np.integer, np.int64, np.int32)):
+                sanitized[k] = int(v)
+            elif isinstance(v, (np.floating, np.float64, np.float32)):
+                sanitized[k] = float(v)
+            elif isinstance(v, np.ndarray):
+                sanitized[k] = v.tolist()
+            else:
+                sanitized[k] = v
+        return sanitized
+
     def initialize_population(self, model_name: str) -> List[int]:
         """Initialize random population for a model."""
         space = self.search_spaces[model_name]
@@ -54,6 +68,7 @@ class EvolutionaryOptimizer:
         
         for _ in range(self.config.population_size):
             config = space.sample(self.rng)
+            config = self._sanitize_config(config)
             trial_id = self.storage.create_trial(model_name, config)
             trial_ids.append(trial_id)
         
@@ -115,6 +130,7 @@ class EvolutionaryOptimizer:
             
             # Mutation
             child_config = space.mutate(child_config, self.config.mutation_rate, self.rng)
+            child_config = self._sanitize_config(child_config)
             
             # Create trial
             trial_id = self.storage.create_trial(model_name, child_config)

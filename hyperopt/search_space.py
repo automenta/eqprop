@@ -54,18 +54,30 @@ class SearchSpace:
                     min_val, max_val, scale = param_spec
                     if scale == 'log':
                         # Gaussian perturbation in log space
-                        current = mutated[param_name]
+                        current = mutated.get(param_name)
+                        if current is None:
+                            # Initialize if missing
+                            current = rng.uniform(min_val, max_val)
+                        
                         log_val = np.log(current) + rng.normal(0, 0.5)
                         mutated[param_name] = float(np.clip(np.exp(log_val), min_val, max_val))
                     elif scale == 'int':
                         # Random walk
+                        current = mutated.get(param_name)
+                        if current is None:
+                            current = int((min_val + max_val) / 2)
+                            
                         delta = rng.integers(-2, 3)
-                        mutated[param_name] = int(np.clip(mutated[param_name] + delta, min_val, max_val))
+                        mutated[param_name] = int(np.clip(current + delta, min_val, max_val))
                     else:  # linear
                         # Gaussian perturbation
+                        current = mutated.get(param_name)
+                        if current is None:
+                            current = (min_val + max_val) / 2.0
+                            
                         span = max_val - min_val
                         mutated[param_name] = float(np.clip(
-                            mutated[param_name] + rng.normal(0, span * 0.1),
+                            current + rng.normal(0, span * 0.1),
                             min_val, max_val
                         ))
                 else:
@@ -169,12 +181,12 @@ SEARCH_SPACES = {
         }
     ),
     
-    "Deep Hebbian (500 Layer)": SearchSpace(
-        "Deep Hebbian (500 Layer)",
+    "Deep Hebbian (Hundred-Layer)": SearchSpace(
+        "Deep Hebbian (Hundred-Layer)",
         {
             'lr': (1e-5, 5e-3, 'log'),
             'hidden_dim': [64, 128],
-            'num_layers': [100, 200, 500],  # Test deep scaling
+            'num_layers': [50, 100, 150],  # Test deep scaling
         }
     ),
 }

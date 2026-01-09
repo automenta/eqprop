@@ -37,13 +37,13 @@ from eqprop_trainer.hyperopt_worker import HyperoptSearchWorker
 class HyperoptSearchDashboard(QMainWindow):
     """Main dashboard window for hyperparameter search and comparison."""
 
-    def __init__(self, task='shakespeare', db_path=None, quick_mode=True, population_size=10, n_generations=5, pruning_threshold=20.0):
+    def __init__(self, task='shakespeare', db_path=None, quick_mode=True, population_size=10, n_generations=5, max_trial_time=60.0):
         super().__init__()
         # Set global config
         GLOBAL_CONFIG.task = task
         GLOBAL_CONFIG.quick_mode = quick_mode
         GLOBAL_CONFIG.epochs = 3 if quick_mode else 20
-        GLOBAL_CONFIG.max_epoch_time = pruning_threshold
+        GLOBAL_CONFIG.max_trial_time = max_trial_time
         
         self.task = task
         self.setWindowTitle(f"Hyperparameter Search Dashboard - Task: {task.upper()}")
@@ -284,6 +284,12 @@ class HyperoptSearchDashboard(QMainWindow):
             "font-weight: bold; background-color: #e74c3c; color: white; padding: 10px; font-size: 14px;"
         )
         layout.addWidget(reset_btn)
+        
+        # Checkbox to show/hide pruned trials
+        self.show_pruned_cb = QCheckBox("Show Pruned")
+        self.show_pruned_cb.setChecked(False)  # Hide by default
+        self.show_pruned_cb.toggled.connect(self.update_visualizations)
+        layout.addWidget(self.show_pruned_cb)
 
         return group
 
@@ -657,6 +663,10 @@ class HyperoptSearchDashboard(QMainWindow):
 
         # Sort trials by trial_id in descending order (most recent first)
         sorted_trials = sorted(trials, key=lambda t: t.trial_id, reverse=True)
+        
+        # Filter pruned trials if checkbox is not checked
+        if hasattr(self, 'show_pruned_cb') and not self.show_pruned_cb.isChecked():
+            sorted_trials = [t for t in sorted_trials if t.status.lower() not in ['pruned', 'terminated', 'stopped']]
 
         self.experiment_table.setRowCount(len(sorted_trials))
 

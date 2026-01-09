@@ -57,13 +57,36 @@ class HyperoptSearchWorker(QThread):
                 'epochs': GLOBAL_CONFIG.epochs,
                 'model_name': model_name
             }
-        elif 'MLP' in model_name or 'EqProp' in model_name:
+        elif 'Deep Hebbian' in model_name:
             return {
+                'lr': 5e-4,
+                'hidden_dim': 128,
+                'num_layers': 500, # Explicitly configured for depth
+                'epochs': GLOBAL_CONFIG.epochs,
+                'model_name': model_name
+            }
+        elif 'MLP' in model_name or 'EqProp' in model_name:
+            # Check for specific EqProp variants to add beta
+            config = {
                 'lr': 1e-3,
                 'hidden_dim': 64,
                 'steps': 12,
                 'epochs': GLOBAL_CONFIG.epochs,
                 'model_name': model_name
+            }
+            if 'MLP' in model_name:
+                config['beta'] = 0.22 # Required for EqProp MLP
+                config['num_layers'] = 10 # Required for EqProp MLP
+            return config
+        elif 'CHL' in model_name:
+             return {
+                'lr': 1e-3,
+                'hidden_dim': 128,
+                'num_layers': 10,
+                'model_name': model_name,
+                'beta': 0.1, # Required for CHL
+                'steps': 20,
+                'epochs': GLOBAL_CONFIG.epochs
             }
         else:
             # General default config
@@ -167,7 +190,27 @@ class HyperoptSearchWorker(QThread):
                     success = False
                     start_time = time.time()
                     try:
-                        success = self.runner.run_trial(trial_id)
+                        # Define pruning callback
+                        def pruning_callback(trial_id, epoch, metrics):
+                            # Update scheduler with intermediate progress
+                            # Note: scheduler.update_experiment_progress expects full Trial object usually,
+                            # but here we are just checking for pruning conditions.
+                            # We can manually trigger the check logic.
+                            
+                            # Update experiment state in scheduler
+                            self.scheduler.update_experiment_progress(
+                                trial_id, 
+                                metrics, 
+                                actual_epochs=epoch
+                            )
+                            
+                            # Check if scheduler allocated_epochs has been reduced below current epoch
+                            # Only prune if we are stopping EARLY (before the natural end of the trial)
+                            if experiment.get('allocated_epochs', 0) <= epoch and epoch < self.runner.epochs:
+                                return True # Prune!
+                            return False
+
+                        success = self.runner.run_trial(trial_id, pruning_callback=pruning_callback)
                     except Exception as e:
                         print(f"Error running trial {trial_id}: {e}")
                         success = False

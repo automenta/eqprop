@@ -79,11 +79,15 @@ class TrialRunner:
         y = torch.stack([data[i+self.seq_len] for i in idx]).to(device)
         return x, y
     
-    def run_trial(self, trial_id: int) -> bool:
+    def run_trial(self, trial_id: int, pruning_callback=None) -> bool:
         """Run a single trial and record results.
         
+        Args:
+            trial_id: ID of the trial to run.
+            pruning_callback: Optional function that takes (trial_id, epoch, metrics) and returns True if trial should be pruned.
+        
         Returns:
-            True if successful, False if failed.
+            True if successful/completed, False if failed or pruned.
         """
         # Get trial
         trial = self.storage.get_trial(trial_id)
@@ -183,6 +187,20 @@ class TrialRunner:
                 print(f"Epoch {epoch+1}/{n_epochs}: "
                       f"loss={avg_val_loss:.4f}, acc={avg_val_acc:.4f}, "
                       f"ppl={avg_val_ppl:.2f}, time={epoch_time:.1f}s")
+
+                # Check for pruning
+                if pruning_callback:
+                    metrics = {
+                        'loss': avg_val_loss,
+                        'accuracy': avg_val_acc,
+                        'perplexity': avg_val_ppl,
+                        'time': epoch_time,
+                        'iteration_time': epoch_time / self.batches_per_epoch
+                    }
+                    if pruning_callback(trial_id, epoch + 1, metrics):
+                        print(f"✂️ Trial {trial_id} PRUNED at epoch {epoch+1}")
+                        self.storage.update_trial(trial_id, status='pruned')
+                        return False
             
             # Final metrics
             final_loss = np.mean(val_losses)

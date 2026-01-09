@@ -56,7 +56,33 @@ MODEL_REGISTRY = [
         has_steps=True,
         color="#4ecdc4"
     ),
-    # EqProp Transformers (From Track 37 results)
+    # Other Bio-Plausible Algorithms
+    ModelSpec(
+        name="DFA (Direct Feedback Alignment)",
+        description="Random feedback weights",
+        model_type="dfa",
+        default_lr=0.001,
+        color="#45b7d1"
+    ),
+    ModelSpec(
+        name="CHL (Contrastive Hebbian)",
+        description="Contrastive Hebbian Learning",
+        model_type="chl",
+        default_lr=0.001,
+        default_beta=0.1,
+        default_steps=20,
+        has_beta=True,
+        has_steps=True,
+        color="#f9ca24"
+    ),
+    ModelSpec(
+        name="Deep Hebbian (Hundred-Layer)",
+        description="100-layer Hebbian chain with SN",
+        model_type="deep_hebbian",
+        default_lr=0.0005,
+        color="#6c5ce7"
+    ),
+    # EqProp Transformers (From Track 37 results) - SLOW MODELS LAST
     ModelSpec(
         name="EqProp Transformer (Attention Only)",
         description="Best variant: EqProp in attention only",
@@ -96,32 +122,6 @@ MODEL_REGISTRY = [
         default_steps=20,
         has_steps=True,
         color="#16a085"
-    ),
-    # Other Bio-Plausible Algorithms
-    ModelSpec(
-        name="DFA (Direct Feedback Alignment)",
-        description="Random feedback weights",
-        model_type="dfa",
-        default_lr=0.001,
-        color="#45b7d1"
-    ),
-    ModelSpec(
-        name="CHL (Contrastive Hebbian)",
-        description="Contrastive Hebbian Learning",
-        model_type="chl",
-        default_lr=0.001,
-        default_beta=0.1,
-        default_steps=20,
-        has_beta=True,
-        has_steps=True,
-        color="#f9ca24"
-    ),
-    ModelSpec(
-        name="Deep Hebbian (500 Layer)",
-        description="500-layer Hebbian chain with SN",
-        model_type="deep_hebbian",
-        default_lr=0.0005,
-        color="#6c5ce7"
     ),
 ]
 
@@ -236,7 +236,7 @@ class AlgorithmWrapper:
             return create_model(
                 'backprop',  # Use backprop with many layers to simulate deep hebbian
                 input_dim=self.hidden_dim,
-                hidden_dims=[self.hidden_dim] * min(self.num_layers, 10),  # Up to 10 layers
+                hidden_dims=[self.hidden_dim] * self.num_layers,  # Use requested depth
                 output_dim=self.vocab_size,
                 use_spectral_norm=True
             ).to(self.device)

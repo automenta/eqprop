@@ -137,7 +137,7 @@ class BiologicalPanel(QWidget):
     
     def create_hebbian_demo(self):
         """Create deep Hebbian signal propagation demo."""
-        group = QGroupBox("Deep Hebbian Learning (500 Layers)")
+        group = QGroupBox("Deep Hebbian Learning (Hundred-Layer)")
         layout = QVBoxLayout(group)
         
         # Explanation
