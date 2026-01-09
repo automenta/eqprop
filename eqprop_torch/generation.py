@@ -5,15 +5,16 @@ Provides autoregressive generation for any model that outputs logits,
 including bioplausible research algorithms.
 """
 
+from typing import Any, Callable, Dict, Optional, Union
+
 import torch
 import torch.nn.functional as F
-from typing import Optional, Callable
 
 
 def generate_text(
     model: torch.nn.Module,
-    char_to_idx: dict,
-    idx_to_char: dict,
+    char_to_idx: Dict[str, int],
+    idx_to_char: Dict[int, str],
     prompt: str = "",
     max_new_tokens: int = 100,
     temperature: float = 1.0,
@@ -22,12 +23,12 @@ def generate_text(
 ) -> str:
     """
     Universal autoregressive text generation for any model.
-    
+
     Works with:
     - EqProp LM variants (have built-in generate)
     - Research algorithms (need this wrapper)
     - Any model that outputs logits
-    
+
     Args:
         model: Any torch.nn.Module that outputs logits
         char_to_idx: Character to index mapping
@@ -37,7 +38,7 @@ def generate_text(
         temperature: Sampling temperature (higher = more random)
         top_k: If set, only sample from top k tokens
         device: Device to run on
-        
+
     Returns:
         Generated text string
     """
@@ -114,7 +115,7 @@ def generate_text(
 
 def generate_from_dataset(
     model: torch.nn.Module,
-    dataset,
+    dataset: Any,
     prompt: str = "",
     max_new_tokens: int = 100,
     temperature: float = 1.0,
@@ -122,7 +123,7 @@ def generate_from_dataset(
 ) -> str:
     """
     Convenience wrapper that extracts vocab from dataset.
-    
+
     Args:
         model: Model to generate with
         dataset: CharDataset with vocab_size, char_to_idx, idx_to_char
@@ -130,7 +131,7 @@ def generate_from_dataset(
         max_new_tokens: Tokens to generate
         temperature: Sampling temperature
         top_k: Top-k filtering
-        
+
     Returns:
         Generated text string
     """

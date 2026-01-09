@@ -4,10 +4,11 @@ EqProp-Torch Dataset Utilities
 HuggingFace datasets and tokenizers integration for easy LM and vision dataset loading.
 """
 
-import torch
-from torch.utils.data import Dataset, DataLoader
-from typing import Optional, Tuple, Dict, Any
 import warnings
+from typing import Any, Dict, Optional, Tuple, Union
+
+import torch
+from torch.utils.data import DataLoader, Dataset
 
 
 # =============================================================================
@@ -75,7 +76,7 @@ def get_vision_dataset(
 class CharDataset(Dataset):
     """Character-level language modeling dataset."""
     
-    def __init__(self, text: str, seq_len: int = 128):
+    def __init__(self, text: str, seq_len: int = 128) -> None:
         self.seq_len = seq_len
         
         # Build vocabulary
@@ -96,7 +97,15 @@ class CharDataset(Dataset):
         return x, y
     
     def decode(self, indices: torch.Tensor) -> str:
-        """Convert indices back to text."""
+        """
+        Convert indices back to text.
+
+        Args:
+            indices: Tensor of character indices
+
+        Returns:
+            Decoded text string
+        """
         return ''.join(self.idx_to_char[i.item()] for i in indices)
 
 

@@ -5,26 +5,74 @@ Provides torch.compile wrappers for 2-3x speedup and optional CuPy/Triton kernel
 Designed for portability: works on CPU, CUDA, ROCm, and Apple MPS.
 """
 
-import torch
 import warnings
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
+
+import torch
 
 
 def get_optimal_backend() -> str:
     """
     Detect best available compute backend.
-    
+
     Returns:
         'cuda' | 'mps' | 'cpu'
     """
-    if torch.cuda.is_available():
-        return 'cuda'
-    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-        return 'mps'
-    return 'cpu'
+    backend_detector = BackendDetector()
+    return backend_detector.detect_best_backend()
 
 
-def enable_tf32(enable: bool = True):
+def get_device_count(device_type: str) -> int:
+    """
+    Get the number of available devices of a given type.
+
+    Args:
+        device_type: Type of device ('cuda', 'cpu', etc.)
+
+    Returns:
+        Number of available devices
+    """
+    if device_type == 'cuda' and torch.cuda.is_available():
+        return torch.cuda.device_count()
+    elif device_type == 'cpu':
+        return 1  # CPU is always available
+    else:
+        return 0
+
+
+class BackendDetector:
+    """Helper class to detect the optimal compute backend."""
+
+    @staticmethod
+    def detect_best_backend() -> str:
+        """Detect the best available compute backend."""
+        cuda_backend = BackendDetector._get_cuda_backend()
+        if cuda_backend:
+            return cuda_backend
+
+        mps_backend = BackendDetector._get_mps_backend()
+        if mps_backend:
+            return mps_backend
+
+        return 'cpu'
+
+    @staticmethod
+    def _get_cuda_backend() -> str:
+        """Get CUDA backend if available."""
+        return 'cuda' if torch.cuda.is_available() else None
+
+    @staticmethod
+    def _get_mps_backend() -> str:
+        """Get MPS backend if available."""
+        return 'mps' if BackendDetector._is_mps_available() else None
+
+    @staticmethod
+    def _is_mps_available() -> bool:
+        """Check if MPS backend is available (Apple Silicon)."""
+        return hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
+
+
+def enable_tf32(enable: bool = True) -> None:
     """
     Enable TensorFloat-32 (TF32) for significant speedup on Ampere+ GPUs.
     
@@ -47,26 +95,36 @@ def enable_tf32(enable: bool = True):
 def check_cupy_available() -> Tuple[bool, str]:
     """
     Check if CuPy is available with proper CUDA configuration.
-    
+
     Returns:
         (available: bool, message: str)
     """
-    try:
-        import cupy as cp
-        # Try a simple operation to verify CUDA works
-        _ = cp.zeros(10)
-        return True, "CuPy available with CUDA"
-    except ImportError:
-        return False, "CuPy not installed. Install with: pip install cupy-cuda12x"
-    except Exception as e:
-        return False, f"CuPy installed but CUDA failed: {e}"
+    cupy_checker = CupyChecker()
+    return cupy_checker.check_availability()
+
+
+class CupyChecker:
+    """Helper class to check CuPy availability."""
+
+    @staticmethod
+    def check_availability() -> Tuple[bool, str]:
+        """Check if CuPy is available with proper CUDA configuration."""
+        try:
+            import cupy as cp
+            # Try a simple operation to verify CUDA works
+            _ = cp.zeros(10)
+            return True, "CuPy available with CUDA"
+        except ImportError:
+            return False, "CuPy not installed. Install with: pip install cupy-cuda12x"
+        except Exception as e:
+            return False, f"CuPy installed but CUDA failed: {e}"
 
 
 def compile_model(
-    model: torch.nn.Module, 
+    model: torch.nn.Module,
     mode: str = "reduce-overhead",
     fullgraph: bool = False,
-    dynamic: bool = None,
+    dynamic: Optional[bool] = None,
 ) -> torch.nn.Module:
     """
     Wrap model with torch.compile for significant speedup.
@@ -115,15 +173,21 @@ def compile_model(
         return model
 
 
-def compile_settling_loop(settling_fn):
+def compile_settling_loop(settling_fn: Callable) -> Callable:
     """
     Decorator to compile the inner settling loop for maximum speed.
-    
+
     Use this on the forward_step method of EqProp models:
-    
+
         @compile_settling_loop
         def forward_step(self, h, x_emb):
             ...
+
+    Args:
+        settling_fn: Function to compile
+
+    Returns:
+        Compiled function
     """
     if not hasattr(torch, 'compile'):
         return settling_fn

@@ -80,7 +80,7 @@ __all__ = [
     "EqPropTrainer",
     # Models
     "LoopedMLP",
-    "BackpropMLP", 
+    "BackpropMLP",
     "ConvEqProp",
     "TransformerEqProp",
     # Kernel

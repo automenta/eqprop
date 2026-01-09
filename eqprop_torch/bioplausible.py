@@ -6,30 +6,24 @@ All algorithms inherit from BaseAlgorithm (nn.Module) and provide both
 standard forward() and custom train_step() methods.
 """
 
-import sys
-from pathlib import Path
-
-# Ensure algorithms/ is in path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 try:
-    # Import all algorithm classes directly
-    from algorithms import (
-        BaseAlgorithm,
+    # Import all algorithm classes directly from the algorithms package
+    from ..algorithms import (
+        ALGORITHM_REGISTRY,
+        AdaptiveFeedbackAlignment,
         BackpropBaseline,
+        ContrastiveFeedbackAlignment,
+        EnergyGuidedFA,
+        EnergyMinimizingFA,
+        EquilibriumAlignment,
+        LayerwiseEquilibriumFA,
+        MomentumEquilibrium,
+        PredictiveCodingHybrid,
+        SparseEquilibrium,
         StandardEqProp,
         StandardFA,
-        EquilibriumAlignment,
-        AdaptiveFeedbackAlignment,
-        ContrastiveFeedbackAlignment,
-        LayerwiseEquilibriumFA,
-        PredictiveCodingHybrid,
-        EnergyGuidedFA,
-        SparseEquilibrium,
-        MomentumEquilibrium,
         StochasticFA,
-        EnergyMinimizingFA,
-        ALGORITHM_REGISTRY,
+        BaseAlgorithm,
     )
     HAS_BIOPLAUSIBLE = True
 except ImportError as e:

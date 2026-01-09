@@ -15,8 +15,10 @@ Usage:
     kernel.train_step(x_batch, y_batch)
 """
 
+import warnings
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import numpy as np
-from typing import Dict, Tuple, Optional
 
 
 # Try to import CuPy for GPU
@@ -28,63 +30,83 @@ except ImportError:
     HAS_CUPY = False
 
 
-def get_backend(use_gpu: bool):
+def get_backend(use_gpu: bool) -> Any:
     """Return appropriate array library (CuPy or NumPy)."""
     if use_gpu and HAS_CUPY:
         return cp
     return np
 
 
-def to_numpy(arr):
+def to_numpy(arr: Any) -> np.ndarray:
     """Convert array to NumPy (handles both NumPy and CuPy arrays)."""
     if HAS_CUPY and cp is not None and isinstance(arr, cp.ndarray):
         return cp.asnumpy(arr)
     return arr
 
 
-def spectral_normalize(W, num_iters: int = 1, u: Optional[np.ndarray] = None, xp=np):
+def spectral_normalize(W: np.ndarray, num_iters: int = 1, u: Optional[np.ndarray] = None, xp=np) -> Tuple[np.ndarray, Optional[np.ndarray], float]:
     """Power iteration spectral normalization.
-    
+
     Normalizes W by its largest singular value (spectral norm).
     This ensures the operator norm ‖W‖ ≈ 1, maintaining Lipschitz < 1.
-    
+
     Args:
         W: Weight matrix [out_dim, in_dim]
         num_iters: Power iteration steps (1 is usually enough)
         u: Previous u vector for warm start
         xp: Array module (np or cp)
-        
+
     Returns:
         W_normalized: Normalized weight matrix
         u_new: Updated u vector for next call
         sigma: Estimated spectral norm
     """
     out_dim, in_dim = W.shape
-    
-    if u is None:
-        u = xp.random.randn(out_dim).astype(W.dtype)
-        u = u / xp.linalg.norm(u)
-    
+
+    u = _initialize_u_vector(u, out_dim, W.dtype, xp)
+
     for _ in range(num_iters):
-        v = W.T @ u
-        v = v / (xp.linalg.norm(v) + 1e-12)
-        u = W @ v
-        u = u / (xp.linalg.norm(u) + 1e-12)
-    
-    sigma = u @ W @ v
+        v = _compute_v_vector(W, u, xp)
+        u = _compute_u_vector(W, v, xp)
+
+    sigma = _compute_spectral_norm(W, u, v)
     W_normalized = W / (sigma + 1e-12)
-    
+
     return W_normalized, u, sigma
 
 
-def softmax(x, xp=np):
+def _initialize_u_vector(u: Optional[np.ndarray], out_dim: int, dtype: np.dtype, xp) -> np.ndarray:
+    """Initialize or validate the u vector for power iteration."""
+    if u is None:
+        u = xp.random.randn(out_dim).astype(dtype)
+    return u / xp.linalg.norm(u)
+
+
+def _compute_v_vector(W: np.ndarray, u: np.ndarray, xp) -> np.ndarray:
+    """Compute v vector in power iteration: v = W.T @ u, normalized."""
+    v = W.T @ u
+    return v / (xp.linalg.norm(v) + 1e-12)
+
+
+def _compute_u_vector(W: np.ndarray, v: np.ndarray, xp) -> np.ndarray:
+    """Compute u vector in power iteration: u = W @ v, normalized."""
+    u = W @ v
+    return u / (xp.linalg.norm(u) + 1e-12)
+
+
+def _compute_spectral_norm(W: np.ndarray, u: np.ndarray, v: np.ndarray) -> float:
+    """Compute the spectral norm (largest singular value) of W."""
+    return u @ W @ v
+
+
+def softmax(x: np.ndarray, xp=np) -> np.ndarray:
     """Stable softmax."""
     x_max = xp.max(x, axis=-1, keepdims=True)
     exp_x = xp.exp(x - x_max)
     return exp_x / xp.sum(exp_x, axis=-1, keepdims=True)
 
 
-def cross_entropy_loss(logits, targets, xp=np):
+def cross_entropy_loss(logits: np.ndarray, targets: np.ndarray, xp=np) -> float:
     """Cross-entropy loss from logits."""
     batch_size = logits.shape[0]
     probs = softmax(logits, xp)
@@ -94,7 +116,7 @@ def cross_entropy_loss(logits, targets, xp=np):
     return loss
 
 
-def tanh_deriv(x, xp=np):
+def tanh_deriv(x: np.ndarray, xp=np) -> np.ndarray:
     """Derivative of tanh: 1 - tanh(x)^2"""
     return 1 - xp.tanh(x) ** 2
 
@@ -117,19 +139,19 @@ class EqPropKernel:
     """
     
     def __init__(
-        self, 
-        input_dim: int, 
-        hidden_dim: int, 
+        self,
+        input_dim: int,
+        hidden_dim: int,
         output_dim: int,
-        gamma: float = 0.5, 
-        beta: float = 0.22, 
+        gamma: float = 0.5,
+        beta: float = 0.22,
         max_steps: int = 10,
-        epsilon: float = 1e-3, 
+        epsilon: float = 1e-3,
         lr: float = 0.001,
-        use_spectral_norm: bool = True, 
+        use_spectral_norm: bool = True,
         use_gpu: bool = False,
         adaptive_epsilon: bool = True,
-    ):
+    ) -> None:
         """Initialize EqProp kernel.
         
         Args:
@@ -184,36 +206,53 @@ class EqPropKernel:
             't': 0,
         }
     
-    def _init_weight(self, in_dim: int, out_dim: int, scale: float = 0.5):
+    def _init_weight(self, in_dim: int, out_dim: int, scale: float = 0.5) -> np.ndarray:
         """Initialize weight matrix with Xavier-like initialization."""
         xp = self.xp
         std = scale * np.sqrt(2.0 / (in_dim + out_dim))
         W = xp.random.randn(out_dim, in_dim).astype(np.float32) * std
         return W
     
-    def _get_normalized_weights(self) -> Dict:
+    def _get_normalized_weights(self) -> Dict[str, np.ndarray]:
         """Get spectral-normalized weights."""
         if not self.use_spectral_norm:
             return self.weights.copy()
-        
+
         weights = self.weights.copy()
-        
-        W1_norm, self.sn_state['W1_u'], _ = spectral_normalize(
-            self.weights['W1'], u=self.sn_state['W1_u'], xp=self.xp
-        )
-        weights['W1'] = W1_norm
-        
-        W2_norm, self.sn_state['W2_u'], _ = spectral_normalize(
-            self.weights['W2'], u=self.sn_state['W2_u'], xp=self.xp
-        )
-        weights['W2'] = W2_norm
-        
+
+        # Normalize W1 and W2 with spectral normalization
+        weights['W1'] = self._normalize_weight('W1', 'W1_u')
+        weights['W2'] = self._normalize_weight('W2', 'W2_u')
+
         return weights
+
+    def _should_normalize_weight(self, weight_key: str) -> bool:
+        """Check if a weight should be normalized."""
+        return self.use_spectral_norm and weight_key in ['W1', 'W2']
+
+    def _normalize_weight(self, weight_key: str, sn_state_key: str) -> np.ndarray:
+        """Normalize a specific weight matrix using spectral normalization."""
+        weight = self.weights[weight_key]
+        u_state = self.sn_state[sn_state_key]
+
+        normalized_weight, new_u_state, _ = spectral_normalize(
+            weight, u=u_state, xp=self.xp
+        )
+
+        self.sn_state[sn_state_key] = new_u_state
+        return normalized_weight
     
-    def forward_step(self, h, x_emb, weights) -> Tuple:
-        """Single equilibrium step.
-        
-        h_next = (1 - γ) * h + γ * (FFN(h) + x_emb)
+    def forward_step(self, h: np.ndarray, x_emb: np.ndarray, weights: Dict[str, np.ndarray]) -> Tuple[np.ndarray, Dict[str, np.ndarray]]:
+        """
+        Single equilibrium step.
+
+        Args:
+            h: Current hidden state
+            x_emb: Embedded input
+            weights: Model weights dictionary
+
+        Returns:
+            Next hidden state and activation dictionary
         """
         xp = self.xp
         
@@ -235,44 +274,93 @@ class EqPropKernel:
         
         return h_next, activations
     
-    def solve_equilibrium(self, x, nudge_grad=None) -> Tuple:
-        """Find equilibrium state h* via fixed-point iteration."""
+    def solve_equilibrium(self, x: np.ndarray, nudge_grad: Optional[np.ndarray] = None) -> Tuple[np.ndarray, List[Dict[str, np.ndarray]], Dict[str, Any]]:
+        """
+        Find equilibrium state h* via fixed-point iteration.
+
+        Args:
+            x: Input data
+            nudge_grad: Optional gradient for nudged phase
+
+        Returns:
+            Equilibrium state, activation log, and convergence info
+        """
         xp = self.xp
         batch_size = x.shape[0]
-        
-        if self.use_gpu and not isinstance(x, xp.ndarray):
-            x = xp.asarray(x)
-        
-        x_emb = x @ self.weights['embed'].T + self.biases['embed']
+
+        x = self._prepare_input(x)
+        x_emb = self._compute_embedded_input(x)
         weights = self._get_normalized_weights()
         h = xp.zeros((batch_size, self.hidden_dim), dtype=np.float32)
-        
+
         activations_log = []
-        
+
         for t in range(self.max_steps):
-            h_prev = h.copy()
-            h, activations = self.forward_step(h, x_emb, weights)
+            h, activations = self._perform_equilibrium_step(h, x_emb, weights, nudge_grad)
             activations_log.append(activations)
-            
-            if nudge_grad is not None:
-                h = h - self.beta * nudge_grad
-            
-            diff = xp.max(xp.linalg.norm(h - h_prev, axis=1))
-            threshold = self.epsilon * (2.0 if self.adaptive_epsilon and t > 5 else 1.0)
-            
-            if diff < threshold:
+
+            if self._check_convergence(h, activations_log[-1]['h'], t):
                 return h, activations_log, {'steps': t + 1, 'converged': True}
-        
+
         return h, activations_log, {'steps': self.max_steps, 'converged': False}
+
+    def _prepare_input(self, x: np.ndarray) -> np.ndarray:
+        """Prepare input for processing on the appropriate device."""
+        if self.use_gpu and not isinstance(x, self.xp.ndarray):
+            return self.xp.asarray(x)
+        return x
+
+    def _compute_embedded_input(self, x: np.ndarray) -> np.ndarray:
+        """Compute embedded input representation."""
+        return x @ self.weights['embed'].T + self.biases['embed']
+
+    def _perform_equilibrium_step(self, h: np.ndarray, x_emb: np.ndarray, weights: Dict[str, np.ndarray],
+                                 nudge_grad: Optional[np.ndarray]) -> Tuple[np.ndarray, Dict[str, np.ndarray]]:
+        """Perform a single equilibrium step, applying nudge if provided."""
+        h_prev = h.copy()
+        h, activations = self.forward_step(h, x_emb, weights)
+
+        if nudge_grad is not None:
+            h = h - self.beta * nudge_grad
+
+        return h, activations
+
+    def _check_convergence(self, h: np.ndarray, h_prev: np.ndarray, step: int) -> bool:
+        """Check if the equilibrium has converged."""
+        diff = self.xp.max(self.xp.linalg.norm(h - h_prev, axis=1))
+        threshold = self._get_convergence_threshold(step)
+        return diff < threshold
+
+    def _get_convergence_threshold(self, step: int) -> float:
+        """Get the convergence threshold based on the current step."""
+        multiplier = 2.0 if self.adaptive_epsilon and step > 5 else 1.0
+        return self.epsilon * multiplier
     
-    def compute_output(self, h):
-        """Compute output logits from hidden state."""
+    def compute_output(self, h: np.ndarray) -> np.ndarray:
+        """
+        Compute output logits from hidden state.
+
+        Args:
+            h: Hidden state
+
+        Returns:
+            Output logits
+        """
         return h @ self.weights['head'].T + self.biases['head']
     
-    def compute_hebbian_update(self, act_free: Dict, act_nudged: Dict) -> Dict:
-        """Compute contrastive Hebbian weight updates.
-        
-        ΔW = (1/β) * (A_nudged ⊗ A_nudged.T - A_free ⊗ A_free.T)
+    def compute_hebbian_update(self, act_free: Dict[str, np.ndarray], act_nudged: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+        """
+        Compute contrastive Hebbian weight updates.
+
+        Args:
+            act_free: Activations from free phase
+            act_nudged: Activations from nudged phase
+
+        Returns:
+            Weight updates dictionary
+
+        Formula:
+            ΔW = (1/β) * (A_nudged ⊗ A_nudged.T - A_free ⊗ A_free.T)
         """
         batch_size = act_free['h'].shape[0]
         
@@ -288,8 +376,16 @@ class EqPropKernel:
         
         return grads
     
-    def adam_update(self, grads: Dict, beta1: float = 0.9, beta2: float = 0.999, eps: float = 1e-8):
-        """Apply Adam optimizer update."""
+    def adam_update(self, grads: Dict[str, np.ndarray], beta1: float = 0.9, beta2: float = 0.999, eps: float = 1e-8) -> None:
+        """
+        Apply Adam optimizer update.
+
+        Args:
+            grads: Gradient dictionary
+            beta1: Adam beta1 parameter
+            beta2: Adam beta2 parameter
+            eps: Adam epsilon parameter
+        """
         self.adam_state['t'] += 1
         t = self.adam_state['t']
         
@@ -306,49 +402,78 @@ class EqPropKernel:
             
             self.weights[key] -= self.lr * m_hat / (self.xp.sqrt(v_hat) + eps)
     
-    def train_step(self, x, y) -> Dict[str, float]:
-        """Full EqProp training step.
-        
+    def train_step(self, x: np.ndarray, y: np.ndarray) -> Dict[str, float]:
+        """
+        Full EqProp training step.
+
         Args:
             x: Input batch [batch, input_dim]
             y: Target labels [batch]
-            
+
         Returns:
             Dict with loss, accuracy, free_steps, nudged_steps
         """
         xp = self.xp
-        
+
+        # Prepare inputs
+        x, y = self._prepare_inputs(x, y)
+
+        # Free Phase
+        h_free, act_log_free, info_free = self.solve_equilibrium(x)
+
+        # Compute gradients for nudging
+        logits, d_logits, nudge_grad = self._compute_gradients_for_nudging(h_free, y, xp)
+
+        # Nudged Phase
+        h_nudged, act_log_nudged, info_nudged = self.solve_equilibrium(x, nudge_grad)
+
+        # Compute Updates
+        grads = self.compute_hebbian_update(act_log_free[-1], act_log_nudged[-1])
+        grads['head'] = d_logits.T @ h_free / self._get_batch_size(x)
+
+        self.adam_update(grads)
+
+        # Compute metrics
+        metrics = self._compute_training_metrics(logits, y, info_free, info_nudged, xp)
+
+        return metrics
+
+    def _prepare_inputs(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """Prepare input tensors for processing."""
+        xp = self.xp
+
         if not isinstance(x, np.ndarray) and not (HAS_CUPY and cp is not None and isinstance(x, cp.ndarray)):
             x = np.asarray(x)
         if self.use_gpu:
             x = xp.asarray(x)
             y = xp.asarray(y)
-        
-        # Free Phase
-        h_free, act_log_free, info_free = self.solve_equilibrium(x)
-        
+
+        return x, y
+
+    def _compute_gradients_for_nudging(self, h_free: np.ndarray, y: np.ndarray, xp) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute gradients needed for the nudging phase."""
         logits = self.compute_output(h_free)
         probs = softmax(logits, xp)
-        batch_size = x.shape[0]
+        batch_size = self._get_batch_size(logits)
+
         one_hot = xp.zeros_like(probs)
         one_hot[xp.arange(batch_size), y] = 1.0
         d_logits = probs - one_hot
         nudge_grad = d_logits @ self.weights['head']
-        
-        # Nudged Phase
-        h_nudged, act_log_nudged, info_nudged = self.solve_equilibrium(x, nudge_grad)
-        
-        # Compute Updates
-        grads = self.compute_hebbian_update(act_log_free[-1], act_log_nudged[-1])
-        grads['head'] = d_logits.T @ h_free / batch_size
-        
-        self.adam_update(grads)
-        
-        # Metrics
+
+        return logits, d_logits, nudge_grad
+
+    def _get_batch_size(self, tensor: np.ndarray) -> int:
+        """Get the batch size from a tensor."""
+        return tensor.shape[0]
+
+    def _compute_training_metrics(self, logits: np.ndarray, y: np.ndarray,
+                                info_free: Dict[str, Any], info_nudged: Dict[str, Any], xp) -> Dict[str, float]:
+        """Compute training metrics."""
         loss = cross_entropy_loss(logits, y, xp)
         preds = xp.argmax(logits, axis=1)
         accuracy = xp.mean(preds == y)
-        
+
         return {
             'loss': float(to_numpy(loss)),
             'accuracy': float(to_numpy(accuracy)),
@@ -356,8 +481,16 @@ class EqPropKernel:
             'nudged_steps': info_nudged['steps'],
         }
     
-    def predict(self, x) -> np.ndarray:
-        """Run inference on input."""
+    def predict(self, x: np.ndarray) -> np.ndarray:
+        """
+        Run inference on input.
+
+        Args:
+            x: Input data
+
+        Returns:
+            Predicted class indices
+        """
         xp = self.xp
         if self.use_gpu:
             x = xp.asarray(x)
@@ -366,8 +499,17 @@ class EqPropKernel:
         logits = self.compute_output(h_star)
         return to_numpy(xp.argmax(logits, axis=1))
     
-    def evaluate(self, x, y) -> float:
-        """Evaluate accuracy on a dataset."""
+    def evaluate(self, x: np.ndarray, y: np.ndarray) -> float:
+        """
+        Evaluate accuracy on a dataset.
+
+        Args:
+            x: Input data
+            y: True labels
+
+        Returns:
+            Accuracy score
+        """
         preds = self.predict(x)
         y_np = to_numpy(y) if not isinstance(y, np.ndarray) else y
         return float(np.mean(preds == y_np))

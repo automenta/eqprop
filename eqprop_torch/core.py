@@ -5,16 +5,17 @@ High-level API for training EqProp models with automatic acceleration,
 checkpointing, and ONNX export.
 """
 
+import time
+import warnings
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from typing import Optional, Callable, Dict, Any, List, Tuple
-import time
-from pathlib import Path
-import warnings
 
-from .acceleration import compile_model, get_optimal_backend, enable_tf32
+from .acceleration import compile_model, enable_tf32, get_optimal_backend
 from .kernel import EqPropKernel
 
 class EqPropTrainer:
@@ -47,10 +48,10 @@ class EqPropTrainer:
         device: Optional[str] = None,
         compile_mode: str = "reduce-overhead",
         allow_tf32: bool = True,
-    ):
+    ) -> None:
         """
-        Initialize trainer.
-        
+        Initialize the EqProp trainer.
+
         Args:
             model: EqProp model (LoopedMLP, ConvEqProp, TransformerEqProp, etc.)
             optimizer: Optimizer name ('adam', 'adamw', 'sgd')
@@ -61,7 +62,7 @@ class EqPropTrainer:
             device: Device to train on (auto-detected if None)
             compile_mode: torch.compile mode ('default', 'reduce-overhead', 'max-autotune')
             allow_tf32: If True, enable TensorFloat-32 on Ampere+ GPUs (default: True)
-        
+
         Raises:
             ValueError: If invalid optimizer or compile_mode
             RuntimeError: If use_kernel=True but model incompatible
@@ -70,35 +71,68 @@ class EqPropTrainer:
         enable_tf32(allow_tf32)
         
         # Validate inputs
-        if optimizer not in ["adam", "adamw", "sgd"]:
-            raise ValueError(
-                f"Invalid optimizer '{optimizer}'. Must be one of: adam, adamw, sgd"
-            )
-        
-        if compile_mode not in ["default", "reduce-overhead", "max-autotune"]:
-            raise ValueError(
-                f"Invalid compile_mode '{compile_mode}'. "
-                f"Must be one of: default, reduce-overhead, max-autotune"
-            )
-        
-        if lr <= 0:
-            raise ValueError(f"Learning rate must be positive, got {lr}")
-        
+        self._validate_inputs(optimizer, compile_mode, lr, weight_decay)
+
         self.device = device or get_optimal_backend()
         self.use_kernel = use_kernel
         self._epoch = 0
         self._step = 0
         self._best_metric = float('inf')
         self._history = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
-        
+
         # Move model to device
+        self._setup_model(model, use_compile, compile_mode)
+
+        # Create optimizer
+        self.optimizer = self._create_optimizer(optimizer, lr, weight_decay)
+
+        # Kernel mode initialization
+        if use_kernel:
+            self._init_kernel_mode_safe()
+    
+    def _validate_inputs(self, optimizer: str, compile_mode: str, lr: float, weight_decay: float) -> None:
+        """Validate initialization parameters."""
+        self._validate_optimizer(optimizer)
+        self._validate_compile_mode(compile_mode)
+        self._validate_lr(lr)
+        self._validate_weight_decay(weight_decay)
+
+    def _validate_optimizer(self, optimizer: str) -> None:
+        """Validate optimizer name."""
+        valid_optimizers = ["adam", "adamw", "sgd"]
+        if optimizer not in valid_optimizers:
+            raise ValueError(
+                f"Invalid optimizer '{optimizer}'. Must be one of: {', '.join(valid_optimizers)}"
+            )
+
+    def _validate_compile_mode(self, compile_mode: str) -> None:
+        """Validate compile mode."""
+        valid_compile_modes = ["default", "reduce-overhead", "max-autotune"]
+        if compile_mode not in valid_compile_modes:
+            raise ValueError(
+                f"Invalid compile_mode '{compile_mode}'. "
+                f"Must be one of: {', '.join(valid_compile_modes)}"
+            )
+
+    def _validate_lr(self, lr: float) -> None:
+        """Validate learning rate."""
+        if lr <= 0:
+            raise ValueError(f"Learning rate must be positive, got {lr}")
+
+    def _validate_weight_decay(self, weight_decay: float) -> None:
+        """Validate weight decay."""
+        if weight_decay < 0:
+            raise ValueError(f"Weight decay must be non-negative, got {weight_decay}")
+
+    def _setup_model(self, model: nn.Module, use_compile: bool, compile_mode: str) -> None:
+        """Setup model on device and apply compilation if requested."""
         try:
             self.model = model.to(self.device)
         except Exception as e:
             raise RuntimeError(f"Failed to move model to device '{self.device}': {e}")
-        
+
         # Apply torch.compile if requested
-        if use_compile and not use_kernel:
+        if use_compile and not self.use_kernel:
             if not hasattr(torch, 'compile'):
                 warnings.warn(
                     "torch.compile not available (requires PyTorch 2.0+). "
@@ -110,33 +144,36 @@ class EqPropTrainer:
                     self.model = compile_model(self.model, mode=compile_mode)
                 except Exception as e:
                     warnings.warn(f"torch.compile failed: {e}. Using uncompiled model.", UserWarning)
-        
-        # Create optimizer
+
+    def _init_kernel_mode_safe(self) -> None:
+        """Initialize CuPy kernel for O(1) memory training with error handling."""
         try:
-            self.optimizer = self._create_optimizer(optimizer, lr, weight_decay)
+            self._init_kernel_mode()
         except Exception as e:
-            raise RuntimeError(f"Failed to create optimizer: {e}")
-        
-        # Kernel mode initialization
-        if use_kernel:
-            try:
-                self._init_kernel_mode()
-            except Exception as e:
-                warnings.warn(f"Kernel mode initialization failed: {e}", UserWarning)
-                self.use_kernel = False
-    
+            warnings.warn(f"Kernel mode initialization failed: {e}", UserWarning)
+            self.use_kernel = False
+
     def _create_optimizer(self, name: str, lr: float, weight_decay: float) -> torch.optim.Optimizer:
         """Create optimizer by name."""
-        if name == "adam":
-            return torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
-        elif name == "adamw":
-            return torch.optim.AdamW(self.model.parameters(), lr=lr, weight_decay=weight_decay)
-        elif name == "sgd":
-            return torch.optim.SGD(self.model.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay)
-        else:
+        optimizer_factory = self._get_optimizer_factory(name, lr, weight_decay)
+        if optimizer_factory is None:
             raise ValueError(f"Unknown optimizer: {name}. Use 'adam', 'adamw', or 'sgd'.")
+
+        try:
+            return optimizer_factory()
+        except Exception as e:
+            raise RuntimeError(f"Failed to create optimizer: {e}")
+
+    def _get_optimizer_factory(self, name: str, lr: float, weight_decay: float) -> Optional[Callable[[], torch.optim.Optimizer]]:
+        """Get optimizer factory function by name."""
+        optimizers = {
+            "adam": lambda: torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay),
+            "adamw": lambda: torch.optim.AdamW(self.model.parameters(), lr=lr, weight_decay=weight_decay),
+            "sgd": lambda: torch.optim.SGD(self.model.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay)
+        }
+        return optimizers.get(name)
     
-    def _init_kernel_mode(self):
+    def _init_kernel_mode(self) -> None:
         """Initialize CuPy kernel for O(1) memory training."""
         from .kernel import EqPropKernel, HAS_CUPY
         
@@ -172,13 +209,13 @@ class EqPropTrainer:
         epochs: int = 10,
         val_loader: Optional[DataLoader] = None,
         loss_fn: Optional[Callable] = None,
-        callback: Optional[Callable[[Dict], None]] = None,
+        callback: Optional[Callable[[Dict[str, Any]], None]] = None,
         log_interval: int = 100,
         checkpoint_path: Optional[str] = None,
-    ) -> Dict[str, list]:
+    ) -> Dict[str, List[float]]:
         """
         Train the model.
-        
+
         Args:
             train_loader: Training data loader
             epochs: Number of epochs
@@ -187,7 +224,7 @@ class EqPropTrainer:
             callback: Called after each epoch with metrics dict
             log_interval: Print progress every N batches
             checkpoint_path: Save best checkpoint to this path
-            
+
         Returns:
             History dict with train/val losses and accuracies
         """
@@ -232,157 +269,246 @@ class EqPropTrainer:
         return self._history
     
     def _train_epoch(
-        self, 
-        loader: DataLoader, 
+        self,
+        loader: DataLoader,
         loss_fn: Callable,
         log_interval: int,
-    ) -> tuple:
-        """Run one training epoch."""
+    ) -> Tuple[float, float]:
+        """
+        Run one training epoch.
+
+        Args:
+            loader: Training data loader
+            loss_fn: Loss function to use
+            log_interval: Print progress every N batches
+
+        Returns:
+            Average loss and accuracy for the epoch
+        """
         self.model.train()
         total_loss = 0.0
         correct = 0
         total = 0
-        
+
         for batch_idx, (x, y) in enumerate(loader):
-            x, y = x.to(self.device), y.to(self.device)
-            
-            # Flatten images if needed
-            if x.dim() == 4 and hasattr(self.model, 'input_dim'):
-                x = x.view(x.size(0), -1)
-            
-            # Forward pass
-            self.optimizer.zero_grad()
-            output = self.model(x)
-            loss = loss_fn(output, y)
-            
-            # Backward pass
-            loss.backward()
-            self.optimizer.step()
-            
-            # Track metrics
-            total_loss += loss.item() * x.size(0)
-            _, predicted = output.max(1)
-            correct += predicted.eq(y).sum().item()
-            total += x.size(0)
-            self._step += 1
-        
-        return total_loss / total, correct / total
+            try:
+                batch_result = self._process_training_batch(x, y, loss_fn, batch_idx, log_interval)
+
+                # Track metrics
+                total_loss += batch_result['loss']
+                correct += batch_result['correct']
+                total += batch_result['total']
+                self._step += 1
+
+            except Exception as e:
+                raise RuntimeError(f"Error processing batch {batch_idx}: {str(e)}")
+
+        return total_loss / total if total > 0 else 0.0, correct / total if total > 0 else 0.0
+
+    def _process_training_batch(self, x: torch.Tensor, y: torch.Tensor, loss_fn: Callable,
+                              batch_idx: int, log_interval: int) -> Dict[str, float]:
+        """Process a single training batch and return metrics."""
+        x, y = x.to(self.device), y.to(self.device)
+
+        # Flatten images if needed
+        x = self._maybe_flatten_input(x)
+
+        # Process batch
+        batch_loss, batch_correct, batch_total = self._process_batch(x, y, loss_fn)
+
+        # Log progress
+        if log_interval > 0 and batch_idx % log_interval == 0:
+            print(f'Batch {batch_idx}: Loss = {batch_loss / batch_total:.4f}')
+
+        return {
+            'loss': batch_loss,
+            'correct': batch_correct,
+            'total': batch_total
+        }
+
+    def _maybe_flatten_input(self, x: torch.Tensor) -> torch.Tensor:
+        """Flatten input tensor if it's 4D and model has input_dim attribute."""
+        if x.dim() == 4 and hasattr(self.model, 'input_dim'):
+            return x.view(x.size(0), -1)
+        return x
+
+    def _process_batch(self, x: torch.Tensor, y: torch.Tensor, loss_fn: Callable) -> Tuple[float, int, int]:
+        """Process a single batch and return loss, correct count, and total count."""
+        self.optimizer.zero_grad()
+
+        output = self.model(x)
+        loss = loss_fn(output, y)
+
+        # Backward pass
+        loss.backward()
+        self.optimizer.step()
+
+        # Calculate metrics
+        return self._calculate_batch_metrics(loss, output, y, x.size(0))
+
+    def _calculate_batch_metrics(self, loss: torch.Tensor, output: torch.Tensor,
+                                targets: torch.Tensor, batch_size: int) -> Tuple[float, int, int]:
+        """Calculate loss, correct predictions, and batch size for a batch."""
+        total_loss = loss.item() * batch_size
+        _, predicted = output.max(1)
+        correct = predicted.eq(targets).sum().item()
+        return total_loss, correct, batch_size
     
     @torch.no_grad()
     def evaluate(
-        self, 
-        loader: DataLoader, 
-        loss_fn: Optional[Callable] = None,
+        self,
+        loader: DataLoader,
+        loss_fn: Optional[Callable[..., torch.Tensor]] = None,
     ) -> Dict[str, float]:
         """
         Evaluate model on a dataset.
-        
+
         Args:
             loader: Data loader
             loss_fn: Loss function (default: CrossEntropyLoss)
-            
+
         Returns:
             Dict with 'loss' and 'accuracy'
         """
         loss_fn = loss_fn or nn.CrossEntropyLoss()
         self.model.eval()
-        
+
         total_loss = 0.0
         correct = 0
         total = 0
-        
-        for x, y in loader:
-            x, y = x.to(self.device), y.to(self.device)
-            
-            if x.dim() == 4 and hasattr(self.model, 'input_dim'):
-                x = x.view(x.size(0), -1)
-            
-            output = self.model(x)
-            loss = loss_fn(output, y)
-            
-            total_loss += loss.item() * x.size(0)
-            _, predicted = output.max(1)
-            correct += predicted.eq(y).sum().item()
-            total += x.size(0)
-        
+
+        try:
+            for batch_idx, (x, y) in enumerate(loader):
+                try:
+                    batch_metrics = self._evaluate_batch(x, y, loss_fn)
+                    total_loss += batch_metrics['loss']
+                    correct += batch_metrics['correct']
+                    total += batch_metrics['total']
+
+                except Exception as e:
+                    print(f"Warning: Error processing evaluation batch {batch_idx}: {str(e)}. Skipping...")
+                    continue
+
+        except Exception as e:
+            raise RuntimeError(f"Evaluation failed: {str(e)}")
+
         return {
-            'loss': total_loss / total,
-            'accuracy': correct / total,
+            'loss': total_loss / total if total > 0 else float('inf'),
+            'accuracy': correct / total if total > 0 else 0.0,
+        }
+
+    def _evaluate_batch(self, x: torch.Tensor, y: torch.Tensor, loss_fn: Callable) -> Dict[str, float]:
+        """Evaluate a single batch and return metrics."""
+        x, y = x.to(self.device), y.to(self.device)
+        x = self._maybe_flatten_input(x)
+
+        output = self.model(x)
+        loss = loss_fn(output, y)
+
+        batch_size = x.size(0)
+        total_loss = loss.item() * batch_size
+        _, predicted = output.max(1)
+        correct = predicted.eq(y).sum().item()
+
+        return {
+            'loss': total_loss,
+            'correct': correct,
+            'total': batch_size
         }
     
-    def save_checkpoint(self, path: str):
+    def save_checkpoint(self, path: str) -> None:
         """Save model checkpoint."""
-        # Handle compiled models
-        model_to_save = self.model
-        if hasattr(self.model, '_orig_mod'):
-            model_to_save = self.model._orig_mod
-        
-        torch.save({
-            'epoch': self._epoch,
-            'step': self._step,
-            'model_state_dict': model_to_save.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
-            'best_metric': self._best_metric,
-            'history': self._history,
-        }, path)
-    
-    def load_checkpoint(self, path: str):
+        try:
+            # Handle compiled models
+            model_to_save = self.model
+            if hasattr(self.model, '_orig_mod'):
+                model_to_save = self.model._orig_mod
+
+            checkpoint = {
+                'epoch': self._epoch,
+                'step': self._step,
+                'model_state_dict': model_to_save.state_dict(),
+                'optimizer_state_dict': self.optimizer.state_dict(),
+                'best_metric': self._best_metric,
+                'history': self._history,
+            }
+
+            torch.save(checkpoint, path)
+        except Exception as e:
+            raise RuntimeError(f"Failed to save checkpoint to {path}: {str(e)}")
+
+    def load_checkpoint(self, path: str) -> None:
         """Load model checkpoint."""
-        checkpoint = torch.load(path, map_location=self.device)
-        
+        try:
+            checkpoint = torch.load(path, map_location=self.device)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Checkpoint file not found: {path}")
+        except Exception as e:
+            raise RuntimeError(f"Failed to load checkpoint from {path}: {str(e)}")
+
         # Handle compiled models
         model_to_load = self.model
         if hasattr(self.model, '_orig_mod'):
             model_to_load = self.model._orig_mod
-        
-        model_to_load.load_state_dict(checkpoint['model_state_dict'])
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        self._epoch = checkpoint['epoch']
-        self._step = checkpoint['step']
-        self._best_metric = checkpoint.get('best_metric', float('inf'))
-        self._history = checkpoint.get('history', self._history)
+
+        try:
+            model_to_load.load_state_dict(checkpoint['model_state_dict'])
+            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self._epoch = checkpoint['epoch']
+            self._step = checkpoint['step']
+            self._best_metric = checkpoint.get('best_metric', float('inf'))
+            self._history = checkpoint.get('history', self._history)
+        except KeyError as e:
+            raise ValueError(f"Checkpoint file missing required key: {str(e)}")
+        except Exception as e:
+            raise RuntimeError(f"Failed to load model state from checkpoint: {str(e)}")
     
     def export_onnx(
-        self, 
-        path: str, 
-        input_shape: tuple,
+        self,
+        path: str,
+        input_shape: Tuple[int, ...],
         opset_version: int = 14,
-        dynamic_axes: Optional[Dict] = None,
-    ):
+        dynamic_axes: Optional[Dict[str, Dict[int, str]]] = None,
+    ) -> None:
         """
         Export model to ONNX format for deployment.
-        
+
         Args:
             path: Output path (.onnx)
             input_shape: Example input shape, e.g. (1, 784)
             opset_version: ONNX opset version
             dynamic_axes: Dynamic axis specification (optional)
         """
-        # Get uncompiled model
-        model = self.model
-        if hasattr(self.model, '_orig_mod'):
-            model = self.model._orig_mod
-        
-        model.eval()
-        dummy_input = torch.randn(*input_shape, device=self.device)
-        
-        dynamic_axes = dynamic_axes or {'input': {0: 'batch'}, 'output': {0: 'batch'}}
-        
-        torch.onnx.export(
-            model,
-            dummy_input,
-            path,
-            opset_version=opset_version,
-            input_names=['input'],
-            output_names=['output'],
-            dynamic_axes=dynamic_axes,
-        )
+        try:
+            # Get uncompiled model
+            model = self.model
+            if hasattr(self.model, '_orig_mod'):
+                model = self.model._orig_mod
+
+            model.eval()
+            dummy_input = torch.randn(*input_shape, device=self.device)
+
+            dynamic_axes = dynamic_axes or {'input': {0: 'batch'}, 'output': {0: 'batch'}}
+
+            torch.onnx.export(
+                model,
+                dummy_input,
+                path,
+                opset_version=opset_version,
+                input_names=['input'],
+                output_names=['output'],
+                dynamic_axes=dynamic_axes,
+                do_constant_folding=True,
+                export_params=True,
+            )
+        except Exception as e:
+            raise RuntimeError(f"ONNX export failed: {str(e)}")
     
     @property
-    def history(self) -> Dict[str, list]:
+    def history(self) -> Dict[str, List[float]]:
         """Return training history."""
         return self._history
-    
+
     @property
     def current_epoch(self) -> int:
         """Return current epoch number."""
@@ -391,7 +517,7 @@ class EqPropTrainer:
     def compute_lipschitz(self) -> float:
         """
         Compute Lipschitz constant if model supports it.
-        
+
         Returns:
             Lipschitz constant L (or 0.0 if not supported)
         """

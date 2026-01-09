@@ -4,7 +4,7 @@ Configuration defaults for EqProp-Torch
 Centralized configuration for common hyperparameters and settings.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict, Union
 
 
 # Default training hyperparameters
@@ -107,35 +107,39 @@ KERNEL_CONFIG = {
 def get_model_config(preset_name: str, **overrides) -> Dict[str, Any]:
     """
     Get model configuration from preset with optional overrides.
-    
+
     Args:
         preset_name: Name of preset (e.g., 'mnist_small')
         **overrides: Override specific values
-        
+
     Returns:
         Configuration dict
-        
+
     Example:
         >>> config = get_model_config('mnist_small', hidden_dim=256)
     """
+    _validate_preset_name(preset_name)
+
+    config = MODEL_PRESETS[preset_name].copy()
+    config.update(overrides)
+    return config
+
+def _validate_preset_name(preset_name: str) -> None:
+    """Validate that the preset name exists."""
     if preset_name not in MODEL_PRESETS:
         raise ValueError(
             f"Unknown preset '{preset_name}'. "
             f"Available: {list(MODEL_PRESETS.keys())}"
         )
-    
-    config = MODEL_PRESETS[preset_name].copy()
-    config.update(overrides)
-    return config
 
 
 def get_dataset_info(dataset_name: str) -> Dict[str, Any]:
     """
     Get dataset configuration.
-    
+
     Args:
         dataset_name: Name of dataset (e.g., 'mnist')
-        
+
     Returns:
         Configuration dict with input_dim, output_dim, etc.
     """

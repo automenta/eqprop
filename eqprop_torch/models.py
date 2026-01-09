@@ -5,11 +5,12 @@ All neural network architectures supporting Equilibrium Propagation training.
 Models use spectral normalization to guarantee Lipschitz constant L < 1 for stable dynamics.
 """
 
+import math
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
-from typing import Optional, List, Tuple
 from torch.nn.utils.parametrizations import spectral_norm
 
 
@@ -20,18 +21,14 @@ from torch.nn.utils.parametrizations import spectral_norm
 def spectral_linear(in_features: int, out_features: int, bias: bool = True, use_sn: bool = True) -> nn.Module:
     """Create a linear layer with optional spectral normalization."""
     layer = nn.Linear(in_features, out_features, bias=bias)
-    if use_sn:
-        return spectral_norm(layer)
-    return layer
+    return spectral_norm(layer) if use_sn else layer
 
 
-def spectral_conv2d(in_channels: int, out_channels: int, kernel_size: int, 
+def spectral_conv2d(in_channels: int, out_channels: int, kernel_size: int,
                    stride: int = 1, padding: int = 0, bias: bool = True, use_sn: bool = True) -> nn.Module:
     """Create a Conv2d layer with optional spectral normalization."""
     layer = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
-    if use_sn:
-        return spectral_norm(layer)
-    return layer
+    return spectral_norm(layer) if use_sn else layer
 
 
 def estimate_lipschitz(layer: nn.Module, iterations: int = 3) -> float:
@@ -39,34 +36,37 @@ def estimate_lipschitz(layer: nn.Module, iterations: int = 3) -> float:
     Estimate Lipschitz constant (spectral norm) of a layer using power iteration.
     Works for Linear and Conv2d layers.
     """
-    if hasattr(layer, 'parametrizations') and hasattr(layer.parametrizations, 'weight'):
-        weight = layer.weight
-    elif hasattr(layer, 'weight'):
-        weight = layer.weight
-    else:
+    weight = _get_layer_weight(layer)
+    if weight is None:
         return 0.0
-        
+
     device = weight.device
-    
-    # Reshape conv weights to 2D matrix
-    if weight.dim() > 2:
-        W = weight.reshape(weight.shape[0], -1)
-    else:
-        W = weight
-        
+    W = _reshape_weight_for_power_iteration(weight)
+
     with torch.no_grad():
-        u = torch.randn(W.shape[1], device=device)
-        u = F.normalize(u, dim=0)
-        
+        u = F.normalize(torch.randn(W.shape[1], device=device), dim=0)
+
         for _ in range(iterations):
-            v = torch.mv(W, u)
-            v = F.normalize(v, dim=0)
-            u = torch.mv(W.t(), v)
-            u = F.normalize(u, dim=0)
-            
+            v = F.normalize(torch.mv(W, u), dim=0)
+            u = F.normalize(torch.mv(W.t(), v), dim=0)
+
         sigma = torch.dot(u, torch.mv(W.t(), v))
-        
+
     return sigma.item()
+
+
+def _get_layer_weight(layer: nn.Module) -> Optional[torch.Tensor]:
+    """Extract weight tensor from a layer."""
+    if hasattr(layer, 'parametrizations') and hasattr(layer.parametrizations, 'weight'):
+        return layer.weight
+    elif hasattr(layer, 'weight'):
+        return layer.weight
+    return None
+
+
+def _reshape_weight_for_power_iteration(weight: torch.Tensor) -> torch.Tensor:
+    """Reshape weight tensor for power iteration (conv weights to 2D matrix)."""
+    return weight.reshape(weight.shape[0], -1) if weight.dim() > 2 else weight
 
 
 # =============================================================================
@@ -76,14 +76,14 @@ def estimate_lipschitz(layer: nn.Module, iterations: int = 3) -> float:
 class LoopedMLP(nn.Module):
     """
     A recurrent MLP that iterates to a fixed-point equilibrium.
-    
+
     The key insight: By constraining Lipschitz constant L < 1 via spectral norm,
     the network is guaranteed to converge to a unique fixed point.
-    
+
     Architecture:
         h_{t+1} = tanh(W_in @ x + W_rec @ h_t)
         output = W_out @ h*  (where h* is the fixed point)
-    
+
     Example:
         >>> model = LoopedMLP(784, 256, 10, use_spectral_norm=True)
         >>> x = torch.randn(32, 784)
@@ -92,13 +92,13 @@ class LoopedMLP(nn.Module):
     """
     
     def __init__(
-        self, 
-        input_dim: int, 
-        hidden_dim: int, 
+        self,
+        input_dim: int,
+        hidden_dim: int,
         output_dim: int,
         use_spectral_norm: bool = True,
         max_steps: int = 30,
-    ):
+    ) -> None:
         super().__init__()
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
@@ -123,29 +123,39 @@ class LoopedMLP(nn.Module):
         
         self._init_weights()
     
-    def _init_weights(self):
+    def _init_weights(self) -> None:
         """Initialize weights for stable equilibrium dynamics."""
-        for m in [self.W_in, self.W_rec, self.W_out]:
-            layer = m.parametrizations.weight.original if hasattr(m, 'parametrizations') else m
-            if hasattr(layer, 'weight'):
-                nn.init.xavier_uniform_(layer.weight, gain=0.5)
-                if layer.bias is not None:
-                    nn.init.zeros_(layer.bias)
+        for layer in [self.W_in, self.W_rec, self.W_out]:
+            self._initialize_single_layer(layer)
+
+    def _initialize_single_layer(self, layer: nn.Module) -> None:
+        """Initialize a single layer with proper weight and bias values."""
+        actual_layer = self._get_actual_layer(layer)
+        if hasattr(actual_layer, 'weight'):
+            nn.init.xavier_uniform_(actual_layer.weight, gain=0.5)
+            if actual_layer.bias is not None:
+                nn.init.zeros_(actual_layer.bias)
+
+    def _get_actual_layer(self, layer: nn.Module) -> nn.Module:
+        """Get the actual layer from a potentially wrapped layer."""
+        if hasattr(layer, 'parametrizations') and hasattr(layer.parametrizations, 'weight'):
+            return layer.parametrizations.weight.original
+        return layer
     
     def forward(
-        self, 
-        x: torch.Tensor, 
-        steps: int = None,
+        self,
+        x: torch.Tensor,
+        steps: Optional[int] = None,
         return_trajectory: bool = False,
-    ) -> torch.Tensor:
+    ) -> Union[torch.Tensor, Tuple[torch.Tensor, List[torch.Tensor]]]:
         """
         Forward pass: iterate to equilibrium.
-        
+
         Args:
             x: Input tensor [batch, input_dim]
             steps: Override number of iteration steps
             return_trajectory: If True, return all hidden states
-            
+
         Returns:
             Output logits [batch, output_dim]
             (optionally) trajectory of hidden states
@@ -172,7 +182,9 @@ class LoopedMLP(nn.Module):
     def compute_lipschitz(self) -> float:
         """
         Compute the Lipschitz constant of the recurrent dynamics.
-        With spectral norm: L is guaranteed to be <= 1.
+
+        Returns:
+            Lipschitz constant (guaranteed to be <= 1 with spectral norm)
         """
         with torch.no_grad():
             W = self.W_rec.weight
@@ -180,46 +192,74 @@ class LoopedMLP(nn.Module):
             return s[0].item()
     
     def inject_noise_and_relax(
-        self, 
-        x: torch.Tensor, 
+        self,
+        x: torch.Tensor,
         noise_level: float = 1.0,
         injection_step: int = 15,
         total_steps: int = 30,
-    ) -> dict:
+    ) -> Dict[str, float]:
         """
         Demonstrate self-healing: inject noise and measure damping.
-        Returns a dict with initial noise, final noise, and damping ratio.
+
+        Args:
+            x: Input tensor [batch, input_dim]
+            noise_level: Magnitude of injected noise
+            injection_step: Step at which to inject noise
+            total_steps: Total number of steps to run
+
+        Returns:
+            Dictionary containing noise metrics and damping information
         """
         batch_size = x.shape[0]
-        
         h = torch.zeros(batch_size, self.hidden_dim, device=x.device, dtype=x.dtype)
         x_proj = self.W_in(x)
-        
-        for _ in range(injection_step):
-            h = torch.tanh(x_proj + self.W_rec(h))
-        
+
+        # Run to injection point
+        h = self._run_equilibrium_steps(h, x_proj, injection_step)
+
+        # Inject noise
         h_clean = h.clone()
-        noise = torch.randn_like(h) * noise_level
-        h_noisy = h + noise
-        
-        initial_noise_norm = noise.norm(dim=1).mean().item()
-        
-        h = h_noisy
-        for _ in range(total_steps - injection_step):
-            h = torch.tanh(x_proj + self.W_rec(h))
-        
-        h_clean_final = h_clean
-        for _ in range(total_steps - injection_step):
-            h_clean_final = torch.tanh(x_proj + self.W_rec(h_clean_final))
-        
-        final_noise_norm = (h - h_clean_final).norm(dim=1).mean().item()
-        damping_ratio = final_noise_norm / initial_noise_norm if initial_noise_norm > 0 else 0
-        
+        h_noisy = h + torch.randn_like(h) * noise_level
+
+        initial_noise_norm = self._compute_noise_norm(h, h_clean).item()
+
+        # Run noisy and clean trajectories
+        h_final, h_clean_final = self._run_trajectories(h_noisy, h_clean, x_proj, injection_step, total_steps)
+
+        final_noise_norm = self._compute_noise_norm(h_final, h_clean_final).item()
+        damping_info = self._calculate_damping(initial_noise_norm, final_noise_norm)
+
         return {
             'initial_noise': initial_noise_norm,
             'final_noise': final_noise_norm,
-            'damping_ratio': damping_ratio,
-            'damping_percent': (1 - damping_ratio) * 100,
+            'damping_ratio': damping_info['ratio'],
+            'damping_percent': damping_info['percent'],
+        }
+
+    def _run_trajectories(self, h_noisy: torch.Tensor, h_clean: torch.Tensor, x_proj: torch.Tensor,
+                         injection_step: int, total_steps: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Run both noisy and clean trajectories for the remaining steps."""
+        steps_remaining = total_steps - injection_step
+        h_final = self._run_equilibrium_steps(h_noisy, x_proj, steps_remaining)
+        h_clean_final = self._run_equilibrium_steps(h_clean, x_proj, steps_remaining)
+        return h_final, h_clean_final
+
+    def _run_equilibrium_steps(self, h: torch.Tensor, x_proj: torch.Tensor, steps: int) -> torch.Tensor:
+        """Run equilibrium dynamics for a specified number of steps."""
+        for _ in range(steps):
+            h = torch.tanh(x_proj + self.W_rec(h))
+        return h
+
+    def _compute_noise_norm(self, h1: torch.Tensor, h2: torch.Tensor) -> torch.Tensor:
+        """Compute mean noise norm between two states."""
+        return (h1 - h2).norm(dim=1).mean()
+
+    def _calculate_damping(self, initial_norm: float, final_norm: float) -> Dict[str, float]:
+        """Calculate damping ratio and percentage."""
+        ratio = final_norm / initial_norm if initial_norm > 0 else 0
+        return {
+            'ratio': ratio,
+            'percent': (1 - ratio) * 100
         }
 
 
@@ -230,7 +270,7 @@ class LoopedMLP(nn.Module):
 class BackpropMLP(nn.Module):
     """Standard feedforward MLP for comparison (no equilibrium dynamics)."""
     
-    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int):
+    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int) -> None:
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
@@ -251,10 +291,10 @@ class BackpropMLP(nn.Module):
 class ConvEqProp(nn.Module):
     """
     Convolutional Equilibrium Propagation Model.
-    
+
     Uses ResNet-like loop structure with spectral normalization.
     Suitable for image classification tasks (MNIST, CIFAR-10).
-    
+
     Example:
         >>> model = ConvEqProp(1, 32, 10)  # MNIST
         >>> x = torch.randn(32, 1, 28, 28)
@@ -262,13 +302,13 @@ class ConvEqProp(nn.Module):
     """
     
     def __init__(
-        self, 
-        input_channels: int, 
-        hidden_channels: int, 
-        output_dim: int, 
+        self,
+        input_channels: int,
+        hidden_channels: int,
+        output_dim: int,
         gamma: float = 0.5,
         use_spectral_norm: bool = True
-    ):
+    ) -> None:
         super().__init__()
         self.hidden_channels = hidden_channels
         self.gamma = gamma
@@ -304,20 +344,39 @@ class ConvEqProp(nn.Module):
             self.W2.weight.mul_(0.5)
 
     def forward_step(self, h: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
-        """Single equilibrium iteration step."""
+        """
+        Single equilibrium iteration step.
+
+        Args:
+            h: Current hidden state
+            x: Input tensor
+
+        Returns:
+            Next hidden state
+        """
         h_norm = self.norm(h)
         x_emb = self.embed(x)
-        
+
         pre_act = self.W1(h_norm)
         hidden = torch.tanh(pre_act)
         ffn_out = self.W2(hidden)
-        
+
         h_target = ffn_out + x_emb
-        h_next = (1 - self.gamma) * h + self.gamma * h_target
+        # Use torch.lerp for more efficient interpolation
+        h_next = torch.lerp(h, h_target, self.gamma)
         return h_next
 
     def forward(self, x: torch.Tensor, steps: int = 25) -> torch.Tensor:
-        """Forward pass: iterate to equilibrium."""
+        """
+        Forward pass: iterate to equilibrium.
+
+        Args:
+            x: Input tensor [batch, channels, height, width]
+            steps: Number of equilibrium steps
+
+        Returns:
+            Output logits [batch, output_dim]
+        """
         B, _, H, W = x.shape
         h = torch.zeros(B, self.hidden_channels, H, W, device=x.device)
         
@@ -334,7 +393,7 @@ class ConvEqProp(nn.Module):
 class EqPropAttention(nn.Module):
     """Self-attention that participates in equilibrium dynamics."""
     
-    def __init__(self, hidden_dim: int, num_heads: int = 4, use_sn: bool = True):
+    def __init__(self, hidden_dim: int, num_heads: int = 4, use_sn: bool = True) -> None:
         super().__init__()
         self.hidden_dim = hidden_dim
         self.num_heads = num_heads
@@ -348,25 +407,34 @@ class EqPropAttention(nn.Module):
         
     def forward(self, h: torch.Tensor) -> torch.Tensor:
         batch_size, seq_len, _ = h.shape
-        
-        Q = self.W_q(h).view(batch_size, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
-        K = self.W_k(h).view(batch_size, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
-        V = self.W_v(h).view(batch_size, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
-        
+
+        Q, K, V = self._compute_qkv(h, batch_size, seq_len)
+
         scores = torch.matmul(Q, K.transpose(-2, -1)) * self.scale
         attn = F.softmax(scores, dim=-1)
         out = torch.matmul(attn, V)
-        
-        return self.W_o(out.transpose(1, 2).contiguous().view(batch_size, seq_len, self.hidden_dim))
+
+        return self.W_o(self._reshape_output(out, batch_size, seq_len))
+
+    def _compute_qkv(self, h: torch.Tensor, batch_size: int, seq_len: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Compute Query, Key, and Value tensors."""
+        Q = self.W_q(h).view(batch_size, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
+        K = self.W_k(h).view(batch_size, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
+        V = self.W_v(h).view(batch_size, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
+        return Q, K, V
+
+    def _reshape_output(self, out: torch.Tensor, batch_size: int, seq_len: int) -> torch.Tensor:
+        """Reshape attention output back to the original format."""
+        return out.transpose(1, 2).contiguous().view(batch_size, seq_len, self.hidden_dim)
 
 
 class TransformerEqProp(nn.Module):
     """
     Transformer with equilibrium dynamics.
-    
+
     All layers (attention + FFN) iterate together to a joint equilibrium.
     Spectral normalization ensures stable convergence.
-    
+
     Example:
         >>> model = TransformerEqProp(vocab_size=1000, hidden_dim=256, output_dim=10)
         >>> x = torch.randint(0, 1000, (32, 64))  # [batch, seq_len]
@@ -374,16 +442,16 @@ class TransformerEqProp(nn.Module):
     """
     
     def __init__(
-        self, 
-        vocab_size: int, 
-        hidden_dim: int, 
+        self,
+        vocab_size: int,
+        hidden_dim: int,
         output_dim: int,
-        num_layers: int = 2, 
+        num_layers: int = 2,
         num_heads: int = 4,
-        max_seq_len: int = 128, 
+        max_seq_len: int = 128,
         alpha: float = 0.5,
         use_spectral_norm: bool = True,
-    ):
+    ) -> None:
         super().__init__()
         self.hidden_dim = hidden_dim
         self.num_layers = num_layers
@@ -411,18 +479,38 @@ class TransformerEqProp(nn.Module):
         self.head = nn.Linear(hidden_dim, output_dim)
         
     def forward_step(self, h: torch.Tensor, x_emb: torch.Tensor, layer_idx: int) -> torch.Tensor:
-        """Single equilibrium iteration step for one layer."""
+        """
+        Single equilibrium iteration step for one layer.
+
+        Args:
+            h: Current hidden state
+            x_emb: Embedded input
+            layer_idx: Index of the current layer
+
+        Returns:
+            Next hidden state
+        """
         h_norm = self.norms1[layer_idx](h)
         h = h + self.attentions[layer_idx](h_norm)
-        
+
         h_norm = self.norms2[layer_idx](h)
         ffn_out = self.ffns[layer_idx](h_norm)
-        
+
         h_target = h + ffn_out + x_emb
-        return (1 - self.alpha) * h + self.alpha * torch.tanh(h_target)
+        # Use torch.lerp for more efficient interpolation
+        return torch.lerp(h, torch.tanh(h_target), self.alpha)
         
     def forward(self, x: torch.Tensor, steps: int = 20) -> torch.Tensor:
-        """Forward pass: iterate all layers to joint equilibrium."""
+        """
+        Forward pass: iterate all layers to joint equilibrium.
+
+        Args:
+            x: Input tensor [batch, seq_len]
+            steps: Number of equilibrium steps
+
+        Returns:
+            Output logits [batch, output_dim]
+        """
         batch_size, seq_len = x.shape
         positions = torch.arange(seq_len, device=x.device).unsqueeze(0)
         x_emb = self.token_emb(x) + self.pos_emb(positions)
