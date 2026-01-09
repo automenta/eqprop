@@ -103,9 +103,9 @@ SEARCH_SPACES = {
         {
             'lr': (1e-5, 1e-2, 'log'),
             'beta': (0.05, 0.5, 'linear'),
-            'steps': (5, 50, 'int'),
-            'hidden_dim': [64, 128, 256],
-            'num_layers': [10, 20, 30, 50],
+            'steps': (5, 20, 'int'),
+            'hidden_dim': [64, 128],
+            'num_layers': [5, 10, 15],
         }
     ),
     
@@ -113,9 +113,9 @@ SEARCH_SPACES = {
         "EqProp Transformer (Attention Only)",
         {
             'lr': (1e-5, 1e-2, 'log'),
-            'steps': (5, 20, 'int'),
-            'hidden_dim': [128, 256, 512],
-            'num_layers': [2, 4, 6],
+            'steps': (5, 12, 'int'),
+            'hidden_dim': [64, 128, 256],
+            'num_layers': [2, 3],
         }
     ),
     
@@ -123,9 +123,9 @@ SEARCH_SPACES = {
         "EqProp Transformer (Full)",
         {
             'lr': (1e-5, 1e-2, 'log'),
-            'steps': (5, 30, 'int'),
-            'hidden_dim': [128, 256],
-            'num_layers': [2, 4, 6],
+            'steps': (5, 20, 'int'),
+            'hidden_dim': [64, 128],
+            'num_layers': [2, 3],
         }
     ),
     
@@ -133,9 +133,9 @@ SEARCH_SPACES = {
         "EqProp Transformer (Hybrid)",
         {
             'lr': (1e-5, 1e-2, 'log'),
-            'steps': (5, 20, 'int'),
+            'steps': (5, 15, 'int'),
             'hidden_dim': [128, 256],
-            'num_layers': [2, 4, 6],
+            'num_layers': [2, 3],
         }
     ),
     

@@ -98,8 +98,9 @@ from .dashboard_helpers import (
 class EqPropDashboard(QMainWindow):
     """Main dashboard window for EqProp training."""
     
-    def __init__(self):
+    def __init__(self, initial_config: Optional[Dict] = None):
         super().__init__()
+        self.initial_config = initial_config
         
         self.setWindowTitle("⚡ EqProp Trainer v0.1.0")
         self.setGeometry(100, 100, 1400, 900)
@@ -125,6 +126,59 @@ class EqPropDashboard(QMainWindow):
         # Update timer for plots
         self.plot_timer = QTimer()
         self.plot_timer.timeout.connect(self._update_plots)
+        
+        # Apply initial configuration if provided
+        if self.initial_config:
+            QTimer.singleShot(100, lambda: self._apply_config(self.initial_config))
+
+    def _apply_config(self, config: Dict):
+        """Apply initial configuration to UI elements."""
+        try:
+            model_name = config.get('model_name', '')
+            
+            # Determine if it's Vision or LM based on model name or config
+            is_vision = any(x in model_name for x in ['MLP', 'Conv', 'Vision']) or 'mnist' in str(self.initial_config).lower() or 'cifar' in str(self.initial_config).lower()
+            
+            if is_vision:
+                self.tabs.setCurrentIndex(1)
+                combo = self.vis_model_combo
+                hidden_spin = self.vis_hidden_spin
+                steps_spin = self.vis_steps_spin
+                lr_spin = self.vis_lr_spin
+                epochs_spin = self.vis_epochs_spin
+            else:
+                self.tabs.setCurrentIndex(0)
+                combo = self.lm_model_combo
+                hidden_spin = self.lm_hidden_spin
+                steps_spin = self.lm_steps_spin
+                lr_spin = self.lm_lr_spin
+                epochs_spin = self.lm_epochs_spin
+            
+            # Select model in combo box
+            index = combo.findText(model_name, Qt.MatchFlag.MatchContains)
+            if index >= 0:
+                combo.setCurrentIndex(index)
+            
+            # Set hyperparameters
+            if 'hidden_dim' in config:
+                hidden_spin.setValue(int(config['hidden_dim']))
+            if 'steps' in config:
+                steps_spin.setValue(int(config['steps']))
+            if 'lr' in config:
+                lr_spin.setValue(float(config['lr']))
+            if 'epochs' in config:
+                epochs_spin.setValue(int(config['epochs']))
+            if 'num_layers' in config:
+                if is_vision:
+                    pass # Vision tab currently doesn't have layers spin (it's hardcoded or part of model)
+                else:
+                    self.lm_layers_spin.setValue(int(config['num_layers']))
+                    
+            self.status_label.setText(f"Loaded configuration for {model_name}")
+            
+        except Exception as e:
+            print(f"Error applying config: {e}")
+            self.status_label.setText(f"Error loading config: {e}")
     
     def _setup_ui(self):
         """Set up the main user interface."""

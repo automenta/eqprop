@@ -207,6 +207,18 @@ class HyperoptStorage:
         
         self.conn.commit()
     
+    def clear_all_trials(self):
+        """Clear all trials and associated epoch metrics from the database."""
+        cursor = self.conn.cursor()
+
+        # Clear epoch metrics first (due to foreign key constraint)
+        cursor.execute("DELETE FROM epoch_metrics")
+
+        # Clear trials
+        cursor.execute("DELETE FROM trials")
+
+        self.conn.commit()
+
     def close(self):
         """Close database connection."""
         if self.conn:

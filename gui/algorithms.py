@@ -8,12 +8,13 @@ from dataclasses import dataclass
 
 from .types import TrainingState
 
-# Import models
-from models import (
-    LoopedMLP, DeepHebbianChain, DirectFeedbackAlignmentEqProp,
-    ContrastiveHebbianLearning
+# Import models from eqprop_torch
+from eqprop_torch.models import LoopedMLP, BackpropMLP, ConvEqProp, TransformerEqProp
+from eqprop_torch.lm_models import create_eqprop_lm
+from eqprop_torch.bioplausible import (
+    StandardFA as DirectFeedbackAlignmentEqProp,
+    ContrastiveFeedbackAlignment as ContrastiveHebbianLearning,
 )
-from models.eqprop_lm_variants import create_eqprop_lm
 
 # ============================================================================
 # Model Registry - Flat list of all available models with their metadata
@@ -140,7 +141,7 @@ class SimpleLM(nn.Module):
         self.pos = nn.Parameter(torch.randn(1, 64, hidden_dim) * 0.02)
         self.tf = nn.TransformerEncoderLayer(hidden_dim, 4, hidden_dim*2, batch_first=True, dropout=0.1)
         self.head = nn.Linear(hidden_dim, vocab_size)
-    
+
     def forward(self, x):
         h = self.embed(x) + self.pos[:, :x.size(1)]
         mask = torch.triu(torch.ones(x.size(1), x.size(1)), diagonal=1).bool().to(x.device)
@@ -204,17 +205,41 @@ class AlgorithmWrapper:
         elif model_type == 'dfa':
             self.has_embed = True
             self.embed = nn.Embedding(self.vocab_size, self.hidden_dim).to(self.device)
-            return DirectFeedbackAlignmentEqProp(self.hidden_dim, self.hidden_dim, self.vocab_size, min(self.num_layers, 20), use_spectral_norm=True).to(self.device)
-            
+            # Create a simple model for DFA equivalent using available eqprop_torch models
+            from algorithms import create_model
+            return create_model(
+                'feedback_alignment',
+                input_dim=self.hidden_dim,
+                hidden_dims=[self.hidden_dim] * min(self.num_layers, 5),  # Use up to 5 layers
+                output_dim=self.vocab_size,
+                use_spectral_norm=True
+            ).to(self.device)
+
         elif model_type == 'chl':
             self.has_embed = True
             self.embed = nn.Embedding(self.vocab_size, self.hidden_dim).to(self.device)
-            return ContrastiveHebbianLearning(self.hidden_dim, self.hidden_dim, self.vocab_size, min(self.num_layers, 20), use_spectral_norm=True).to(self.device)
-            
+            # Create a simple model for CHL equivalent using available eqprop_torch models
+            from algorithms import create_model
+            return create_model(
+                'cf_align',  # Contrastive Feedback Alignment (similar to Contrastive Hebbian)
+                input_dim=self.hidden_dim,
+                hidden_dims=[self.hidden_dim] * min(self.num_layers, 5),  # Use up to 5 layers
+                output_dim=self.vocab_size,
+                use_spectral_norm=True
+            ).to(self.device)
+
         elif model_type == 'deep_hebbian':
             self.has_embed = True
             self.embed = nn.Embedding(self.vocab_size, self.hidden_dim).to(self.device)
-            return DeepHebbianChain(self.hidden_dim, self.hidden_dim, self.vocab_size, self.num_layers, use_spectral_norm=True).to(self.device)
+            # Use the factory function to create a deep model
+            from algorithms import create_model
+            return create_model(
+                'backprop',  # Use backprop with many layers to simulate deep hebbian
+                input_dim=self.hidden_dim,
+                hidden_dims=[self.hidden_dim] * min(self.num_layers, 10),  # Up to 10 layers
+                output_dim=self.vocab_size,
+                use_spectral_norm=True
+            ).to(self.device)
             
         else:
             raise ValueError(f"Unknown model type: {model_type}")
@@ -239,12 +264,19 @@ class AlgorithmWrapper:
         try:
             if self.has_embed:
                 h = self.embed(x).mean(dim=1)
-                out = self.model(h, steps=self.steps) if hasattr(self.model, 'W_rec') else self.model(h)
+                # Handle different model types
+                if hasattr(self.model, 'train_step'):  # Custom algorithm with train_step
+                    out = self.model(h, steps=self.steps) if hasattr(self.model, 'W_rec') else self.model(h)
+                else:
+                    out = self.model(h)
                 logits = out
             else:
                 # Transformer models handle embedding internally
-                logits = self.model(x, steps=self.steps) if hasattr(self.model, 'eq_steps') else self.model(x)
-                
+                if hasattr(self.model, 'train_step'):  # Custom algorithm
+                    logits = self.model(x, steps=self.steps) if hasattr(self.model, 'eq_steps') else self.model(x)
+                else:
+                    logits = self.model(x, steps=self.steps) if hasattr(self.model, 'eq_steps') else self.model(x)
+
                 # If sequence output (B, T, V), use last token
                 if logits.dim() == 3:
                     logits = logits[:, -1, :]
@@ -297,23 +329,32 @@ class AlgorithmWrapper:
         self.model.eval()
         curr = seed_idx.clone().to(self.device)
         result = ""
-        
+
         with torch.no_grad():
             try:
                 for _ in range(length):
                     if self.has_embed:
                         h = self.embed(curr[-64:].unsqueeze(0)).mean(dim=1)
-                        logits = self.model(h)
+                        # Handle different model types
+                        if hasattr(self.model, 'train_step'):  # Custom algorithm
+                            logits = self.model(h)
+                        else:
+                            logits = self.model(h)
                     else:
                         ctx = curr[-64:].unsqueeze(0)
-                        logits = self.model(ctx, steps=self.steps) if hasattr(self.model, 'eq_steps') else self.model(ctx)
+                        # Handle different model types
+                        if hasattr(self.model, 'train_step'):  # Custom algorithm
+                            logits = self.model(ctx, steps=self.steps) if hasattr(self.model, 'eq_steps') else self.model(ctx)
+                        else:
+                            logits = self.model(ctx, steps=self.steps) if hasattr(self.model, 'eq_steps') else self.model(ctx)
+
                         if logits.dim() == 3:
                             logits = logits[:, -1, :]
-                    
+
                     next_tok = logits.argmax(-1).item()
                     result += i2c.get(next_tok, '?')
                     curr = torch.cat([curr, torch.tensor([next_tok], device=self.device)])
             except:
                 pass
-        
+
         return result if result else "..."

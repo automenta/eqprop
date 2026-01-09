@@ -19,6 +19,7 @@ from gui.algorithms import AlgorithmWrapper, get_model_spec
 from gui.utils import load_shakespeare
 from .storage import HyperoptStorage
 from .metrics import TrialMetrics
+from eqprop_trainer.config import GLOBAL_CONFIG
 
 
 class TrialRunner:
@@ -37,14 +38,20 @@ class TrialRunner:
         self.quick_mode = quick_mode
         
         # Training config
-        if quick_mode:
-            self.epochs = 5
+        # Use GLOBAL_CONFIG as the single source of truth
+        self.epochs = GLOBAL_CONFIG.epochs
+        
+        if GLOBAL_CONFIG.quick_mode:
             self.batches_per_epoch = 100
             self.eval_batches = 20
         else:
-            self.epochs = 20
+            # Full mode settings
+            self.epochs = 20 # Fallback default if not matching quick
             self.batches_per_epoch = 200
             self.eval_batches = 50
+            
+        # Re-enforce global epochs regardless of mode to be safe
+        self.epochs = GLOBAL_CONFIG.epochs
         
         self.batch_size = 32
         self.seq_len = 64
@@ -118,7 +125,14 @@ class TrialRunner:
             # Training loop
             epoch_times = []
             
-            for epoch in range(self.epochs):
+            # STRICTLY use Global Config for epochs - ignore trial config
+            n_epochs = self.epochs
+            
+            # Warn if config tries to override (for debugging)
+            if 'epochs' in config and config['epochs'] != n_epochs:
+                print(f"WARNING: Ignoring config['epochs']={config['epochs']}, using Global Config={n_epochs}")
+            
+            for epoch in range(n_epochs):
                 epoch_start = time.time()
                 
                 # Training
@@ -166,7 +180,7 @@ class TrialRunner:
                     avg_val_loss, avg_val_acc, avg_val_ppl, epoch_time
                 )
                 
-                print(f"Epoch {epoch+1}/{self.epochs}: "
+                print(f"Epoch {epoch+1}/{n_epochs}: "
                       f"loss={avg_val_loss:.4f}, acc={avg_val_acc:.4f}, "
                       f"ppl={avg_val_ppl:.2f}, time={epoch_time:.1f}s")
             
@@ -182,7 +196,7 @@ class TrialRunner:
             self.storage.update_trial(
                 trial_id,
                 status='completed',
-                epochs_completed=self.epochs,
+                epochs_completed=n_epochs,
                 final_loss=final_loss,
                 accuracy=final_acc,
                 perplexity=final_ppl,
