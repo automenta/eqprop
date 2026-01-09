@@ -4,7 +4,7 @@ EqProp-Torch Utilities
 Helper functions for ONNX export, model verification, and training utilities.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
@@ -36,17 +36,17 @@ def export_to_onnx(
     # Handle compiled models
     if hasattr(model, '_orig_mod'):
         model = model._orig_mod
-    
+
     model.eval()
     model = model.to(device)
     dummy_input = torch.randn(*input_shape, device=device)
-    
+
     if dynamic_axes is None:
         dynamic_axes = {
             'input': {0: 'batch'},
             'output': {0: 'batch'}
         }
-    
+
     try:
         torch.onnx.export(
             model,
@@ -199,16 +199,16 @@ def _estimate_activation_memory(input_shape: Tuple[int, ...], batch_size: int) -
 class ModelRegistry:
     """
     Simple registry for model factories.
-    
+
     Example:
         >>> registry = ModelRegistry()
         >>> registry.register('my_mlp', lambda: LoopedMLP(784, 256, 10))
         >>> model = registry.create('my_mlp')
     """
-    
+
     def __init__(self) -> None:
         self._factories = {}
-    
+
     def register(self, name: str, factory: Callable[[], nn.Module]) -> None:
         """
         Register a model factory function.
@@ -218,7 +218,7 @@ class ModelRegistry:
             factory: Function that creates the model
         """
         self._factories[name] = factory
-    
+
     def create(self, name: str, **kwargs) -> nn.Module:
         """
         Create a model from the registry.
@@ -233,7 +233,7 @@ class ModelRegistry:
         if name not in self._factories:
             raise ValueError(f"Model '{name}' not registered. Available: {list(self._factories.keys())}")
         return self._factories[name](**kwargs)
-    
+
     def list_models(self) -> List[str]:
         """
         List all registered models.
@@ -262,8 +262,8 @@ def create_model_preset(preset_name: str, **overrides) -> nn.Module:
     Example:
         >>> model = create_model_preset('mnist_small', hidden_dim=512)
     """
-    from .models import LoopedMLP, ConvEqProp
-    
+    from .models import ConvEqProp, LoopedMLP
+
     presets = {
         'mnist_small': lambda: LoopedMLP(784, 128, 10, use_spectral_norm=True),
         'mnist_medium': lambda: LoopedMLP(784, 256, 10, use_spectral_norm=True),
@@ -271,10 +271,10 @@ def create_model_preset(preset_name: str, **overrides) -> nn.Module:
         'cifar_conv': lambda: ConvEqProp(3, 64, 10),
         'cifar_mlp': lambda: LoopedMLP(3072, 512, 10, use_spectral_norm=True),
     }
-    
+
     if preset_name not in presets:
         raise ValueError(f"Unknown preset '{preset_name}'. Available: {list(presets.keys())}")
-    
+
     # Note: overrides would require more sophisticated preset handling
     return presets[preset_name]()
 

@@ -4,8 +4,7 @@ Configuration defaults for EqProp-Torch
 Centralized configuration for common hyperparameters and settings.
 """
 
-from typing import Any, Dict, Union
-
+from typing import Any, Dict
 
 # Default training hyperparameters
 TRAINING_DEFAULTS = {
@@ -144,13 +143,13 @@ def get_dataset_info(dataset_name: str) -> Dict[str, Any]:
         Configuration dict with input_dim, output_dim, etc.
     """
     dataset_name = dataset_name.lower().replace('-', '_')
-    
+
     if dataset_name not in DATASET_CONFIG:
         raise ValueError(
             f"Unknown dataset '{dataset_name}'. "
             f"Available: {list(DATASET_CONFIG.keys())}"
         )
-    
+
     return DATASET_CONFIG[dataset_name].copy()
 
 

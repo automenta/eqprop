@@ -15,11 +15,9 @@ Usage:
     kernel.train_step(x_batch, y_batch)
 """
 
-import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
-
 
 # Try to import CuPy for GPU
 try:
@@ -130,21 +128,21 @@ def tanh_deriv(x: np.ndarray, xp=np) -> np.ndarray:
 
 class EqPropKernel:
     """Pure NumPy/CuPy Equilibrium Propagation kernel.
-    
+
     Implements:
     - Forward pass to equilibrium
-    - Free and nudged phases  
+    - Free and nudged phases
     - Contrastive Hebbian weight updates
     - Spectral normalization for stability
     - Adam optimizer
-    
+
     Example:
         >>> kernel = EqPropKernel(784, 256, 10, use_gpu=True)
         >>> for x_batch, y_batch in data_loader:
         ...     metrics = kernel.train_step(x_batch, y_batch)
         ...     print(f"Loss: {metrics['loss']:.4f}")
     """
-    
+
     def __init__(
         self,
         input_dim: int,
@@ -160,7 +158,7 @@ class EqPropKernel:
         adaptive_epsilon: bool = True,
     ) -> None:
         """Initialize EqProp kernel.
-        
+
         Args:
             input_dim: Input dimension (e.g., 784 for MNIST)
             hidden_dim: Hidden layer dimension
@@ -185,9 +183,9 @@ class EqPropKernel:
         self.use_spectral_norm = use_spectral_norm
         self.use_gpu = use_gpu and HAS_CUPY
         self.adaptive_epsilon = adaptive_epsilon
-        
+
         self.xp = get_backend(self.use_gpu)
-        
+
         # Initialize weights
         scale = 0.5
         self.weights = {
@@ -196,30 +194,30 @@ class EqPropKernel:
             'W2': self._init_weight(hidden_dim * 4, hidden_dim, scale),
             'head': self._init_weight(hidden_dim, output_dim, scale),
         }
-        
+
         self.biases = {
             'embed': self.xp.zeros(hidden_dim, dtype=np.float32),
             'W1': self.xp.zeros(hidden_dim * 4, dtype=np.float32),
             'W2': self.xp.zeros(hidden_dim, dtype=np.float32),
             'head': self.xp.zeros(output_dim, dtype=np.float32),
         }
-        
+
         self.sn_state = {'W1_u': None, 'W2_u': None}
-        
+
         # Adam state
         self.adam_state = {
             'm': {k: self.xp.zeros_like(v) for k, v in self.weights.items()},
             'v': {k: self.xp.zeros_like(v) for k, v in self.weights.items()},
             't': 0,
         }
-    
+
     def _init_weight(self, in_dim: int, out_dim: int, scale: float = 0.5) -> np.ndarray:
         """Initialize weight matrix with Xavier-like initialization."""
         xp = self.xp
         std = scale * np.sqrt(2.0 / (in_dim + out_dim))
         W = xp.random.randn(out_dim, in_dim).astype(np.float32) * std
         return W
-    
+
     def _get_normalized_weights(self) -> Dict[str, np.ndarray]:
         """Get spectral-normalized weights."""
         if not self.use_spectral_norm:
@@ -259,7 +257,7 @@ class EqPropKernel:
             The corresponding weight matrix
         """
         return self.weights[weight_key]
-    
+
     def forward_step(self, h: np.ndarray, x_emb: np.ndarray, weights: Dict[str, np.ndarray]) -> Tuple[np.ndarray, Dict[str, np.ndarray]]:
         """
         Single equilibrium step.
@@ -273,25 +271,25 @@ class EqPropKernel:
             Next hidden state and activation dictionary
         """
         xp = self.xp
-        
+
         h_mean = xp.mean(h, axis=-1, keepdims=True)
         h_std = xp.std(h, axis=-1, keepdims=True) + 1e-5
         h_norm = (h - h_mean) / h_std
-        
+
         ffn_hidden = xp.tanh(h_norm @ weights['W1'].T + self.biases['W1'])
         ffn_out = ffn_hidden @ weights['W2'].T + self.biases['W2']
-        
+
         h_next = (1 - self.gamma) * h + self.gamma * (ffn_out + x_emb)
-        
+
         activations = {
             'h_norm': h_norm,
             'ffn_hidden': ffn_hidden,
             'h': h,
             'h_next': h_next,
         }
-        
+
         return h_next, activations
-    
+
     def solve_equilibrium(self, x: np.ndarray, nudge_grad: Optional[np.ndarray] = None) -> Tuple[np.ndarray, List[Dict[str, np.ndarray]], Dict[str, Any]]:
         """
         Find equilibrium state h* via fixed-point iteration.
@@ -335,7 +333,6 @@ class EqPropKernel:
     def _perform_equilibrium_step(self, h: np.ndarray, x_emb: np.ndarray, weights: Dict[str, np.ndarray],
                                  nudge_grad: Optional[np.ndarray]) -> Tuple[np.ndarray, Dict[str, np.ndarray]]:
         """Perform a single equilibrium step, applying nudge if provided."""
-        h_prev = h.copy()
         h, activations = self.forward_step(h, x_emb, weights)
 
         if nudge_grad is not None:
@@ -353,7 +350,7 @@ class EqPropKernel:
         """Get the convergence threshold based on the current step."""
         multiplier = 2.0 if self.adaptive_epsilon and step > 5 else 1.0
         return self.epsilon * multiplier
-    
+
     def compute_output(self, h: np.ndarray) -> np.ndarray:
         """
         Compute output logits from hidden state.
@@ -365,7 +362,7 @@ class EqPropKernel:
             Output logits
         """
         return h @ self.weights['head'].T + self.biases['head']
-    
+
     def compute_hebbian_update(self, act_free: Dict[str, np.ndarray], act_nudged: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
         """
         Compute contrastive Hebbian weight updates.
@@ -381,19 +378,19 @@ class EqPropKernel:
             ΔW = (1/β) * (A_nudged ⊗ A_nudged.T - A_free ⊗ A_free.T)
         """
         batch_size = act_free['h'].shape[0]
-        
+
         grads = {}
-        
+
         grad_free_W2 = act_free['h_next'].T @ act_free['ffn_hidden'] / batch_size
         grad_nudged_W2 = act_nudged['h_next'].T @ act_nudged['ffn_hidden'] / batch_size
         grads['W2'] = (1.0 / self.beta) * (grad_nudged_W2 - grad_free_W2)
-        
+
         grad_free_W1 = act_free['ffn_hidden'].T @ act_free['h_norm'] / batch_size
         grad_nudged_W1 = act_nudged['ffn_hidden'].T @ act_nudged['h_norm'] / batch_size
         grads['W1'] = (1.0 / self.beta) * (grad_nudged_W1 - grad_free_W1)
-        
+
         return grads
-    
+
     def adam_update(self, grads: Dict[str, np.ndarray], beta1: float = 0.9, beta2: float = 0.999, eps: float = 1e-8) -> None:
         """
         Apply Adam optimizer update.
@@ -406,20 +403,20 @@ class EqPropKernel:
         """
         self.adam_state['t'] += 1
         t = self.adam_state['t']
-        
+
         for key in grads:
             if key not in self.weights:
                 continue
-                
+
             g = grads[key]
             self.adam_state['m'][key] = beta1 * self.adam_state['m'][key] + (1 - beta1) * g
             self.adam_state['v'][key] = beta2 * self.adam_state['v'][key] + (1 - beta2) * (g ** 2)
-            
+
             m_hat = self.adam_state['m'][key] / (1 - beta1 ** t)
             v_hat = self.adam_state['v'][key] / (1 - beta2 ** t)
-            
+
             self.weights[key] -= self.lr * m_hat / (self.xp.sqrt(v_hat) + eps)
-    
+
     def train_step(self, x: np.ndarray, y: np.ndarray) -> Dict[str, float]:
         """
         Full EqProp training step.
@@ -498,7 +495,7 @@ class EqPropKernel:
             'free_steps': info_free['steps'],
             'nudged_steps': info_nudged['steps'],
         }
-    
+
     def predict(self, x: np.ndarray) -> np.ndarray:
         """
         Run inference on input.
@@ -512,11 +509,11 @@ class EqPropKernel:
         xp = self.xp
         if self.use_gpu:
             x = xp.asarray(x)
-        
+
         h_star, _, _ = self.solve_equilibrium(x)
         logits = self.compute_output(h_star)
         return to_numpy(xp.argmax(logits, axis=1))
-    
+
     def evaluate(self, x: np.ndarray, y: np.ndarray) -> float:
         """
         Evaluate accuracy on a dataset.

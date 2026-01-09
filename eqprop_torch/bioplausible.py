@@ -12,6 +12,7 @@ try:
         ALGORITHM_REGISTRY,
         AdaptiveFeedbackAlignment,
         BackpropBaseline,
+        BaseAlgorithm,
         ContrastiveFeedbackAlignment,
         EnergyGuidedFA,
         EnergyMinimizingFA,
@@ -23,10 +24,9 @@ try:
         StandardEqProp,
         StandardFA,
         StochasticFA,
-        BaseAlgorithm,
     )
     HAS_BIOPLAUSIBLE = True
-except ImportError as e:
+except ImportError:
     HAS_BIOPLAUSIBLE = False
     ALGORITHM_REGISTRY = {}
 
@@ -34,7 +34,7 @@ except ImportError as e:
 # Re-export all algorithms at module level
 __all__ = [
     'BaseAlgorithm',
-    'BackpropBaseline', 
+    'BackpropBaseline',
     'StandardEqProp',
     'StandardFA',
     'EquilibriumAlignment',

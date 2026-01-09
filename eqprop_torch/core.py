@@ -7,27 +7,26 @@ checkpointing, and ONNX export.
 
 import time
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 from .acceleration import compile_model, enable_tf32, get_optimal_backend
-from .kernel import EqPropKernel
+
 
 class EqPropTrainer:
     """
     High-level trainer for Equilibrium Propagation models.
-    
+
     Features:
         - Automatic torch.compile for 2-3x speedup
         - Optional CuPy kernel mode for O(1) memory
         - Checkpoint saving/loading
         - ONNX export for deployment
         - Progress callbacks
-    
+
     Example:
         >>> from eqprop_torch import EqPropTrainer, LoopedMLP
         >>> model = LoopedMLP(784, 256, 10)
@@ -35,7 +34,7 @@ class EqPropTrainer:
         >>> trainer.fit(train_loader, epochs=10)
         >>> print(trainer.evaluate(test_loader))
     """
-    
+
     def __init__(
         self,
         model: nn.Module,
@@ -68,7 +67,7 @@ class EqPropTrainer:
         """
         # Enable TF32 by default for performance
         enable_tf32(allow_tf32)
-        
+
         # Validate inputs
         self._validate_inputs(optimizer, compile_mode, lr, weight_decay)
 
@@ -88,7 +87,7 @@ class EqPropTrainer:
         # Kernel mode initialization
         if use_kernel:
             self._init_kernel_mode_safe()
-    
+
     def _validate_inputs(self, optimizer: str, compile_mode: str, lr: float, weight_decay: float) -> None:
         """Validate initialization parameters."""
         self._validate_optimizer(optimizer)
@@ -179,11 +178,12 @@ class EqPropTrainer:
             "sgd": lambda: torch.optim.SGD(self.model.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay)
         }
         return optimizer_factories.get(name)
-    
+
     def _init_kernel_mode(self) -> None:
         """Initialize CuPy kernel for O(1) memory training."""
-        from .kernel import EqPropKernel, HAS_CUPY
-        
+        from .kernel import HAS_CUPY
+        from .kernel import EqPropKernel as KernelEqPropKernel
+
         if not HAS_CUPY:
             warnings.warn(
                 "CuPy not available. Falling back to PyTorch. "
@@ -192,7 +192,7 @@ class EqPropTrainer:
             )
             self.use_kernel = False
             return
-        
+
         # Extract model dimensions
         if hasattr(self.model, 'input_dim'):
             input_dim = self.model.input_dim
@@ -202,14 +202,14 @@ class EqPropTrainer:
             warnings.warn("Model dimensions not detected. Kernel mode disabled.", RuntimeWarning)
             self.use_kernel = False
             return
-        
-        self._kernel = EqPropKernel(
+
+        self._kernel = KernelEqPropKernel(
             input_dim=input_dim,
             hidden_dim=hidden_dim,
             output_dim=output_dim,
             use_gpu=True,
         )
-    
+
     def fit(
         self,
         train_loader: DataLoader,
@@ -236,16 +236,16 @@ class EqPropTrainer:
             History dict with train/val losses and accuracies
         """
         loss_fn = loss_fn or nn.CrossEntropyLoss()
-        
+
         for epoch in range(epochs):
             self._epoch = epoch + 1
             epoch_start = time.time()
-            
+
             # Training phase
             train_loss, train_acc = self._train_epoch(train_loader, loss_fn, log_interval)
             self._history['train_loss'].append(train_loss)
             self._history['train_acc'].append(train_acc)
-            
+
             # Validation phase
             val_loss, val_acc = None, None
             if val_loader is not None:
@@ -254,14 +254,14 @@ class EqPropTrainer:
                 val_acc = val_metrics['accuracy']
                 self._history['val_loss'].append(val_loss)
                 self._history['val_acc'].append(val_acc)
-                
+
                 # Checkpoint best model
                 if checkpoint_path and val_loss < self._best_metric:
                     self._best_metric = val_loss
                     self.save_checkpoint(checkpoint_path)
-            
+
             epoch_time = time.time() - epoch_start
-            
+
             # Callback
             if callback:
                 callback({
@@ -272,9 +272,9 @@ class EqPropTrainer:
                     'val_acc': val_acc,
                     'time': epoch_time,
                 })
-        
+
         return self._history
-    
+
     def _train_epoch(
         self,
         loader: DataLoader,
@@ -372,7 +372,7 @@ class EqPropTrainer:
         _, predicted = output.max(1)
         correct = predicted.eq(targets).sum().item()
         return total_loss, correct, batch_size
-    
+
     @torch.no_grad()
     def evaluate(
         self,
@@ -434,7 +434,7 @@ class EqPropTrainer:
             'correct': correct,
             'total': batch_size
         }
-    
+
     def save_checkpoint(self, path: str) -> None:
         """Save model checkpoint."""
         try:
@@ -481,7 +481,7 @@ class EqPropTrainer:
             raise ValueError(f"Checkpoint file missing required key: {str(e)}")
         except Exception as e:
             raise RuntimeError(f"Failed to load model state from checkpoint: {str(e)}")
-    
+
     def export_onnx(
         self,
         path: str,
@@ -522,7 +522,7 @@ class EqPropTrainer:
             )
         except Exception as e:
             raise RuntimeError(f"ONNX export failed: {str(e)}")
-    
+
     @property
     def history(self) -> Dict[str, List[float]]:
         """Return training history."""
@@ -542,11 +542,11 @@ class EqPropTrainer:
         """
         if hasattr(self.model, 'compute_lipschitz'):
             return self.model.compute_lipschitz()
-        
+
         # Try to find underlying model (e.g. if compiled)
         if hasattr(self.model, '_orig_mod') and hasattr(self.model._orig_mod, 'compute_lipschitz'):
             return self.model._orig_mod.compute_lipschitz()
-            
+
         return 0.0
 
 

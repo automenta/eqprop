@@ -6,13 +6,12 @@ Models use spectral normalization to guarantee Lipschitz constant L < 1 for stab
 """
 
 import math
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.parametrizations import spectral_norm
-
 
 # =============================================================================
 # Utility Functions
@@ -96,7 +95,7 @@ class LoopedMLP(nn.Module):
         >>> output = model(x, steps=30)  # [32, 10]
         >>> L = model.compute_lipschitz()  # Should be < 1.0
     """
-    
+
     def __init__(
         self,
         input_dim: int,
@@ -111,24 +110,24 @@ class LoopedMLP(nn.Module):
         self.output_dim = output_dim
         self.max_steps = max_steps
         self.use_spectral_norm = use_spectral_norm
-        
+
         # Input projection
         self.W_in = nn.Linear(input_dim, hidden_dim)
-        
+
         # Recurrent (hidden-to-hidden) connection
         self.W_rec = nn.Linear(hidden_dim, hidden_dim)
-        
+
         # Output projection
         self.W_out = nn.Linear(hidden_dim, output_dim)
-        
+
         # Apply spectral normalization if enabled
         if use_spectral_norm:
             self.W_in = spectral_norm(self.W_in)
             self.W_rec = spectral_norm(self.W_rec)
             self.W_out = spectral_norm(self.W_out)
-        
+
         self._init_weights()
-    
+
     def _init_weights(self) -> None:
         """Initialize weights for stable equilibrium dynamics."""
         for layer in [self.W_in, self.W_rec, self.W_out]:
@@ -155,7 +154,7 @@ class LoopedMLP(nn.Module):
         elif hasattr(layer, 'weight'):
             return layer.weight
         return None
-    
+
     def forward(
         self,
         x: torch.Tensor,
@@ -214,7 +213,7 @@ class LoopedMLP(nn.Module):
             if return_trajectory:
                 trajectory.append(h)
         return h
-    
+
     def compute_lipschitz(self) -> float:
         """
         Compute the Lipschitz constant of the recurrent dynamics.
@@ -226,7 +225,7 @@ class LoopedMLP(nn.Module):
             W = self.W_rec.weight
             s = torch.linalg.svdvals(W)
             return s[0].item()
-    
+
     def inject_noise_and_relax(
         self,
         x: torch.Tensor,
@@ -300,12 +299,12 @@ class LoopedMLP(nn.Module):
 
 
 # =============================================================================
-# BackpropMLP - Baseline for Comparison  
+# BackpropMLP - Baseline for Comparison
 # =============================================================================
 
 class BackpropMLP(nn.Module):
     """Standard feedforward MLP for comparison (no equilibrium dynamics)."""
-    
+
     def __init__(self, input_dim: int, hidden_dim: int, output_dim: int) -> None:
         super().__init__()
         self.net = nn.Sequential(
@@ -315,7 +314,7 @@ class BackpropMLP(nn.Module):
             nn.Tanh(),
             nn.Linear(hidden_dim, output_dim),
         )
-    
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.net(x)
 
@@ -336,7 +335,7 @@ class ConvEqProp(nn.Module):
         >>> x = torch.randn(32, 1, 28, 28)
         >>> output = model(x, steps=25)  # [32, 10]
     """
-    
+
     def __init__(
         self,
         input_channels: int,
@@ -348,13 +347,13 @@ class ConvEqProp(nn.Module):
         super().__init__()
         self.hidden_channels = hidden_channels
         self.gamma = gamma
-        
+
         # Input embedding
         self.embed = spectral_conv2d(
-            input_channels, hidden_channels, kernel_size=3, padding=1, 
+            input_channels, hidden_channels, kernel_size=3, padding=1,
             use_sn=use_spectral_norm
         )
-        
+
         # Recurrent weights
         self.W1 = spectral_conv2d(
             hidden_channels, hidden_channels * 2, kernel_size=3, padding=1,
@@ -364,16 +363,16 @@ class ConvEqProp(nn.Module):
             hidden_channels * 2, hidden_channels, kernel_size=3, padding=1,
             use_sn=use_spectral_norm
         )
-            
+
         self.norm = nn.GroupNorm(8, hidden_channels)
-        
+
         # Classifier head
         self.head = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
             nn.Linear(hidden_channels, output_dim)
         )
-        
+
         # Initialize for stability
         with torch.no_grad():
             self.W1.weight.mul_(0.5)
@@ -442,19 +441,19 @@ class ConvEqProp(nn.Module):
 
 class EqPropAttention(nn.Module):
     """Self-attention that participates in equilibrium dynamics."""
-    
+
     def __init__(self, hidden_dim: int, num_heads: int = 4, use_sn: bool = True) -> None:
         super().__init__()
         self.hidden_dim = hidden_dim
         self.num_heads = num_heads
         self.head_dim = hidden_dim // num_heads
         self.scale = 1.0 / math.sqrt(self.head_dim)
-        
+
         self.W_q = spectral_linear(hidden_dim, hidden_dim, use_sn=use_sn)
         self.W_k = spectral_linear(hidden_dim, hidden_dim, use_sn=use_sn)
         self.W_v = spectral_linear(hidden_dim, hidden_dim, use_sn=use_sn)
         self.W_o = spectral_linear(hidden_dim, hidden_dim, use_sn=use_sn)
-        
+
     def forward(self, h: torch.Tensor) -> torch.Tensor:
         batch_size, seq_len, _ = h.shape
 
@@ -490,7 +489,7 @@ class TransformerEqProp(nn.Module):
         >>> x = torch.randint(0, 1000, (32, 64))  # [batch, seq_len]
         >>> output = model(x, steps=20)  # [32, 10]
     """
-    
+
     def __init__(
         self,
         vocab_size: int,
@@ -506,15 +505,15 @@ class TransformerEqProp(nn.Module):
         self.hidden_dim = hidden_dim
         self.num_layers = num_layers
         self.alpha = alpha
-        
+
         self.token_emb = nn.Embedding(vocab_size, hidden_dim)
         self.pos_emb = nn.Embedding(max_seq_len, hidden_dim)
-        
+
         self.attentions = nn.ModuleList([
-            EqPropAttention(hidden_dim, num_heads, use_sn=use_spectral_norm) 
+            EqPropAttention(hidden_dim, num_heads, use_sn=use_spectral_norm)
             for _ in range(num_layers)
         ])
-        
+
         self.ffns = nn.ModuleList([
             nn.Sequential(
                 spectral_linear(hidden_dim, hidden_dim * 2, use_sn=use_spectral_norm),
@@ -522,12 +521,12 @@ class TransformerEqProp(nn.Module):
                 spectral_linear(hidden_dim * 2, hidden_dim, use_sn=use_spectral_norm)
             ) for _ in range(num_layers)
         ])
-        
+
         self.norms1 = nn.ModuleList([nn.LayerNorm(hidden_dim) for _ in range(num_layers)])
         self.norms2 = nn.ModuleList([nn.LayerNorm(hidden_dim) for _ in range(num_layers)])
-        
+
         self.head = nn.Linear(hidden_dim, output_dim)
-        
+
     def forward_step(self, h: torch.Tensor, x_emb: torch.Tensor, layer_idx: int) -> torch.Tensor:
         """
         Single equilibrium iteration step for one layer.
@@ -549,7 +548,7 @@ class TransformerEqProp(nn.Module):
         h_target = h + ffn_out + x_emb
         # Use torch.lerp for more efficient interpolation
         return torch.lerp(h, torch.tanh(h_target), self.alpha)
-        
+
     def forward(self, x: torch.Tensor, steps: int = 20) -> torch.Tensor:
         """
         Forward pass: iterate all layers to joint equilibrium.
@@ -564,13 +563,13 @@ class TransformerEqProp(nn.Module):
         batch_size, seq_len = x.shape
         positions = torch.arange(seq_len, device=x.device).unsqueeze(0)
         x_emb = self.token_emb(x) + self.pos_emb(positions)
-        
+
         h = torch.zeros_like(x_emb)
-        
+
         for _ in range(steps):
             for i in range(self.num_layers):
                 h = self.forward_step(h, x_emb, i)
-                
+
         return self.head(h.mean(dim=1))
 
 
@@ -581,7 +580,7 @@ class TransformerEqProp(nn.Module):
 __all__ = [
     # Utility functions
     'spectral_linear',
-    'spectral_conv2d', 
+    'spectral_conv2d',
     'estimate_lipschitz',
     # Models
     'LoopedMLP',

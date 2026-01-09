@@ -5,37 +5,36 @@ A production-grade library for training neural networks with Equilibrium Propaga
 featuring spectral normalization for stability and torch.compile for acceleration.
 """
 
+from .acceleration import (
+    check_cupy_available,
+    compile_model,
+    enable_tf32,
+    get_optimal_backend,
+)
 from .core import EqPropTrainer
+from .datasets import CharDataset, create_data_loaders, get_lm_dataset, get_vision_dataset
+from .generation import generate_from_dataset, generate_text
+from .kernel import HAS_CUPY, EqPropKernel
 from .models import (
-    LoopedMLP,
     BackpropMLP,
     ConvEqProp,
+    LoopedMLP,
     TransformerEqProp,
 )
-from .kernel import EqPropKernel, HAS_CUPY
-from .acceleration import (
-    compile_model,
-    get_optimal_backend,
-    check_cupy_available,
-    enable_tf32,
-)
-from .datasets import get_vision_dataset, get_lm_dataset, CharDataset, create_data_loaders
-from .generation import generate_text, generate_from_dataset
 from .utils import (
-    export_to_onnx,
-    count_parameters,
-    verify_spectral_norm,
-    create_model_preset,
     ModelRegistry,
+    count_parameters,
+    create_model_preset,
+    export_to_onnx,
+    verify_spectral_norm,
 )
 
 # Language model variants (optional import - fails gracefully if dependencies missing)
 try:
     from .lm_models import (
+        create_eqprop_lm,
         get_eqprop_lm,
         list_eqprop_lm_variants,
-        create_eqprop_lm,
-        EQPROP_LM_REGISTRY,
     )
     HAS_LM_VARIANTS = True
 except ImportError:
@@ -47,26 +46,26 @@ except ImportError:
 # These are first-class PyTorch nn.Module models, same status as LoopedMLP
 try:
     from .bioplausible import (
-        # Base class
-        BaseAlgorithm,
-        # Core algorithms
-        BackpropBaseline,
-        StandardEqProp,
-        StandardFA,
-        # Hybrid algorithms
-        EquilibriumAlignment,
-        AdaptiveFeedbackAlignment,
-        ContrastiveFeedbackAlignment,
-        LayerwiseEquilibriumFA,
-        PredictiveCodingHybrid,
-        EnergyGuidedFA,
-        SparseEquilibrium,
-        MomentumEquilibrium,
-        StochasticFA,
-        EnergyMinimizingFA,
+        ALGORITHM_REGISTRY,
         # Registry
         HAS_BIOPLAUSIBLE,
-        ALGORITHM_REGISTRY,
+        AdaptiveFeedbackAlignment,
+        # Core algorithms
+        BackpropBaseline,
+        # Base class
+        BaseAlgorithm,
+        ContrastiveFeedbackAlignment,
+        EnergyGuidedFA,
+        EnergyMinimizingFA,
+        # Hybrid algorithms
+        EquilibriumAlignment,
+        LayerwiseEquilibriumFA,
+        MomentumEquilibrium,
+        PredictiveCodingHybrid,
+        SparseEquilibrium,
+        StandardEqProp,
+        StandardFA,
+        StochasticFA,
     )
 except ImportError:
     HAS_BIOPLAUSIBLE = False

@@ -77,11 +77,11 @@ class BackendDetector:
 def enable_tf32(enable: bool = True) -> None:
     """
     Enable TensorFloat-32 (TF32) for significant speedup on Ampere+ GPUs.
-    
-    TF32 reduces precision slightly (19 bits vs 24 bits significand) 
-    but maintains full range, usually providing 2-3x speedup for 
+
+    TF32 reduces precision slightly (19 bits vs 24 bits significand)
+    but maintains full range, usually providing 2-3x speedup for
     matmul and convolutions with negligible accuracy loss.
-    
+
     Args:
         enable: Whether to enable TF32
     """
@@ -130,10 +130,10 @@ def compile_model(
 ) -> torch.nn.Module:
     """
     Wrap model with torch.compile for significant speedup.
-    
+
     Works on CPU, CUDA, ROCm, and MPS without modification.
     Falls back gracefully if torch.compile is unavailable.
-    
+
     Args:
         model: PyTorch model to compile
         mode: Compilation mode:
@@ -142,10 +142,10 @@ def compile_model(
             - 'max-autotune': Maximum speed (longer compile)
         fullgraph: If True, requires entire forward to be capturable
         dynamic: Enable dynamic shapes (None = auto-detect)
-    
+
     Returns:
         Compiled model (or original if compile unavailable)
-    
+
     Example:
         >>> model = LoopedMLP(784, 256, 10)
         >>> model = compile_model(model, mode='reduce-overhead')
@@ -158,11 +158,11 @@ def compile_model(
             RuntimeWarning
         )
         return model
-    
+
     try:
         compiled = torch.compile(
-            model, 
-            mode=mode, 
+            model,
+            mode=mode,
             fullgraph=fullgraph,
             dynamic=dynamic,
         )
@@ -193,7 +193,7 @@ def compile_settling_loop(settling_fn: Callable) -> Callable:
     """
     if not hasattr(torch, 'compile'):
         return settling_fn
-    
+
     try:
         return torch.compile(settling_fn, mode='reduce-overhead')
     except Exception:
@@ -206,8 +206,8 @@ def compile_settling_loop(settling_fn: Callable) -> Callable:
 
 TRITON_AVAILABLE = False
 try:
-    import triton
-    import triton.language as tl
+    import triton  # noqa: F401
+    import triton.language as tl  # noqa: F401
     TRITON_AVAILABLE = True
 except ImportError:
     pass
@@ -223,8 +223,8 @@ def check_triton_available() -> Tuple[bool, str]:
 # Triton kernel example (commented - requires Triton and CUDA/ROCm)
 # @triton.jit
 # def settling_kernel(
-#     h_ptr, x_proj_ptr, W_rec_ptr, 
-#     hidden_dim: tl.constexpr, 
+#     h_ptr, x_proj_ptr, W_rec_ptr,
+#     hidden_dim: tl.constexpr,
 #     BLOCK_SIZE: tl.constexpr
 # ):
 #     """Fused settling iteration kernel."""
