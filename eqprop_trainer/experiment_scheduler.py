@@ -81,15 +81,95 @@ class ExperimentScheduler:
 
         return experiment
 
-    def update_experiment_progress(self, experiment_id: int, metrics: Dict[str, float], actual_epochs: int = 0):
-        """Update experiment with latest metrics and adjust scheduling."""
-        # Find the experiment
-        experiment = None
+    def _find_experiment_by_id(self, experiment_id: int) -> Optional[Dict[str, Any]]:
+        """Find an experiment by its ID."""
         for exp in self.running_experiments:
             if exp.get('trial_id') == experiment_id:
-                experiment = exp
-                break
+                return exp
+        return None
 
+    def _calculate_performance_score(self, metrics: Dict[str, float]) -> float:
+        """Calculate composite performance score."""
+        acc = metrics.get('accuracy', 0.0)
+        ppl = metrics.get('perplexity', 10.0)
+        iter_time = metrics.get('iteration_time', 1.0)
+        params = metrics.get('param_count', 1.0)
+
+        # Composite performance score (higher is better)
+        # Accuracy contributes positively, others contribute negatively
+        performance_score = acc - (ppl / 100.0) - (iter_time / 10.0) - (params / 100.0)
+        return performance_score
+
+    def _should_prune_by_time_budget(self, experiment: Dict[str, Any], actual_epochs: int, elapsed_time: float) -> bool:
+        """Check if experiment should be pruned based on time budget."""
+        # HARD PRUNING: Derived limit from total budget
+        # e.g. 60s / 3 epochs = 20s/epoch
+        # e.g. 60s / 5 epochs = 12s/epoch
+        per_epoch_limit = GLOBAL_CONFIG.max_trial_time / max(GLOBAL_CONFIG.epochs, 1)
+
+        current_rate = elapsed_time / actual_epochs
+        if current_rate > per_epoch_limit:
+            print(f"PRUNED: Experiment {experiment['trial_id']} exceeded {per_epoch_limit:.1f}s/epoch limit (Budget: {GLOBAL_CONFIG.max_trial_time}s / {GLOBAL_CONFIG.epochs} epochs)")
+            return True
+
+        projected_total_time = current_rate * experiment['allocated_epochs']
+        baseline_expected_time = experiment['baseline_time'] * self.max_walltime_multiplier
+
+        if projected_total_time > baseline_expected_time * 3:  # 3x safety margin beyond max multiplier
+            print(f"Pruned experiment {experiment['trial_id']} - Projected time {projected_total_time:.1f}s exceeds 3x baseline threshold {baseline_expected_time * 3:.1f}s")
+            return True
+
+        # Additional check: if current elapsed time already exceeds max allowed time
+        if elapsed_time > experiment['max_time']:
+            print(f"Pruned experiment {experiment['trial_id']} - Elapsed time {elapsed_time:.1f}s exceeds max allowed time {experiment['max_time']:.1f}s")
+            return True
+
+        # EARLY PRUNING: Check if current iteration is taking way too long compared to baseline
+        # If we're at epoch 1 and already taking 50x longer than baseline per epoch, prune immediately
+        if actual_epochs == 1 and elapsed_time > experiment['baseline_time'] * 20:
+            print(f"EARLY PRUNING: Experiment {experiment['trial_id']} took {elapsed_time:.1f}s for epoch 1, which is >20x baseline {experiment['baseline_time']:.1f}s")
+            return True
+
+        return False
+
+    def _update_trial_status(self, experiment_id: int, status: str):
+        """Update trial status in storage."""
+        try:
+            if hasattr(self, 'storage') and self.storage:
+                trial = self.storage.get_trial(experiment_id)
+                if trial:
+                    self.storage.update_trial(experiment_id, status=status)
+        except:
+            pass  # Ignore errors when updating trial status
+
+    def _adjust_allocated_epochs(self, experiment: Dict[str, Any], promise_score: float, actual_epochs: int):
+        """Adjust allocated epochs based on promise score and time budget."""
+        if experiment['start_time'] is None:
+            return
+
+        elapsed_time = time.time() - experiment['start_time']
+        time_budget_remaining = experiment['max_time'] - elapsed_time
+
+        # Only extend if we have sufficient time budget and the experiment is promising
+        if (promise_score > 0.6 and
+            actual_epochs < experiment['allocated_epochs'] and
+            time_budget_remaining > 30):  # At least 30 seconds remaining
+
+            # Extend epochs conservatively
+            extension = min(3, max(1, experiment['allocated_epochs'] // 2))
+            experiment['allocated_epochs'] = min(
+                experiment['allocated_epochs'] + extension,
+                int(experiment['max_time'] / max(elapsed_time / max(actual_epochs, 1), 0.001) * 0.8)  # Don't exceed 80% of projected time
+            )
+
+        # Check if we should terminate early due to poor performance
+        if (promise_score < 0.1 and actual_epochs >= 3 and
+            elapsed_time > experiment['baseline_time'] * 0.3):  # Used 30% of baseline time
+            experiment['allocated_epochs'] = actual_epochs  # Stop early
+
+    def update_experiment_progress(self, experiment_id: int, metrics: Dict[str, float], actual_epochs: int = 0):
+        """Update experiment with latest metrics and adjust scheduling."""
+        experiment = self._find_experiment_by_id(experiment_id)
         if not experiment:
             return
 
@@ -98,14 +178,7 @@ class ExperimentScheduler:
             experiment['actual_epochs'] = actual_epochs
 
             # Calculate performance indicator
-            acc = metrics.get('accuracy', 0.0)
-            ppl = metrics.get('perplexity', 10.0)
-            iter_time = metrics.get('iteration_time', 1.0)
-            params = metrics.get('param_count', 1.0)
-
-            # Composite performance score (higher is better)
-            # Accuracy contributes positively, others contribute negatively
-            performance_score = acc - (ppl / 100.0) - (iter_time / 10.0) - (params / 100.0)
+            performance_score = self._calculate_performance_score(metrics)
             experiment['estimated_performance'] = performance_score
 
             # Track performance history
@@ -124,97 +197,13 @@ class ExperimentScheduler:
                 elapsed_time = time.time() - experiment['start_time']
 
                 # Prune if taking more than 5x longer than baseline for the epochs completed
-                if actual_epochs > 0:
-                    current_rate = elapsed_time / actual_epochs
-                    
-                    
-                    # HARD PRUNING: Derived limit from total budget
-                    # e.g. 60s / 3 epochs = 20s/epoch
-                    # e.g. 60s / 5 epochs = 12s/epoch
-                    per_epoch_limit = GLOBAL_CONFIG.max_trial_time / max(GLOBAL_CONFIG.epochs, 1)
-                    
-                    if current_rate > per_epoch_limit:
-                         experiment['allocated_epochs'] = actual_epochs
-                         print(f"PRUNED: Experiment {experiment_id} exceeded {per_epoch_limit:.1f}s/epoch limit (Budget: {GLOBAL_CONFIG.max_trial_time}s / {GLOBAL_CONFIG.epochs} epochs)")
-                         try:
-                             if hasattr(self, 'storage') and self.storage:
-                                 self.storage.update_trial(experiment_id, status='pruned')
-                         except:
-                             pass
-                         return
-
-                    projected_total_time = current_rate * experiment['allocated_epochs']
-                    baseline_expected_time = experiment['baseline_time'] * self.max_walltime_multiplier
-
-                    if projected_total_time > baseline_expected_time * 3:  # 3x safety margin beyond max multiplier
-                        experiment['allocated_epochs'] = actual_epochs  # Stop immediately
-                        print(f"Pruned experiment {experiment_id} - Projected time {projected_total_time:.1f}s exceeds 3x baseline threshold {baseline_expected_time * 3:.1f}s")
-
-                        # Update trial status to pruned in storage
-                        try:
-                            if hasattr(self, 'storage') and self.storage:
-                                trial = self.storage.get_trial(experiment_id)
-                                if trial:
-                                    self.storage.update_trial(experiment_id, status='pruned')
-                        except:
-                            pass  # Ignore errors when updating trial status
-
-                        return
-
-                # Additional check: if current elapsed time already exceeds max allowed time
-                if elapsed_time > experiment['max_time']:
+                if actual_epochs > 0 and self._should_prune_by_time_budget(experiment, actual_epochs, elapsed_time):
                     experiment['allocated_epochs'] = actual_epochs  # Stop immediately
-                    print(f"Pruned experiment {experiment_id} - Elapsed time {elapsed_time:.1f}s exceeds max allowed time {experiment['max_time']:.1f}s")
-
-                    # Update trial status to pruned in storage
-                    try:
-                        if hasattr(self, 'storage') and self.storage:
-                            trial = self.storage.get_trial(experiment_id)
-                            if trial:
-                                self.storage.update_trial(experiment_id, status='pruned')
-                    except:
-                        pass  # Ignore errors when updating trial status
-
-                    return
-
-                # EARLY PRUNING: Check if current iteration is taking way too long compared to baseline
-                # If we're at epoch 1 and already taking 50x longer than baseline per epoch, prune immediately
-                if actual_epochs == 1 and elapsed_time > experiment['baseline_time'] * 20:
-                    experiment['allocated_epochs'] = actual_epochs  # Stop immediately
-                    print(f"EARLY PRUNING: Experiment {experiment_id} took {elapsed_time:.1f}s for epoch 1, which is >20x baseline {experiment['baseline_time']:.1f}s")
-
-                    # Update trial status to pruned in storage
-                    try:
-                        if hasattr(self, 'storage') and self.storage:
-                            trial = self.storage.get_trial(experiment_id)
-                            if trial:
-                                self.storage.update_trial(experiment_id, status='pruned')
-                    except:
-                        pass  # Ignore errors when updating trial status
-
+                    self._update_trial_status(experiment_id, 'pruned')
                     return
 
             # If experiment is showing promise, consider extending it
-            if experiment['start_time'] is not None:
-                elapsed_time = time.time() - experiment['start_time']
-                time_budget_remaining = experiment['max_time'] - elapsed_time
-
-                # Only extend if we have sufficient time budget and the experiment is promising
-                if (promise_score > 0.6 and
-                    actual_epochs < experiment['allocated_epochs'] and
-                    time_budget_remaining > 30):  # At least 30 seconds remaining
-
-                    # Extend epochs conservatively
-                    extension = min(3, max(1, experiment['allocated_epochs'] // 2))
-                    experiment['allocated_epochs'] = min(
-                        experiment['allocated_epochs'] + extension,
-                        int(experiment['max_time'] / max(elapsed_time / max(actual_epochs, 1), 0.001) * 0.8)  # Don't exceed 80% of projected time
-                    )
-
-                # Check if we should terminate early due to poor performance
-                if (promise_score < 0.1 and actual_epochs >= 3 and
-                    elapsed_time > experiment['baseline_time'] * 0.3):  # Used 30% of baseline time
-                    experiment['allocated_epochs'] = actual_epochs  # Stop early
+            self._adjust_allocated_epochs(experiment, promise_score, actual_epochs)
         except Exception as e:
             print(f"Error updating experiment progress: {e}")
             # Continue with original values if calculation fails

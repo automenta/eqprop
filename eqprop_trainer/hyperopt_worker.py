@@ -45,59 +45,78 @@ class HyperoptSearchWorker(QThread):
         self.total_models = len(optimizer.model_names) if optimizer.model_names else 1
         self.completed_baselines = 0
 
+    def _get_transformer_config(self, model_name: str) -> Dict[str, Any]:
+        """Generate default configuration for transformer models."""
+        return {
+            'lr': 3e-4,
+            'hidden_dim': 128,
+            'num_layers': 2,
+            'steps': 12,
+            'epochs': GLOBAL_CONFIG.epochs,
+            'model_name': model_name
+        }
+
+    def _get_deep_hebbian_config(self, model_name: str) -> Dict[str, Any]:
+        """Generate default configuration for deep hebbian models."""
+        return {
+            'lr': 5e-4,
+            'hidden_dim': 128,
+            'num_layers': 500, # Explicitly configured for depth
+            'epochs': GLOBAL_CONFIG.epochs,
+            'model_name': model_name
+        }
+
+    def _get_eqprop_config(self, model_name: str) -> Dict[str, Any]:
+        """Generate default configuration for EqProp models."""
+        config = {
+            'lr': 1e-3,
+            'hidden_dim': 64,
+            'steps': 12,
+            'epochs': GLOBAL_CONFIG.epochs,
+            'model_name': model_name
+        }
+        if 'MLP' in model_name:
+            config['beta'] = 0.22 # Required for EqProp MLP
+            config['num_layers'] = 10 # Required for EqProp MLP
+        return config
+
+    def _get_chl_config(self, model_name: str) -> Dict[str, Any]:
+        """Generate default configuration for CHL models."""
+        return {
+            'lr': 1e-3,
+            'hidden_dim': 128,
+            'num_layers': 10,
+            'model_name': model_name,
+            'beta': 0.1, # Required for CHL
+            'steps': 20,
+            'epochs': GLOBAL_CONFIG.epochs
+        }
+
+    def _get_general_config(self, model_name: str) -> Dict[str, Any]:
+        """Generate general default configuration."""
+        return {
+            'lr': 3e-4,
+            'hidden_dim': 128,
+            'num_layers': 2,
+            'steps': 12,
+            'epochs': GLOBAL_CONFIG.epochs,
+            'model_name': model_name
+        }
+
     def get_default_config_for_model(self, model_name):
         """Generate a default configuration for a given model."""
         # Default configuration based on model type
         if 'Transformer' in model_name:
-            return {
-                'lr': 3e-4,
-                'hidden_dim': 128,
-                'num_layers': 2,
-                'steps': 12,
-                'epochs': GLOBAL_CONFIG.epochs,
-                'model_name': model_name
-            }
+            return self._get_transformer_config(model_name)
         elif 'Deep Hebbian' in model_name:
-            return {
-                'lr': 5e-4,
-                'hidden_dim': 128,
-                'num_layers': 500, # Explicitly configured for depth
-                'epochs': GLOBAL_CONFIG.epochs,
-                'model_name': model_name
-            }
+            return self._get_deep_hebbian_config(model_name)
         elif 'MLP' in model_name or 'EqProp' in model_name:
-            # Check for specific EqProp variants to add beta
-            config = {
-                'lr': 1e-3,
-                'hidden_dim': 64,
-                'steps': 12,
-                'epochs': GLOBAL_CONFIG.epochs,
-                'model_name': model_name
-            }
-            if 'MLP' in model_name:
-                config['beta'] = 0.22 # Required for EqProp MLP
-                config['num_layers'] = 10 # Required for EqProp MLP
-            return config
+            return self._get_eqprop_config(model_name)
         elif 'CHL' in model_name:
-             return {
-                'lr': 1e-3,
-                'hidden_dim': 128,
-                'num_layers': 10,
-                'model_name': model_name,
-                'beta': 0.1, # Required for CHL
-                'steps': 20,
-                'epochs': GLOBAL_CONFIG.epochs
-            }
+            return self._get_chl_config(model_name)
         else:
             # General default config
-            return {
-                'lr': 3e-4,
-                'hidden_dim': 128,
-                'num_layers': 2,
-                'steps': 12,
-                'epochs': GLOBAL_CONFIG.epochs,
-                'model_name': model_name
-            }
+            return self._get_general_config(model_name)
 
     def run(self):
         try:

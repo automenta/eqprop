@@ -369,51 +369,60 @@ class HyperoptSearchDashboard(QMainWindow):
 
         return group
 
+    def _create_plot_widget(self, title: str, xlabel: str, ylabel: str) -> pg.PlotWidget:
+        """Create a standardized plot widget."""
+        plot_widget = pg.PlotWidget(title=title)
+        plot_widget.setLabel('bottom', xlabel)
+        plot_widget.setLabel('left', ylabel)
+        plot_widget.showGrid(x=True, y=True, alpha=0.3)
+        return plot_widget
+
     def create_pareto_plots(self):
         group = QGroupBox("Pareto Frontier Visualization")
         layout = QHBoxLayout(group)
 
-        # 4 scatter plots showing different trade-offs
-        plots_layout = [[None, None], [None, None]]
+        # Create standardized plots
+        self.plot_acc_ppl = self._create_plot_widget(
+            "Accuracy vs Perplexity",
+            "Perplexity (lower is better)",
+            "Accuracy"
+        )
 
-        # Accuracy vs Perplexity
-        self.plot_acc_ppl = pg.PlotWidget(title="Accuracy vs Perplexity")
-        self.plot_acc_ppl.setLabel('bottom', 'Perplexity (lower is better)')
-        self.plot_acc_ppl.setLabel('left', 'Accuracy')
-        self.plot_acc_ppl.showGrid(x=True, y=True, alpha=0.3)
-        plots_layout[0][0] = self.plot_acc_ppl
+        self.plot_acc_speed = self._create_plot_widget(
+            "Accuracy vs Speed",
+            "Iteration Time (ms)",
+            "Accuracy"
+        )
 
-        # Accuracy vs Speed
-        self.plot_acc_speed = pg.PlotWidget(title="Accuracy vs Speed")
-        self.plot_acc_speed.setLabel('bottom', 'Iteration Time (ms)')
-        self.plot_acc_speed.setLabel('left', 'Accuracy')
-        self.plot_acc_speed.showGrid(x=True, y=True, alpha=0.3)
-        plots_layout[0][1] = self.plot_acc_speed
+        self.plot_acc_params = self._create_plot_widget(
+            "Accuracy vs Parameters",
+            "Parameters (M)",
+            "Accuracy"
+        )
 
-        # Accuracy vs Params
-        self.plot_acc_params = pg.PlotWidget(title="Accuracy vs Parameters")
-        self.plot_acc_params.setLabel('bottom', 'Parameters (M)')
-        self.plot_acc_params.setLabel('left', 'Accuracy')
-        self.plot_acc_params.showGrid(x=True, y=True, alpha=0.3)
-        plots_layout[1][0] = self.plot_acc_params
-
-        # Speed vs Params
-        self.plot_speed_params = pg.PlotWidget(title="Speed vs Parameters")
-        self.plot_speed_params.setLabel('bottom', 'Parameters (M)')
-        self.plot_speed_params.setLabel('left', 'Iteration Time (ms)')
-        self.plot_speed_params.showGrid(x=True, y=True, alpha=0.3)
-        plots_layout[1][1] = self.plot_speed_params
+        self.plot_speed_params = self._create_plot_widget(
+            "Speed vs Parameters",
+            "Parameters (M)",
+            "Iteration Time (ms)"
+        )
 
         # Add to layout in 2x2 grid
         grid_widget = QWidget()
         grid_layout = QVBoxLayout(grid_widget)
 
-        for row in plots_layout:
-            row_widget = QWidget()
-            row_layout = QHBoxLayout(row_widget)
-            for plot in row:
-                row_layout.addWidget(plot)
-            grid_layout.addWidget(row_widget)
+        # Add plots in 2x2 grid
+        top_row = QWidget()
+        top_layout = QHBoxLayout(top_row)
+        top_layout.addWidget(self.plot_acc_ppl)
+        top_layout.addWidget(self.plot_acc_speed)
+
+        bottom_row = QWidget()
+        bottom_layout = QHBoxLayout(bottom_row)
+        bottom_layout.addWidget(self.plot_acc_params)
+        bottom_layout.addWidget(self.plot_speed_params)
+
+        grid_layout.addWidget(top_row)
+        grid_layout.addWidget(bottom_row)
 
         layout.addWidget(grid_widget)
 

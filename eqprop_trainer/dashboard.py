@@ -6,7 +6,7 @@ Features stunning dark cyberpunk theme with live pyqtgraph plots.
 """
 
 import sys
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Tuple
 from pathlib import Path
 
 from PyQt6.QtWidgets import (
@@ -211,32 +211,51 @@ class EqPropDashboard(QMainWindow):
         self.status_label.setStyleSheet("color: #808090; padding: 5px;")
         layout.addWidget(self.status_label)
     
+    def _create_control_group(self, title: str, controls: List[Tuple[str, object]]) -> QGroupBox:
+        """Create a generic control group with common layout."""
+        group = QGroupBox(title)
+        layout = QGridLayout(group)
+
+        for i, (label, widget) in enumerate(controls):
+            layout.addWidget(QLabel(label), i, 0)
+            layout.addWidget(widget, i, 1)
+
+        return group
+
+    def _create_plot_widget(self, title: str, ylabel: str, xlabel: str = 'Epoch',
+                           yrange: Optional[Tuple[float, float]] = None) -> tuple:
+        """Create a standardized plot widget."""
+        plot_widget = pg.PlotWidget()
+        plot_widget.setBackground('#0a0a0f')
+        plot_widget.setLabel('left', ylabel, color=PLOT_COLORS.get(ylabel.lower().split()[0], '#ffffff'))
+        plot_widget.setLabel('bottom', xlabel)
+        plot_widget.showGrid(x=True, y=True, alpha=0.2)
+
+        if yrange:
+            plot_widget.setYRange(*yrange)
+
+        curve = plot_widget.plot(pen=pg.mkPen(PLOT_COLORS.get(ylabel.lower().split()[0], '#ffffff'), width=2))
+        return plot_widget, curve
+
     def _create_lm_tab(self) -> QWidget:
         """Create the Language Modeling tab."""
         tab = QWidget()
         layout = QHBoxLayout(tab)
         layout.setSpacing(15)
-        
+
         # Left panel: Controls
         left_panel = QVBoxLayout()
         layout.addLayout(left_panel, stretch=1)
-        
+
         # Model Selection
-        model_group = QGroupBox("🧠 Model")
-        model_layout = QGridLayout(model_group)
-        
-        model_layout.addWidget(QLabel("Architecture:"), 0, 0)
-        self.lm_model_combo = QComboBox()
-        
-        # LM-specific models
         lm_items = [
             "FullEqProp Transformer",
-            "Attention-Only EqProp", 
+            "Attention-Only EqProp",
             "Recurrent Core EqProp",
             "Hybrid EqProp",
             "LoopedMLP LM",
         ]
-        
+
         # Add bioplausible research algorithms
         try:
             from eqprop_torch import HAS_BIOPLAUSIBLE, ALGORITHM_REGISTRY
@@ -246,169 +265,153 @@ class EqPropDashboard(QMainWindow):
                     lm_items.append(f"{key} - {desc}")
         except:
             pass
-        
+
+        self.lm_model_combo = QComboBox()
         self.lm_model_combo.addItems(lm_items)
-        model_layout.addWidget(self.lm_model_combo, 0, 1)
-        
-        model_layout.addWidget(QLabel("Hidden Dim:"), 1, 0)
+
         self.lm_hidden_spin = QSpinBox()
         self.lm_hidden_spin.setRange(64, 1024)
         self.lm_hidden_spin.setValue(256)
         self.lm_hidden_spin.setSingleStep(64)
-        model_layout.addWidget(self.lm_hidden_spin, 1, 1)
-        
-        model_layout.addWidget(QLabel("Layers:"), 2, 0)
+
         self.lm_layers_spin = QSpinBox()
         self.lm_layers_spin.setRange(1, 100)  # Support deep architectures
         self.lm_layers_spin.setValue(4)
-        model_layout.addWidget(self.lm_layers_spin, 2, 1)
-        
-        model_layout.addWidget(QLabel("Eq Steps:"), 3, 0)
+
         self.lm_steps_spin = QSpinBox()
         self.lm_steps_spin.setRange(5, 50)
         self.lm_steps_spin.setValue(15)
-        model_layout.addWidget(self.lm_steps_spin, 3, 1)
-        
+
+        model_controls = [
+            ("Architecture:", self.lm_model_combo),
+            ("Hidden Dim:", self.lm_hidden_spin),
+            ("Layers:", self.lm_layers_spin),
+            ("Eq Steps:", self.lm_steps_spin)
+        ]
+        model_group = self._create_control_group("🧠 Model", model_controls)
         left_panel.addWidget(model_group)
-        
+
         # Dynamic Hyperparameters Group
         self.lm_hyperparam_group = QGroupBox("⚙️ Model Hyperparameters")
         self.lm_hyperparam_layout = QGridLayout(self.lm_hyperparam_group)
         self.lm_hyperparam_widgets = {}  # Store widgets for cleanup
         left_panel.addWidget(self.lm_hyperparam_group)
         self.lm_hyperparam_group.setVisible(False)  # Hidden by default
-        
+
         # Connect model selection to update hyperparameters
         self.lm_model_combo.currentTextChanged.connect(self._update_lm_hyperparams)
-        
+
         # Dataset Selection
-        data_group = QGroupBox("📚 Dataset")
-        data_layout = QGridLayout(data_group)
-        
-        data_layout.addWidget(QLabel("Dataset:"), 0, 0)
         self.lm_dataset_combo = QComboBox()
         self.lm_dataset_combo.addItems([
             "tiny_shakespeare",
             "wikitext-2",
             "ptb",
         ])
-        data_layout.addWidget(self.lm_dataset_combo, 0, 1)
-        
-        data_layout.addWidget(QLabel("Seq Length:"), 1, 0)
+
         self.lm_seqlen_spin = QSpinBox()
         self.lm_seqlen_spin.setRange(32, 512)
         self.lm_seqlen_spin.setValue(128)
-        data_layout.addWidget(self.lm_seqlen_spin, 1, 1)
-        
-        data_layout.addWidget(QLabel("Batch Size:"), 2, 0)
+
         self.lm_batch_spin = QSpinBox()
         self.lm_batch_spin.setRange(8, 256)
         self.lm_batch_spin.setValue(64)
-        data_layout.addWidget(self.lm_batch_spin, 2, 1)
-        
+
+        data_controls = [
+            ("Dataset:", self.lm_dataset_combo),
+            ("Seq Length:", self.lm_seqlen_spin),
+            ("Batch Size:", self.lm_batch_spin)
+        ]
+        data_group = self._create_control_group("📚 Dataset", data_controls)
         left_panel.addWidget(data_group)
-        
-        # Training Settings  
-        train_group = QGroupBox("⚙️ Training")
-        train_layout = QGridLayout(train_group)
-        
-        train_layout.addWidget(QLabel("Epochs:"), 0, 0)
+
+        # Training Settings
         self.lm_epochs_spin = QSpinBox()
         self.lm_epochs_spin.setRange(1, 500)
         self.lm_epochs_spin.setValue(50)
-        train_layout.addWidget(self.lm_epochs_spin, 0, 1)
-        
-        train_layout.addWidget(QLabel("Learning Rate:"), 1, 0)
+
         self.lm_lr_spin = QDoubleSpinBox()
         self.lm_lr_spin.setRange(0.0001, 0.1)
         self.lm_lr_spin.setValue(0.001)
         self.lm_lr_spin.setSingleStep(0.0001)
         self.lm_lr_spin.setDecimals(4)
-        train_layout.addWidget(self.lm_lr_spin, 1, 1)
-        
+
         self.lm_compile_check = QCheckBox("torch.compile (2x speedup)")
         self.lm_compile_check.setChecked(True)
-        train_layout.addWidget(self.lm_compile_check, 2, 0, 1, 2)
-        
+
+        train_controls = [
+            ("Epochs:", self.lm_epochs_spin),
+            ("Learning Rate:", self.lm_lr_spin),
+            ("", self.lm_compile_check)
+        ]
+        train_group = self._create_control_group("⚙️ Training", train_controls)
         left_panel.addWidget(train_group)
-        
+
         # Train/Stop Buttons
         btn_layout = QHBoxLayout()
-        
+
         self.lm_train_btn = QPushButton("▶ Train")
         self.lm_train_btn.setObjectName("trainButton")
         self.lm_train_btn.clicked.connect(lambda: self._start_training('lm'))
         btn_layout.addWidget(self.lm_train_btn)
-        
+
         self.lm_stop_btn = QPushButton("⏹ Stop")
         self.lm_stop_btn.setObjectName("stopButton")
         self.lm_stop_btn.setEnabled(False)
         self.lm_stop_btn.clicked.connect(self._stop_training)
         btn_layout.addWidget(self.lm_stop_btn)
-        
+
         left_panel.addLayout(btn_layout)
-        
+
         # Progress bar
         self.lm_progress = QProgressBar()
         self.lm_progress.setTextVisible(True)
         self.lm_progress.setFormat("Epoch %v / %m")
         left_panel.addWidget(self.lm_progress)
-        
+
+        # Parameter count display
+        self.lm_param_label = QLabel("Parameters: --")
+        self.lm_param_label.setStyleSheet("color: #00d4ff; font-weight: bold; padding: 5px;")
+        left_panel.addWidget(self.lm_param_label)
+
         # Stretch to push everything up
         left_panel.addStretch()
-        
+
         # Right panel: Plots and Generation
         right_panel = QVBoxLayout()
         layout.addLayout(right_panel, stretch=2)
-        
+
         if HAS_PYQTGRAPH:
             # Configure pyqtgraph for dark theme
             pg.setConfigOptions(antialias=True)
-            
+
             # Loss/Accuracy plot
             metrics_group = QGroupBox("📊 Training Metrics")
             metrics_layout = QVBoxLayout(metrics_group)
-            
-            self.lm_loss_plot = pg.PlotWidget()
-            self.lm_loss_plot.setBackground('#0a0a0f')
-            self.lm_loss_plot.setLabel('left', 'Loss', color=PLOT_COLORS['loss'])
-            self.lm_loss_plot.setLabel('bottom', 'Epoch')
-            self.lm_loss_plot.showGrid(x=True, y=True, alpha=0.2)
-            self.lm_loss_curve = self.lm_loss_plot.plot(pen=pg.mkPen(PLOT_COLORS['loss'], width=2))
+
+            self.lm_loss_plot, self.lm_loss_curve = self._create_plot_widget("Loss", "Loss")
             metrics_layout.addWidget(self.lm_loss_plot)
-            
+
             # Accuracy plot
-            self.lm_acc_plot = pg.PlotWidget()
-            self.lm_acc_plot.setBackground('#0a0a0f')
-            self.lm_acc_plot.setLabel('left', 'Accuracy', color=PLOT_COLORS['accuracy'])
-            self.lm_acc_plot.setLabel('bottom', 'Epoch')
-            self.lm_acc_plot.showGrid(x=True, y=True, alpha=0.2)
-            self.lm_acc_plot.setYRange(0, 1.0)
-            self.lm_acc_curve = self.lm_acc_plot.plot(pen=pg.mkPen(PLOT_COLORS['accuracy'], width=2))
+            self.lm_acc_plot, self.lm_acc_curve = self._create_plot_widget("Accuracy", "Accuracy", yrange=(0, 1.0))
             metrics_layout.addWidget(self.lm_acc_plot)
 
-            
             # Lipschitz plot
-            self.lm_lip_plot = pg.PlotWidget()
-            self.lm_lip_plot.setBackground('#0a0a0f')
-            self.lm_lip_plot.setLabel('left', 'Lipschitz L', color=PLOT_COLORS['lipschitz'])
-            self.lm_lip_plot.setLabel('bottom', 'Epoch')
-            self.lm_lip_plot.showGrid(x=True, y=True, alpha=0.2)
+            self.lm_lip_plot, self.lm_lip_curve = self._create_plot_widget("Lipschitz L", "Lipschitz L")
             self.lm_lip_plot.addLine(y=1.0, pen=pg.mkPen('r', width=1, style=Qt.PenStyle.DashLine))
-            self.lm_lip_curve = self.lm_lip_plot.plot(pen=pg.mkPen(PLOT_COLORS['lipschitz'], width=2))
             metrics_layout.addWidget(self.lm_lip_plot)
-            
+
             right_panel.addWidget(metrics_group, stretch=2)
         else:
             # Fallback text display
             no_plot_label = QLabel("Install pyqtgraph for live plots: pip install pyqtgraph")
             no_plot_label.setStyleSheet("color: #808090; padding: 20px;")
             right_panel.addWidget(no_plot_label)
-        
+
         # Generation panel
         gen_group = QGroupBox("✨ Text Generation")
         gen_layout = QVBoxLayout(gen_group)
-        
+
         gen_controls = QHBoxLayout()
         gen_controls.addWidget(QLabel("Temperature:"))
         self.temp_slider = QSlider(Qt.Orientation.Horizontal)
@@ -419,36 +422,31 @@ class EqPropDashboard(QMainWindow):
         self.temp_label.setFixedWidth(40)
         gen_controls.addWidget(self.temp_label)
         self.temp_slider.valueChanged.connect(lambda v: self.temp_label.setText(f"{v/10:.1f}"))
-        
+
         gen_btn = QPushButton("Generate")
         gen_btn.clicked.connect(self._generate_text)
         gen_controls.addWidget(gen_btn)
         gen_layout.addLayout(gen_controls)
-        
+
         self.gen_output = QTextEdit()
         self.gen_output.setReadOnly(True)
         self.gen_output.setPlaceholderText("Generated text will appear here...")
         gen_layout.addWidget(self.gen_output)
-        
+
         right_panel.addWidget(gen_group, stretch=1)
-        
-        # Parameter count display
-        self.lm_param_label = QLabel("Parameters: --")
-        self.lm_param_label.setStyleSheet("color: #00d4ff; font-weight: bold; padding: 5px;")
-        left_panel.insertWidget(left_panel.count() - 1, self.lm_param_label)
-        
+
         # Weight Visualization (if pyqtgraph available)
         if HAS_PYQTGRAPH and ENABLE_WEIGHT_VIZ:
             viz_group = QGroupBox("🎞️ Weight Matrices")
             viz_layout = QVBoxLayout(viz_group)
-            
+
             self.lm_weight_widgets = []
             self.lm_weight_labels = []
-            
+
             self.lm_weights_container = QWidget()
             self.lm_weights_layout = QVBoxLayout(self.lm_weights_container)
             viz_layout.addWidget(self.lm_weights_container)
-            
+
             right_panel.addWidget(viz_group)
 
         return tab
@@ -458,25 +456,18 @@ class EqPropDashboard(QMainWindow):
         tab = QWidget()
         layout = QHBoxLayout(tab)
         layout.setSpacing(15)
-        
+
         # Left panel: Controls
         left_panel = QVBoxLayout()
         layout.addLayout(left_panel, stretch=1)
-        
+
         # Model Selection
-        model_group = QGroupBox("🧠 Model")
-        model_layout = QGridLayout(model_group)
-        
-        model_layout.addWidget(QLabel("Architecture:"), 0, 0)
-        self.vis_model_combo = QComboBox()
-        
-        # Core EqProp models
         model_items = [
             "LoopedMLP",
             "ConvEqProp",
             "BackpropMLP (baseline)",
         ]
-        
+
         # Try to add bio-plausible algorithms from research codebase
         try:
             from eqprop_torch import HAS_BIOPLAUSIBLE, ALGORITHM_REGISTRY
@@ -488,39 +479,37 @@ class EqPropDashboard(QMainWindow):
                     model_items.append(f"{key} - {desc}")
         except:
             pass  # Bio-plausible models not available
-        
+
+        self.vis_model_combo = QComboBox()
         self.vis_model_combo.addItems(model_items)
-        model_layout.addWidget(self.vis_model_combo, 0, 1)
-        
-        model_layout.addWidget(QLabel("Hidden Dim:"), 1, 0)
+
         self.vis_hidden_spin = QSpinBox()
         self.vis_hidden_spin.setRange(64, 1024)
         self.vis_hidden_spin.setValue(256)
-        model_layout.addWidget(self.vis_hidden_spin, 1, 1)
-        
-        model_layout.addWidget(QLabel("Max Steps:"), 2, 0)
+
         self.vis_steps_spin = QSpinBox()
         self.vis_steps_spin.setRange(5, 100)
         self.vis_steps_spin.setValue(30)
-        model_layout.addWidget(self.vis_steps_spin, 2, 1)
-        
+
+        model_controls = [
+            ("Architecture:", self.vis_model_combo),
+            ("Hidden Dim:", self.vis_hidden_spin),
+            ("Max Steps:", self.vis_steps_spin)
+        ]
+        model_group = self._create_control_group("🧠 Model", model_controls)
         left_panel.addWidget(model_group)
-        
+
         # Dynamic Hyperparameters Group
         self.vis_hyperparam_group = QGroupBox("⚙️ Model Hyperparameters")
         self.vis_hyperparam_layout = QGridLayout(self.vis_hyperparam_group)
         self.vis_hyperparam_widgets = {}  # Store widgets for cleanup
         left_panel.addWidget(self.vis_hyperparam_group)
         self.vis_hyperparam_group.setVisible(False)  # Hidden by default
-        
+
         # Connect model selection to update hyperparameters
         self.vis_model_combo.currentTextChanged.connect(self._update_vis_hyperparams)
-        
+
         # Dataset
-        data_group = QGroupBox("📚 Dataset")
-        data_layout = QGridLayout(data_group)
-        
-        data_layout.addWidget(QLabel("Dataset:"), 0, 0)
         self.vis_dataset_combo = QComboBox()
         self.vis_dataset_combo.addItems([
             "MNIST",
@@ -528,141 +517,124 @@ class EqPropDashboard(QMainWindow):
             "CIFAR-10",
             "KMNIST",
         ])
-        data_layout.addWidget(self.vis_dataset_combo, 0, 1)
-        
-        data_layout.addWidget(QLabel("Batch Size:"), 1, 0)
+
         self.vis_batch_spin = QSpinBox()
         self.vis_batch_spin.setRange(16, 512)
         self.vis_batch_spin.setValue(64)
-        data_layout.addWidget(self.vis_batch_spin, 1, 1)
-        
+
+        data_controls = [
+            ("Dataset:", self.vis_dataset_combo),
+            ("Batch Size:", self.vis_batch_spin)
+        ]
+        data_group = self._create_control_group("📚 Dataset", data_controls)
         left_panel.addWidget(data_group)
-        
+
         # Training
-        train_group = QGroupBox("⚙️ Training")
-        train_layout = QGridLayout(train_group)
-        
-        train_layout.addWidget(QLabel("Epochs:"), 0, 0)
         self.vis_epochs_spin = QSpinBox()
         self.vis_epochs_spin.setRange(1, 100)
         self.vis_epochs_spin.setValue(10)
-        train_layout.addWidget(self.vis_epochs_spin, 0, 1)
-        
-        train_layout.addWidget(QLabel("Learning Rate:"), 1, 0)
+
         self.vis_lr_spin = QDoubleSpinBox()
         self.vis_lr_spin.setRange(0.0001, 0.1)
         self.vis_lr_spin.setValue(0.001)
         self.vis_lr_spin.setDecimals(4)
-        train_layout.addWidget(self.vis_lr_spin, 1, 1)
-        
+
         self.vis_compile_check = QCheckBox("torch.compile")
         self.vis_compile_check.setChecked(True)
-        train_layout.addWidget(self.vis_compile_check, 2, 0, 1, 2)
-        
+
+        train_controls = [
+            ("Epochs:", self.vis_epochs_spin),
+            ("Learning Rate:", self.vis_lr_spin),
+            ("", self.vis_compile_check)
+        ]
+        train_group = self._create_control_group("⚙️ Training", train_controls)
         left_panel.addWidget(train_group)
-        
+
         # Buttons
         btn_layout = QHBoxLayout()
-        
+
         self.vis_train_btn = QPushButton("▶ Train")
         self.vis_train_btn.setObjectName("trainButton")
         self.vis_train_btn.clicked.connect(lambda: self._start_training('vision'))
         btn_layout.addWidget(self.vis_train_btn)
-        
+
         self.vis_stop_btn = QPushButton("⏹ Stop")
         self.vis_stop_btn.setObjectName("stopButton")
         self.vis_stop_btn.setEnabled(False)
         self.vis_stop_btn.clicked.connect(self._stop_training)
         btn_layout.addWidget(self.vis_stop_btn)
-        
+
         left_panel.addLayout(btn_layout)
-        
+
         self.vis_progress = QProgressBar()
         self.vis_progress.setFormat("Epoch %v / %m")
         left_panel.addWidget(self.vis_progress)
-        
+
         # Parameter count display
         self.vis_param_label = QLabel("Parameters: --")
         self.vis_param_label.setStyleSheet("color: #00d4ff; font-weight: bold; padding: 5px;")
         left_panel.addWidget(self.vis_param_label)
-        
+
         left_panel.addStretch()
-        
+
         # Right panel: Plots
         right_panel = QVBoxLayout()
         layout.addLayout(right_panel, stretch=2)
-        
+
         if HAS_PYQTGRAPH:
             metrics_group = QGroupBox("📊 Training Metrics")
             metrics_layout = QVBoxLayout(metrics_group)
-            
-            self.vis_loss_plot = pg.PlotWidget()
-            self.vis_loss_plot.setBackground('#0a0a0f')
-            self.vis_loss_plot.setLabel('left', 'Loss', color=PLOT_COLORS['loss'])
-            self.vis_loss_plot.setLabel('bottom', 'Epoch')
-            self.vis_loss_plot.showGrid(x=True, y=True, alpha=0.2)
-            self.vis_loss_curve = self.vis_loss_plot.plot(pen=pg.mkPen(PLOT_COLORS['loss'], width=2), name='Loss')
+
+            self.vis_loss_plot, self.vis_loss_curve = self._create_plot_widget("Loss", "Loss")
             metrics_layout.addWidget(self.vis_loss_plot)
-            
+
             # Accuracy plot
-            self.vis_acc_plot = pg.PlotWidget()
-            self.vis_acc_plot.setBackground('#0a0a0f')
-            self.vis_acc_plot.setLabel('left', 'Accuracy', color=PLOT_COLORS['accuracy'])
-            self.vis_acc_plot.setLabel('bottom', 'Epoch')
-            self.vis_acc_plot.showGrid(x=True, y=True, alpha=0.2)
-            self.vis_acc_plot.setYRange(0, 1.0)
-            self.vis_acc_curve = self.vis_acc_plot.plot(pen=pg.mkPen(PLOT_COLORS['accuracy'], width=2), name='Accuracy')
+            self.vis_acc_plot, self.vis_acc_curve = self._create_plot_widget("Accuracy", "Accuracy", yrange=(0, 1.0))
             metrics_layout.addWidget(self.vis_acc_plot)
 
-            
-            self.vis_lip_plot = pg.PlotWidget()
-            self.vis_lip_plot.setBackground('#0a0a0f')
-            self.vis_lip_plot.setLabel('left', 'Lipschitz L')
-            self.vis_lip_plot.setLabel('bottom', 'Epoch')
-            self.vis_lip_plot.showGrid(x=True, y=True, alpha=0.2)
+            self.vis_lip_plot, self.vis_lip_curve = self._create_plot_widget("Lipschitz L", "Lipschitz L")
             self.vis_lip_plot.addLine(y=1.0, pen=pg.mkPen('r', width=1, style=Qt.PenStyle.DashLine))
-            self.vis_lip_curve = self.vis_lip_plot.plot(pen=pg.mkPen(PLOT_COLORS['lipschitz'], width=2))
             metrics_layout.addWidget(self.vis_lip_plot)
-            
+
             right_panel.addWidget(metrics_group)
-        
+
         # Stats display
         stats_group = QGroupBox("📈 Results")
         stats_layout = QGridLayout(stats_group)
-        
+
         stats_layout.addWidget(QLabel("Test Accuracy:"), 0, 0)
         self.vis_acc_label = QLabel("--")
         self.vis_acc_label.setObjectName("metricLabel")
         stats_layout.addWidget(self.vis_acc_label, 0, 1)
-        
+
         stats_layout.addWidget(QLabel("Final Loss:"), 1, 0)
         self.vis_loss_label = QLabel("--")
         stats_layout.addWidget(self.vis_loss_label, 1, 1)
-        
+
         stats_layout.addWidget(QLabel("Lipschitz:"), 2, 0)
         self.vis_lip_label = QLabel("--")
         stats_layout.addWidget(self.vis_lip_label, 2, 1)
-        
+
         right_panel.addWidget(stats_group)
-        
+
         # Weight Visualization (if pyqtgraph available)
         if HAS_PYQTGRAPH and ENABLE_WEIGHT_VIZ:
             viz_group = QGroupBox("🎞️ Weight Matrices")
             viz_layout = QVBoxLayout(viz_group)
-            
+
             # Create container for weight heatmaps
             self.vis_weight_widgets = []  # Store ImageView widgets
             self.vis_weight_labels = []   # Store labels
-            
+
             # We'll create these dynamically when model is available
             self.vis_weights_container = QWidget()
             self.vis_weights_layout = QVBoxLayout(self.vis_weights_container)
             viz_layout.addWidget(self.vis_weights_container)
-            
+
             right_panel.addWidget(viz_group)
-        
+
         right_panel.addStretch()
-        
+
         return tab
     
     def _start_training(self, mode: str):
@@ -670,84 +642,187 @@ class EqPropDashboard(QMainWindow):
         try:
             import torch
             from eqprop_torch import LoopedMLP, ConvEqProp, BackpropMLP
-            
+
             if mode == 'vision':
                 self._start_vision_training()
             else:
                 self._start_lm_training()
-                
+
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to start training:\n{e}")
-    
-    def _start_vision_training(self):
-        """Start vision model training."""
+
+    def _create_model_and_loader(self, mode: str):
+        """Create model and data loader based on mode (vision or lm)."""
         import torch
         from eqprop_torch import LoopedMLP, ConvEqProp, BackpropMLP
-        from eqprop_torch.datasets import get_vision_dataset
         from torch.utils.data import DataLoader
-        
+
+        if mode == 'vision':
+            return self._create_vision_model_and_loader()
+        else:
+            return self._create_lm_model_and_loader()
+
+    def _create_vision_model_and_loader(self):
+        """Create vision model and data loader."""
+        from eqprop_torch.datasets import get_vision_dataset
+
         # Get dataset
         dataset_name = self.vis_dataset_combo.currentText().lower().replace('-', '_')
         use_flatten = 'MLP' in self.vis_model_combo.currentText()
-        
+
         train_data = get_vision_dataset(dataset_name, train=True, flatten=use_flatten)
         self.train_loader = DataLoader(train_data, batch_size=self.vis_batch_spin.value(), shuffle=True)
-        
+
         # Create model
         hidden = self.vis_hidden_spin.value()
         model_name = self.vis_model_combo.currentText()
-        
+
         # Check if it's a bio-plausible research algorithm
         if ' - ' in model_name:  # Bio-plausible models are formatted as "key - description"
             algorithm_key = model_name.split(' - ')[0]
             try:
                 from eqprop_torch import HAS_BIOPLAUSIBLE
                 from algorithms import create_model, AlgorithmConfig
-                
+
                 if not HAS_BIOPLAUSIBLE:
                     raise ImportError("Research algorithms not available")
-                
+
                 # Determine input_dim based on dataset
                 if 'MNIST' in self.vis_dataset_combo.currentText():
                     input_dim = 784
                 else:  # CIFAR-10
                     input_dim = 3072
-                
+
                 # Create research algorithm model directly (first-class nn.Module)
-                self.model = create_model(
+                model = create_model(
                     algorithm_key,
                     input_dim,
                     [hidden],  # Single hidden layer
                     10  # 10 classes
                 )
             except Exception as e:
-                QMessageBox.warning(self, "Model Creation Failed", 
+                QMessageBox.warning(self, "Model Creation Failed",
                                    f"Could not create {algorithm_key}: {e}")
+                return None, None
         elif 'LoopedMLP' in model_name:
             input_dim = 784 if 'MNIST' in self.vis_dataset_combo.currentText() else 3072
-            self.model = LoopedMLP(input_dim, hidden, 10, max_steps=self.vis_steps_spin.value())
+            model = LoopedMLP(input_dim, hidden, 10, max_steps=self.vis_steps_spin.value())
         elif 'ConvEqProp' in model_name:
             channels = 1 if 'MNIST' in self.vis_dataset_combo.currentText() else 3
-            self.model = ConvEqProp(channels, hidden // 4, 10)
+            model = ConvEqProp(channels, hidden // 4, 10)
         else:  # BackpropMLP
             input_dim = 784 if 'MNIST' in self.vis_dataset_combo.currentText() else 3072
-            self.model = BackpropMLP(input_dim, hidden, 10)
-        
+            model = BackpropMLP(input_dim, hidden, 10)
+
+        return model, self.train_loader
+
+    def _create_lm_model_and_loader(self):
+        """Create language model and data loader."""
+        from eqprop_torch import HAS_LM_VARIANTS, HAS_BIOPLAUSIBLE
+        from eqprop_torch.datasets import get_lm_dataset
+        from torch.utils.data import DataLoader
+
+        model_name = self.lm_model_combo.currentText()
+
+        # Check if it's a bioplausible algorithm
+        if ' - ' in model_name:
+            algorithm_key = model_name.split(' - ')[0]
+            try:
+                from algorithms import create_model
+
+                # Get dataset to determine vocab size
+                dataset_name = self.lm_dataset_combo.currentText()
+                seq_len = self.lm_seqlen_spin.value()
+
+                # Load dataset
+                dataset = get_lm_dataset(dataset_name, seq_len=seq_len, split='train')
+                vocab_size = dataset.vocab_size if hasattr(dataset, 'vocab_size') else 256
+
+                # Create algorithm model
+                hidden = self.lm_hidden_spin.value()
+                model = create_model(
+                    algorithm_key,
+                    vocab_size,  # Input = vocab
+                    [hidden],
+                    vocab_size   # Output = vocab (next token prediction)
+                )
+
+                train_loader = DataLoader(dataset, batch_size=self.lm_batch_spin.value(), shuffle=True)
+                return model, train_loader
+
+            except Exception as e:
+                QMessageBox.warning(self, "Model Creation Failed",
+                                   f"Could not create {algorithm_key}: {e}")
+                return None, None
+
+        # LM variant models
+        elif HAS_LM_VARIANTS:
+            try:
+                from eqprop_torch import get_eqprop_lm
+
+                # Map UI names to variant keys
+                variant_map = {
+                    "FullEqProp Transformer": "full",
+                    "Attention-Only EqProp": "attention_only",
+                    "Recurrent Core EqProp": "recurrent_core",
+                    "Hybrid EqProp": "hybrid",
+                    "LoopedMLP LM": "looped_mlp"
+                }
+
+                variant = variant_map.get(model_name, "full")
+
+                # Get dataset
+                dataset_name = self.lm_dataset_combo.currentText()
+                seq_len = self.lm_seqlen_spin.value()
+
+                dataset = get_lm_dataset(dataset_name, seq_len=seq_len, split='train')
+                vocab_size = dataset.vocab_size if hasattr(dataset, 'vocab_size') else 256
+
+                # Create LM model
+                model = get_eqprop_lm(
+                    variant,
+                    vocab_size=vocab_size,
+                    hidden_dim=self.lm_hidden_spin.value(),
+                    num_layers=self.lm_layers_spin.value(),
+                    max_seq_len=seq_len,
+                    eq_steps=self.lm_steps_spin.value()
+                )
+
+                train_loader = DataLoader(dataset, batch_size=self.lm_batch_spin.value(), shuffle=True)
+                return model, train_loader
+
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to create LM model:\n{e}")
+                return None, None
+        else:
+            QMessageBox.warning(self, "Not Available", "LM variants not available")
+            return None, None
+    
+    def _start_vision_training(self):
+        """Start vision model training."""
+        # Create model and data loader
+        model, train_loader = self._create_vision_model_and_loader()
+
+        if model is None or train_loader is None:
+            return  # Error already shown to user
+
+        self.model = model
+        self.train_loader = train_loader
+
         # Clear history
         self.loss_history.clear()
         self.acc_history.clear()
         self.lipschitz_history.clear()
-        
-        # Create and start worker
-        # Create and start worker
+
         # Get hyperparameters
         hyperparams = self._get_current_hyperparams(self.vis_hyperparam_widgets)
-        
+
         # Update parameter count
         if hasattr(self, 'vis_param_label'):
             count = count_parameters(self.model)
             self.vis_param_label.setText(f"Parameters: {format_parameter_count(count)}")
-        
+
+        # Create and start worker
         self.worker = TrainingWorker(
             self.model,
             self.train_loader,
@@ -760,108 +835,37 @@ class EqPropDashboard(QMainWindow):
         self.worker.finished.connect(self._on_finished)
         self.worker.error.connect(self._on_error)
         self.worker.weights_updated.connect(self._update_weight_visualization)
-        
+
         # Update UI
         self.vis_train_btn.setEnabled(False)
         self.vis_stop_btn.setEnabled(True)
         self.vis_progress.setMaximum(self.vis_epochs_spin.value())
         self.vis_progress.setValue(0)
-        
+
+        model_name = self.vis_model_combo.currentText()
         self.status_label.setText(f"Training {model_name}...")
         self.plot_timer.start(100)
         self.worker.start()
     
     def _start_lm_training(self):
         """Start language model training."""
-        import torch
-        from eqprop_torch import HAS_LM_VARIANTS, HAS_BIOPLAUSIBLE
-        from eqprop_torch.datasets import get_lm_dataset
-        from torch.utils.data import DataLoader
-        
-        model_name = self.lm_model_combo.currentText()
-        
-        # Check if it's a bioplausible algorithm
-        if ' - ' in model_name:
-            algorithm_key = model_name.split(' - ')[0]
-            try:
-                from algorithms import create_model
-                
-                # Get dataset to determine vocab size
-                dataset_name = self.lm_dataset_combo.currentText()
-                seq_len = self.lm_seqlen_spin.value()
-                
-                # Load dataset
-                dataset = get_lm_dataset(dataset_name, seq_len=seq_len, split='train')
-                vocab_size = dataset.vocab_size if hasattr(dataset, 'vocab_size') else 256
-                
-                # Create algorithm model
-                hidden = self.lm_hidden_spin.value()
-                self.model = create_model(
-                    algorithm_key,
-                    vocab_size,  # Input = vocab
-                    [hidden],
-                    vocab_size   # Output = vocab (next token prediction)
-                )
-                
-                self.train_loader = DataLoader(dataset, batch_size=self.lm_batch_spin.value(), shuffle=True)
-                
-            except Exception as e:
-                QMessageBox.warning(self, "Model Creation Failed", 
-                                   f"Could not create {algorithm_key}: {e}")
-                return
-        
-        # LM variant models
-        elif HAS_LM_VARIANTS:
-            try:
-                from eqprop_torch import get_eqprop_lm
-                
-                # Map UI names to variant keys
-                variant_map = {
-                    "FullEqProp Transformer": "full",
-                    "Attention-Only EqProp": "attention_only",
-                    "Recurrent Core EqProp": "recurrent_core",
-                    "Hybrid EqProp": "hybrid",
-                    "LoopedMLP LM": "looped_mlp"
-                }
-                
-                variant = variant_map.get(model_name, "full")
-                
-                # Get dataset
-                dataset_name = self.lm_dataset_combo.currentText()
-                seq_len = self.lm_seqlen_spin.value()
-                
-                dataset = get_lm_dataset(dataset_name, seq_len=seq_len, split='train')
-                vocab_size = dataset.vocab_size if hasattr(dataset, 'vocab_size') else 256
-                
-                # Create LM model
-                self.model = get_eqprop_lm(
-                    variant,
-                    vocab_size=vocab_size,
-                    hidden_dim=self.lm_hidden_spin.value(),
-                    num_layers=self.lm_layers_spin.value(),
-                    max_seq_len=seq_len,
-                    eq_steps=self.lm_steps_spin.value()
-                )
-                
-                self.train_loader = DataLoader(dataset, batch_size=self.lm_batch_spin.value(), shuffle=True)
-                
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to create LM model:\n{e}")
-                return
-        else:
-            QMessageBox.warning(self, "Not Available", "LM variants not available")
-            return
-        
+        # Create model and data loader
+        model, train_loader = self._create_lm_model_and_loader()
+
+        if model is None or train_loader is None:
+            return  # Error already shown to user
+
+        self.model = model
+        self.train_loader = train_loader
+
         # Clear history
         self.loss_history.clear()
         self.acc_history.clear()
         self.lipschitz_history.clear()
-        
-        # Create and start worker
-        # Create and start worker
+
         # Get hyperparameters
         hyperparams = self._get_current_hyperparams(self.lm_hyperparam_widgets)
-        
+
         # Update parameter count
         if hasattr(self, 'lm_param_label'):
             count = count_parameters(self.model)
@@ -879,13 +883,15 @@ class EqPropDashboard(QMainWindow):
         self.worker.finished.connect(self._on_finished)
         self.worker.error.connect(self._on_error)
         self.worker.weights_updated.connect(self._update_weight_visualization)
-        
+
         # Update UI
         self.lm_train_btn.setEnabled(False)
         self.lm_stop_btn.setEnabled(True)
         self.lm_progress.setMaximum(self.lm_epochs_spin.value())
         self.lm_progress.setValue(0)
-        
+
+        model_name = self.lm_model_combo.currentText()
+        dataset_name = self.lm_dataset_combo.currentText()
         self.status_label.setText(f"Training {model_name} on {dataset_name}...")
         self.plot_timer.start(100)
         self.worker.start()

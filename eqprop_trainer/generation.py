@@ -116,6 +116,75 @@ class UniversalGenerator:
         # Fallback: autoregressive generation
         return self._autoregressive_generate(prompt, max_new_tokens, temperature, top_k)
     
+    def _validate_and_adjust_logits(self, logits: torch.Tensor) -> torch.Tensor:
+        """Validate and adjust logits to match vocab size."""
+        if logits.shape[0] != self.vocab_size:
+            # Pad or trim logits to vocab size
+            if logits.shape[0] < self.vocab_size:
+                padding = torch.zeros(
+                    self.vocab_size - logits.shape[0],
+                    device=logits.device,
+                    dtype=logits.dtype
+                )
+                logits = torch.cat([logits, padding])
+            else:
+                logits = logits[:self.vocab_size]
+        return logits
+
+    def _prepare_input_tensor(self, generated_tokens: list) -> torch.Tensor:
+        """Prepare input tensor based on model type."""
+        if hasattr(self.model, 'input_dim'):
+            # Vision model: use last token as flattened input
+            input_tensor = torch.zeros(1, self.model.input_dim, device=self.device)
+            # One-hot encode last token
+            if len(generated_tokens) > 0:
+                last_token = generated_tokens[-1] % self.vocab_size
+                if last_token < self.model.input_dim:
+                    input_tensor[0, last_token] = 1.0
+        elif hasattr(self.model, 'token_emb'):
+            # LM model: use tokens directly
+            input_tensor = torch.tensor(
+                generated_tokens[-min(len(generated_tokens), 128):],  # Last 128 tokens
+                dtype=torch.long,
+                device=self.device
+            ).unsqueeze(0)
+        else:
+            # Generic: one-hot encode last token
+            input_tensor = torch.zeros(1, self.vocab_size, device=self.device)
+            if len(generated_tokens) > 0:
+                last_token = generated_tokens[-1] % self.vocab_size
+                input_tensor[0, last_token] = 1.0
+        return input_tensor
+
+    def _process_model_output(self, output: torch.Tensor) -> torch.Tensor:
+        """Process model output to extract logits."""
+        if output.dim() == 3:
+            # LM output: [batch, seq, vocab]
+            logits = output[0, -1, :]  # Take last position
+        elif output.dim() == 2:
+            # Vision output: [batch, classes]
+            logits = output[0, :]
+        else:
+            # Unexpected shape, try to handle gracefully
+            if output.numel() == self.vocab_size:
+                # Flatten to vocab size
+                logits = output.flatten()
+            else:
+                # Take mean across all dimensions except vocab dimension if possible
+                # Otherwise just flatten
+                logits = output.flatten()
+                if logits.shape[0] > self.vocab_size:
+                    logits = logits[:self.vocab_size]
+                elif logits.shape[0] < self.vocab_size:
+                    # Pad with zeros
+                    padding = torch.zeros(
+                        self.vocab_size - logits.shape[0],
+                        device=logits.device,
+                        dtype=logits.dtype
+                    )
+                    logits = torch.cat([logits, padding])
+        return logits
+
     def _autoregressive_generate(
         self,
         prompt: str,
@@ -125,83 +194,54 @@ class UniversalGenerator:
     ) -> str:
         """Autoregressive generation for models without native generate()."""
         self.model.eval()
-        
+
         # Encode prompt
         if not prompt:
             prompt = " "  # Start with space if empty
-        
+
         tokens = self.tokenizer.encode(prompt)
         generated_tokens = tokens.copy()
-        
+
         with torch.no_grad():
-            for _ in range(max_new_tokens):
+            for i in range(max_new_tokens):
                 # Prepare input - different strategies for different model types
-                if hasattr(self.model, 'input_dim'):
-                    # Vision model: use last token as flattened input
-                    input_tensor = torch.zeros(1, self.model.input_dim, device=self.device)
-                    # One-hot encode last token
-                    if len(generated_tokens) > 0:
-                        last_token = generated_tokens[-1] % self.vocab_size
-                        if last_token < self.model.input_dim:
-                            input_tensor[0, last_token] = 1.0
-                elif hasattr(self.model, 'token_emb'):
-                    # LM model: use tokens directly
-                    input_tensor = torch.tensor(
-                        generated_tokens[-min(len(generated_tokens), 128):],  # Last 128 tokens
-                        dtype=torch.long,
-                        device=self.device
-                    ).unsqueeze(0)
-                else:
-                    # Generic: one-hot encode last token
-                    input_tensor = torch.zeros(1, self.vocab_size, device=self.device)
-                    if len(generated_tokens) > 0:
-                        last_token = generated_tokens[-1] % self.vocab_size
-                        input_tensor[0, last_token] = 1.0
-                
-                # Forward pass
                 try:
+                    input_tensor = self._prepare_input_tensor(generated_tokens)
+
+                    # Forward pass
                     output = self.model(input_tensor)
+
+                    # Get logits for next token
+                    logits = self._process_model_output(output)
+
+                    # Validate and adjust logits
+                    logits = self._validate_and_adjust_logits(logits)
+
+                    # Apply temperature
+                    temperature_safe = max(temperature, 0.01)
+                    logits = logits / temperature_safe
+
+                    # Apply top-k filtering
+                    if top_k > 0 and top_k < logits.shape[0]:
+                        indices_to_remove = logits < torch.topk(logits, min(top_k, logits.shape[0]))[0][..., -1, None]
+                        logits[indices_to_remove] = float('-inf')
+
+                    # Apply softmax and sample
+                    probs = F.softmax(logits, dim=-1)
+
+                    # Handle case where all probabilities are zero (due to top-k filtering)
+                    if torch.sum(probs) == 0:
+                        probs = torch.ones_like(probs) / probs.shape[0]
+
+                    next_token = torch.multinomial(probs, num_samples=1).item()
+
+                    # Add to generated tokens
+                    generated_tokens.append(next_token)
+
                 except Exception as e:
-                    print(f"Generation forward pass failed: {e}")
+                    print(f"Error during generation at step {i}: {e}")
                     break
-                
-                # Get logits for next token
-                if output.dim() == 3:
-                    # LM output: [batch, seq, vocab]
-                    logits = output[0, -1, :]
-                elif output.dim() == 2:
-                    # Vision output: [batch, classes]
-                    logits = output[0, :]
-                else:
-                    print(f"Unexpected output shape: {output.shape}")
-                    break
-                
-                # Ensure logits are correct size
-                if logits.shape[0] != self.vocab_size:
-                    # Pad or trim logits to vocab size
-                    if logits.shape[0] < self.vocab_size:
-                        padding = torch.zeros(
-                            self.vocab_size - logits.shape[0],
-                            device=logits.device
-                        )
-                        logits = torch.cat([logits, padding])
-                    else:
-                        logits = logits[:self.vocab_size]
-                
-                # Apply temperature
-                logits = logits / max(temperature, 0.01)
-                
-                # Apply top-k filtering
-                if top_k > 0:
-                    indices_to_remove = logits < torch.topk(logits, min(top_k, logits.shape[0]))[0][..., -1, None]
-                    logits[indices_to_remove] = float('-inf')
-                
-                # Sample next token
-                probs = F.softmax(logits, dim=-1)
-                next_token = torch.multinomial(probs, num_samples=1).item()
-                
-                generated_tokens.append(next_token)
-        
+
         # Decode to text
         return self.tokenizer.decode(generated_tokens)
 
