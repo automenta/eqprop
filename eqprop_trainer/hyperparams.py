@@ -244,11 +244,25 @@ class HyperparamRegistry:
         ]
 
     def get_schema(self, model_type: str) -> List[HyperparamSpec]:
-        """Get hyperparameter schema for a model type."""
+        """
+        Get hyperparameter schema for a model type.
+
+        Args:
+            model_type: Type of model to get hyperparameters for
+
+        Returns:
+            List of HyperparamSpec objects
+        """
         return self.schemas.get(model_type, [])
 
     def register_schema(self, model_type: str, specs: List[HyperparamSpec]):
-        """Register a new hyperparameter schema."""
+        """
+        Register a new hyperparameter schema.
+
+        Args:
+            model_type: Name of the model type
+            specs: List of hyperparameter specifications
+        """
         self.schemas[model_type] = specs
 
 
@@ -291,5 +305,13 @@ def get_hyperparams_for_model(model_name: str) -> List[HyperparamSpec]:
 
 
 def hyperparams_to_dict(specs: List[HyperparamSpec]) -> Dict[str, Any]:
-    """Convert list of specs to dict of default values."""
+    """
+    Convert list of specs to dict of default values.
+
+    Args:
+        specs: List of hyperparameter specifications
+
+    Returns:
+        Dictionary mapping parameter names to their default values
+    """
     return {spec.name: spec.default for spec in specs}

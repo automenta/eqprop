@@ -13,37 +13,58 @@ from typing import Union, Optional
 
 class SimpleCharTokenizer:
     """Simple character-level tokenizer for universal generation."""
-    
+
     def __init__(self, chars: str = None):
-        """Initialize with character vocabulary."""
+        """
+        Initialize with character vocabulary.
+
+        Args:
+            chars: String of characters to use as vocabulary. If None, uses printable ASCII.
+        """
         if chars is None:
             # Default: printable ASCII
             chars = ''.join(chr(i) for i in range(32, 127))
-        
+
         self.chars = chars
         self.vocab_size = len(chars)
         self.char_to_idx = {ch: i for i, ch in enumerate(chars)}
         self.idx_to_char = {i: ch for i, ch in enumerate(chars)}
-    
+
     def encode(self, text: str) -> list:
-        """Convert text to list of indices."""
+        """
+        Convert text to list of indices.
+
+        Args:
+            text: Input text to encode
+
+        Returns:
+            List of integer indices representing the text
+        """
         return [self.char_to_idx.get(ch, 0) for ch in text]
-    
+
     def decode(self, indices: list) -> str:
-        """Convert indices to text."""
+        """
+        Convert indices to text.
+
+        Args:
+            indices: List of integer indices to decode
+
+        Returns:
+            Decoded text string
+        """
         return ''.join(self.idx_to_char.get(idx, '?') for idx in indices)
 
 
 class UniversalGenerator:
     """
     Universal text generator that works with ANY PyTorch model.
-    
+
     For models without .generate() method, uses autoregressive prediction.
     Works with Vision models, LM models, or any classifier.
     """
-    
+
     def __init__(
-        self, 
+        self,
         model: nn.Module,
         vocab_size: int = 95,  # Printable ASCII
         tokenizer: Optional[SimpleCharTokenizer] = None,
@@ -59,14 +80,14 @@ class UniversalGenerator:
         self.model = model
         self.vocab_size = vocab_size
         self.device = device
-        
+
         if tokenizer is None:
             tokenizer = SimpleCharTokenizer()
         self.tokenizer = tokenizer
-        
+
         # Check if model has native generation
         self.has_native_generate = hasattr(model, 'generate') and callable(model.generate)
-    
+
     def generate(
         self,
         prompt: str = "",
@@ -76,13 +97,13 @@ class UniversalGenerator:
     ) -> str:
         """
         Generate text from prompt.
-        
+
         Args:
             prompt: Starting text
             max_new_tokens: Number of tokens to generate
             temperature: Sampling temperature (higher = more random)
             top_k: Top-k sampling (0 = disabled)
-            
+
         Returns:
             Generated text
         """
@@ -92,32 +113,40 @@ class UniversalGenerator:
                 # Encode prompt to tokens
                 if isinstance(prompt, str):
                     prompt_tokens = torch.tensor(
-                        self.tokenizer.encode(prompt), 
+                        self.tokenizer.encode(prompt),
                         dtype=torch.long,
                         device=self.device
                     ).unsqueeze(0)
                 else:
                     prompt_tokens = prompt
-                
+
                 # Call native generate
                 output_tokens = self.model.generate(
                     prompt_tokens,
                     max_new_tokens=max_new_tokens,
                     temperature=temperature
                 )
-                
+
                 # Decode back to text
                 if isinstance(output_tokens, torch.Tensor):
                     output_tokens = output_tokens[0].tolist()
                 return self.tokenizer.decode(output_tokens)
             except Exception as e:
                 print(f"Native generation failed: {e}, falling back to autoregressive")
-        
+
         # Fallback: autoregressive generation
         return self._autoregressive_generate(prompt, max_new_tokens, temperature, top_k)
-    
+
     def _validate_and_adjust_logits(self, logits: torch.Tensor) -> torch.Tensor:
-        """Validate and adjust logits to match vocab size."""
+        """
+        Validate and adjust logits to match vocab size.
+
+        Args:
+            logits: Raw logits from model output
+
+        Returns:
+            Adjusted logits with correct vocab size
+        """
         if logits.shape[0] != self.vocab_size:
             # Pad or trim logits to vocab size
             if logits.shape[0] < self.vocab_size:
@@ -132,7 +161,15 @@ class UniversalGenerator:
         return logits
 
     def _prepare_input_tensor(self, generated_tokens: list) -> torch.Tensor:
-        """Prepare input tensor based on model type."""
+        """
+        Prepare input tensor based on model type.
+
+        Args:
+            generated_tokens: List of tokens generated so far
+
+        Returns:
+            Prepared input tensor for the model
+        """
         if hasattr(self.model, 'input_dim'):
             # Vision model: use last token as flattened input
             input_tensor = torch.zeros(1, self.model.input_dim, device=self.device)
@@ -157,7 +194,15 @@ class UniversalGenerator:
         return input_tensor
 
     def _process_model_output(self, output: torch.Tensor) -> torch.Tensor:
-        """Process model output to extract logits."""
+        """
+        Process model output to extract logits.
+
+        Args:
+            output: Raw model output tensor
+
+        Returns:
+            Processed logits for next token prediction
+        """
         if output.dim() == 3:
             # LM output: [batch, seq, vocab]
             logits = output[0, -1, :]  # Take last position
@@ -192,7 +237,18 @@ class UniversalGenerator:
         temperature: float,
         top_k: int,
     ) -> str:
-        """Autoregressive generation for models without native generate()."""
+        """
+        Autoregressive generation for models without native generate().
+
+        Args:
+            prompt: Initial prompt text
+            max_new_tokens: Maximum number of new tokens to generate
+            temperature: Sampling temperature
+            top_k: Top-k sampling parameter
+
+        Returns:
+            Generated text string
+        """
         self.model.eval()
 
         # Encode prompt
@@ -247,12 +303,28 @@ class UniversalGenerator:
 
 
 def count_parameters(model: nn.Module) -> int:
-    """Count total trainable parameters in a model."""
+    """
+    Count total trainable parameters in a model.
+
+    Args:
+        model: PyTorch model
+
+    Returns:
+        Total number of trainable parameters
+    """
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
 def format_parameter_count(count: int) -> str:
-    """Format parameter count in human-readable form."""
+    """
+    Format parameter count in human-readable form.
+
+    Args:
+        count: Raw parameter count
+
+    Returns:
+        Human-readable parameter count (e.g., "1.2M", "500K")
+    """
     if count >= 1_000_000:
         return f"{count / 1_000_000:.2f}M"
     elif count >= 1_000:

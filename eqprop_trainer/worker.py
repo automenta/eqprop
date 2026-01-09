@@ -77,7 +77,7 @@ class TrainingWorker(QThread):
                 # Flatten sequence tokens and one-hot encode
                 x_flat = x.reshape(-1)
                 return torch.nn.functional.one_hot(x_flat, num_classes=vocab_size).float()
-        
+
         return x
 
     def _compute_loss_and_accuracy(self, output, y):
@@ -188,7 +188,7 @@ class TrainingWorker(QThread):
 
         return {'loss': epoch_loss / max(epoch_total, 1), 'accuracy': epoch_correct / max(epoch_total, 1)}
 
-    def _emit_batch_progress(self, epoch, batch_idx, num_batches, epoch_loss, 
+    def _emit_batch_progress(self, epoch, batch_idx, num_batches, epoch_loss,
                            epoch_correct, epoch_total, x, batch_time, total_start):
         """Emit progress update for batch processing."""
         current_loss = epoch_loss / max(epoch_total, 1)
@@ -231,7 +231,7 @@ class TrainingWorker(QThread):
             except Exception:
                 pass  # Ignore visualization errors
 
-    def _emit_epoch_metrics(self, epoch, num_batches, epoch_loss, epoch_correct, 
+    def _emit_epoch_metrics(self, epoch, num_batches, epoch_loss, epoch_correct,
                           epoch_total, lipschitz):
         """Emit final metrics for the epoch."""
         final_metrics = {
@@ -273,7 +273,7 @@ class TrainingWorker(QThread):
                     break
 
                 epoch_metrics = self._train_epoch(epoch, trainer, num_batches, total_start)
-                
+
                 if epoch_metrics is None:  # Training was stopped
                     break
 

@@ -6,7 +6,7 @@ Features stunning dark cyberpunk theme with live pyqtgraph plots.
 """
 
 import sys
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List, Tuple, Any
 from pathlib import Path
 
 from PyQt6.QtWidgets import (
@@ -21,7 +21,7 @@ from PyQt6.QtGui import QFont
 # Monkeypatch pyparsing for matplotlib compatibility (snake_case -> camelCase)
 try:
     import pyparsing
-    
+
     # helper to alias method if missing
     def alias_method(cls, snake, camel):
         if hasattr(cls, camel) and not hasattr(cls, snake):
@@ -30,7 +30,7 @@ try:
     # Alias one_of -> oneOf, nested_expr -> nestedExpr
     alias_method(pyparsing, 'one_of', 'oneOf')
     alias_method(pyparsing, 'nested_expr', 'nestedExpr')
-    
+
     # Generic alias for common snake_case -> camelCase mismatches in pyparsing
     for snake, camel in [
         ('delimited_list', 'delimitedList'),
@@ -39,19 +39,19 @@ try:
         ('one_of', 'oneOf'),
     ]:
         alias_method(pyparsing, snake, camel)
-    
+
     # Alias ParserElement methods (parse_string, reset_cache, enable_packrat)
     if hasattr(pyparsing, 'ParserElement'):
         PE = pyparsing.ParserElement
         alias_method(PE, 'parse_string', 'parseString')
-        
+
         # fix for static methods (resetCache, enablePackrat) being called as instance methods
         if hasattr(PE, 'resetCache') and not hasattr(PE, 'reset_cache'):
             PE.reset_cache = lambda *args, **kwargs: PE.resetCache()
-            
+
         if hasattr(PE, 'enablePackrat') and not hasattr(PE, 'enable_packrat'):
             PE.enable_packrat = lambda *args, **kwargs: PE.enablePackrat(*args, **kwargs)
-            
+
     # Alias pyparsing_common attributes (convert_to_float -> convertToFloat, etc)
     if hasattr(pyparsing, 'pyparsing_common'):
         PC = pyparsing.pyparsing_common
@@ -64,7 +64,7 @@ try:
             ('grouped', 'grouped'),
         ]:
             alias_method(PC, snake, camel)
-        
+
     # Alias ParseException
     if hasattr(pyparsing, 'ParseException'):
         alias_method(pyparsing.ParseException, 'mark_input_line', 'markInputLine')
@@ -87,8 +87,8 @@ from .generation import UniversalGenerator, SimpleCharTokenizer, count_parameter
 from .hyperparams import get_hyperparams_for_model, HyperparamSpec
 from .viz_utils import extract_weights, format_weight_for_display, normalize_weights_for_display, get_layer_description
 from .dashboard_helpers import (
-    generate_text_universal, 
-    update_hyperparams_generic, 
+    generate_text_universal,
+    update_hyperparams_generic,
     get_current_hyperparams_generic,
     create_weight_viz_widgets_generic,
     update_weight_visualization_generic
@@ -97,36 +97,36 @@ from .dashboard_helpers import (
 
 class EqPropDashboard(QMainWindow):
     """Main dashboard window for EqProp training."""
-    
+
     def __init__(self, initial_config: Optional[Dict] = None):
         super().__init__()
         self.initial_config = initial_config
-        
+
         self.setWindowTitle("⚡ EqProp Trainer v0.1.0")
         self.setGeometry(100, 100, 1400, 900)
-        
+
         # Apply theme
         self.setStyleSheet(CYBERPUNK_DARK)
-        
+
         # Training state
         self.worker: Optional[TrainingWorker] = None
         self.model = None
         self.train_loader = None
         self.current_hyperparams: Dict = {}  # Model-specific hyperparameters
         self.generator: Optional[UniversalGenerator] = None
-        
+
         # Plot data
         self.loss_history: List[float] = []
         self.acc_history: List[float] = []
         self.lipschitz_history: List[float] = []
-        
+
         # Initialize UI
         self._setup_ui()
-        
+
         # Update timer for plots
         self.plot_timer = QTimer()
         self.plot_timer.timeout.connect(self._update_plots)
-        
+
         # Apply initial configuration if provided
         if self.initial_config:
             QTimer.singleShot(100, lambda: self._apply_config(self.initial_config))
@@ -135,10 +135,10 @@ class EqPropDashboard(QMainWindow):
         """Apply initial configuration to UI elements."""
         try:
             model_name = config.get('model_name', '')
-            
+
             # Determine if it's Vision or LM based on model name or config
             is_vision = any(x in model_name for x in ['MLP', 'Conv', 'Vision']) or 'mnist' in str(self.initial_config).lower() or 'cifar' in str(self.initial_config).lower()
-            
+
             if is_vision:
                 self.tabs.setCurrentIndex(1)
                 combo = self.vis_model_combo
@@ -153,12 +153,12 @@ class EqPropDashboard(QMainWindow):
                 steps_spin = self.lm_steps_spin
                 lr_spin = self.lm_lr_spin
                 epochs_spin = self.lm_epochs_spin
-            
+
             # Select model in combo box
             index = combo.findText(model_name, Qt.MatchFlag.MatchContains)
             if index >= 0:
                 combo.setCurrentIndex(index)
-            
+
             # Set hyperparameters
             if 'hidden_dim' in config:
                 hidden_spin.setValue(int(config['hidden_dim']))
@@ -173,13 +173,13 @@ class EqPropDashboard(QMainWindow):
                     pass # Vision tab currently doesn't have layers spin (it's hardcoded or part of model)
                 else:
                     self.lm_layers_spin.setValue(int(config['num_layers']))
-                    
+
             self.status_label.setText(f"Loaded configuration for {model_name}")
-            
+
         except Exception as e:
             print(f"Error applying config: {e}")
             self.status_label.setText(f"Error loading config: {e}")
-    
+
     def _setup_ui(self):
         """Set up the main user interface."""
         central = QWidget()
@@ -187,30 +187,30 @@ class EqPropDashboard(QMainWindow):
         layout = QVBoxLayout(central)
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
-        
+
         # Header
         header = QLabel("⚡ EqProp Trainer")
         header.setObjectName("headerLabel")
         header.setFont(QFont("Segoe UI", 28, QFont.Weight.Bold))
         layout.addWidget(header)
-        
+
         # Main content area with tabs
         self.tabs = QTabWidget()
         layout.addWidget(self.tabs, stretch=1)
-        
+
         # Tab 1: Language Modeling
         lm_tab = self._create_lm_tab()
         self.tabs.addTab(lm_tab, "🔤 Language Model")
-        
+
         # Tab 2: Vision
         vision_tab = self._create_vision_tab()
         self.tabs.addTab(vision_tab, "📷 Vision")
-        
+
         # Status bar
         self.status_label = QLabel("Ready. Select a model and dataset to begin training.")
         self.status_label.setStyleSheet("color: #808090; padding: 5px;")
         layout.addWidget(self.status_label)
-    
+
     def _create_control_group(self, title: str, controls: List[Tuple[str, object]]) -> QGroupBox:
         """Create a generic control group with common layout."""
         group = QGroupBox(title)
@@ -450,7 +450,7 @@ class EqPropDashboard(QMainWindow):
             right_panel.addWidget(viz_group)
 
         return tab
-    
+
     def _create_vision_tab(self) -> QWidget:
         """Create the Vision training tab."""
         tab = QWidget()
@@ -636,7 +636,7 @@ class EqPropDashboard(QMainWindow):
         right_panel.addStretch()
 
         return tab
-    
+
     def _start_training(self, mode: str):
         """Start training in background thread."""
         try:
@@ -665,6 +665,7 @@ class EqPropDashboard(QMainWindow):
     def _create_vision_model_and_loader(self):
         """Create vision model and data loader."""
         from eqprop_torch.datasets import get_vision_dataset
+        from torch.utils.data import DataLoader
 
         # Get dataset
         dataset_name = self.vis_dataset_combo.currentText().lower().replace('-', '_')
@@ -797,7 +798,7 @@ class EqPropDashboard(QMainWindow):
         else:
             QMessageBox.warning(self, "Not Available", "LM variants not available")
             return None, None
-    
+
     def _start_vision_training(self):
         """Start vision model training."""
         # Create model and data loader
@@ -846,7 +847,7 @@ class EqPropDashboard(QMainWindow):
         self.status_label.setText(f"Training {model_name}...")
         self.plot_timer.start(100)
         self.worker.start()
-    
+
     def _start_lm_training(self):
         """Start language model training."""
         # Create model and data loader
@@ -896,43 +897,43 @@ class EqPropDashboard(QMainWindow):
         self.plot_timer.start(100)
         self.worker.start()
 
-    
+
     def _stop_training(self):
         """Stop training."""
         if self.worker:
             self.worker.stop()
             self.status_label.setText("Stopping training...")
-    
+
     def _on_progress(self, metrics: dict):
         """Handle training progress update."""
         self.loss_history.append(metrics['loss'])
         self.acc_history.append(metrics['accuracy'])
         self.lipschitz_history.append(metrics['lipschitz'])
-        
+
         # Update progress bar
         self.vis_progress.setValue(metrics['epoch'])
         self.lm_progress.setValue(metrics['epoch'])
-        
+
         # Update labels
         self.vis_acc_label.setText(f"{metrics['accuracy']:.1%}")
         self.vis_loss_label.setText(f"{metrics['loss']:.4f}")
         self.vis_lip_label.setText(f"{metrics['lipschitz']:.4f}")
-        
+
         self.status_label.setText(
             f"Epoch {metrics['epoch']}/{metrics['total_epochs']} | "
             f"Loss: {metrics['loss']:.4f} | "
             f"Acc: {metrics['accuracy']:.1%} | "
             f"L: {metrics['lipschitz']:.4f}"
         )
-    
+
     def _update_plots(self):
         """Update plot curves."""
         if not HAS_PYQTGRAPH:
             return
-        
+
         if self.loss_history:
             epochs = list(range(1, len(self.loss_history) + 1))
-            
+
             # Update vision plots
             if hasattr(self, 'vis_loss_curve'):
                 self.vis_loss_curve.setData(epochs, self.loss_history)
@@ -940,7 +941,7 @@ class EqPropDashboard(QMainWindow):
                 if hasattr(self, 'vis_acc_curve'):
                     self.vis_acc_curve.setData(epochs, self.acc_history)
                 self.vis_lip_curve.setData(epochs, self.lipschitz_history)
-            
+
             # Update LM plots
             if hasattr(self, 'lm_loss_curve'):
                 self.lm_loss_curve.setData(epochs, self.loss_history)
@@ -950,7 +951,7 @@ class EqPropDashboard(QMainWindow):
                 self.lm_lip_curve.setData(epochs, self.lipschitz_history)
 
 
-    
+
     def _on_finished(self, result: dict):
         """Handle training completion."""
         self.plot_timer.stop()
@@ -958,12 +959,12 @@ class EqPropDashboard(QMainWindow):
         self.vis_stop_btn.setEnabled(False)
         self.lm_train_btn.setEnabled(True)
         self.lm_stop_btn.setEnabled(False)
-        
+
         if result.get('success'):
             self.status_label.setText(f"✓ Training complete! ({result['epochs_completed']} epochs)")
         else:
             self.status_label.setText("Training stopped.")
-    
+
     def _on_error(self, error: str):
         """Handle training error."""
         self.plot_timer.stop()
@@ -971,7 +972,7 @@ class EqPropDashboard(QMainWindow):
         self.vis_stop_btn.setEnabled(False)
         self.status_label.setText("Training error!")
         QMessageBox.critical(self, "Training Error", error)
-    
+
     def _generate_text(self):
         """Generate text from the model (works even with untrained models)."""
         generate_text_universal(self)
@@ -979,23 +980,23 @@ class EqPropDashboard(QMainWindow):
     def _update_lm_hyperparams(self, model_name: str):
         """Update LM hyperparameter widgets based on selected model."""
         update_hyperparams_generic(self, model_name, self.lm_hyperparam_layout, self.lm_hyperparam_widgets, self.lm_hyperparam_group)
-    
+
     def _update_vis_hyperparams(self, model_name: str):
         """Update Vision hyperparameter widgets based on selected model."""
         update_hyperparams_generic(self, model_name, self.vis_hyperparam_layout, self.vis_hyperparam_widgets, self.vis_hyperparam_group)
-    
+
     def _get_current_hyperparams(self, widgets: dict) -> dict:
         """Extract current values from hyperparameter widgets."""
         return get_current_hyperparams_generic(widgets)
-    
+
     def _update_weight_visualization(self, weights: dict):
         """Update weight visualization heatmaps."""
         if not HAS_PYQTGRAPH or not ENABLE_WEIGHT_VIZ:
             return
-            
+
         # Determine which tab is active to update correct widgets
         active_idx = self.tabs.currentIndex()
-        
+
         # 0 = LM Tab, 1 = Vision Tab
         if active_idx == 0:
             layout = self.lm_weights_layout
@@ -1005,7 +1006,7 @@ class EqPropDashboard(QMainWindow):
             layout = self.vis_weights_layout
             widgets = self.vis_weight_widgets
             labels = self.vis_weight_labels
-            
+
         # If widgets list is empty, create them
         if not widgets:
             # Clear existing items in layout
@@ -1013,10 +1014,10 @@ class EqPropDashboard(QMainWindow):
                 item = layout.takeAt(0)
                 if item.widget():
                     item.widget().deleteLater()
-            
+
             widgets.clear()
             labels.clear()
-            
+
             # Create widgets
             for name, W in list(weights.items())[:3]:
                 # Label
@@ -1024,7 +1025,7 @@ class EqPropDashboard(QMainWindow):
                 label.setStyleSheet("color: #00d4ff; font-weight: bold;")
                 layout.addWidget(label)
                 labels.append(label)
-                
+
                 # Image View
                 img_view = pg.ImageView()
                 img_view.setFixedHeight(150)
@@ -1033,18 +1034,17 @@ class EqPropDashboard(QMainWindow):
                 img_view.ui.menuBtn.hide()
                 layout.addWidget(img_view)
                 widgets.append(img_view)
-        
+
         # Update content
         for i, (name, W) in enumerate(weights.items()):
             if i >= len(widgets):
                 break
-            
+
             W_display = format_weight_for_display(W)
             W_norm = normalize_weights_for_display(W_display)
-            
+
             try:
                 widgets[i].setImage(W_norm.T, levels=(0, 1))
                 labels[i].setText(get_layer_description(name))
             except Exception:
                 pass
-

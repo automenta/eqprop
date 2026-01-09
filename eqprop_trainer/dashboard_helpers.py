@@ -17,7 +17,13 @@ except:
 
 
 def _clear_widgets_from_layout(layout: QGridLayout, widgets: dict):
-    """Clear existing widgets from layout and dictionary."""
+    """
+    Clear existing widgets from layout and dictionary.
+
+    Args:
+        layout: Grid layout containing the widgets
+        widgets: Dictionary of widgets to clear
+    """
     for widget in widgets.values():
         if isinstance(widget, (QSpinBox, QDoubleSpinBox, QCheckBox, QLabel)):
             widget.deleteLater()
@@ -31,7 +37,15 @@ def _clear_widgets_from_layout(layout: QGridLayout, widgets: dict):
 
 
 def _create_widget_for_spec(spec: 'HyperparamSpec'):
-    """Create a widget based on the hyperparameter specification."""
+    """
+    Create a widget based on the hyperparameter specification.
+
+    Args:
+        spec: Hyperparameter specification object
+
+    Returns:
+        Created widget or None if type is unsupported
+    """
     if spec.type == 'int':
         widget = QSpinBox()
         widget.setRange(spec.min_val or 0, spec.max_val or 1000)
@@ -59,7 +73,16 @@ def _create_widget_for_spec(spec: 'HyperparamSpec'):
 
 
 def update_hyperparams_generic(self, model_name: str, layout: QGridLayout, widgets: dict, group: QGroupBox):
-    """Generic method to update hyperparameter widgets."""
+    """
+    Generic method to update hyperparameter widgets.
+
+    Args:
+        self: Reference to the dashboard instance
+        model_name: Name of the model to get hyperparameters for
+        layout: Layout to add widgets to
+        widgets: Dictionary to store widget references
+        group: Group box to show/hide
+    """
     from .hyperparams import get_hyperparams_for_model
 
     # Clear existing widgets
@@ -90,7 +113,15 @@ def update_hyperparams_generic(self, model_name: str, layout: QGridLayout, widge
 
 
 def get_current_hyperparams_generic(widgets: dict) -> dict:
-    """Extract current values from hyperparameter widgets."""
+    """
+    Extract current values from hyperparameter widgets.
+
+    Args:
+        widgets: Dictionary of hyperparameter widgets
+
+    Returns:
+        Dictionary mapping parameter names to current values
+    """
     hyperparams = {}
     for name, widget in widgets.items():
         if name.endswith('_label'):
@@ -103,7 +134,13 @@ def get_current_hyperparams_generic(widgets: dict) -> dict:
 
 
 def update_weight_visualization_generic(self, weights: Dict[str, np.ndarray]):
-    """Update weight visualization heatmaps."""
+    """
+    Update weight visualization heatmaps.
+
+    Args:
+        self: Reference to the dashboard instance
+        weights: Dictionary mapping layer names to weight arrays
+    """
     if not HAS_PG:
         return
 
@@ -132,7 +169,13 @@ def update_weight_visualization_generic(self, weights: Dict[str, np.ndarray]):
 
 
 def create_weight_viz_widgets_generic(self, weights: Dict[str, np.ndarray]):
-    """Create weight visualization widgets based on model weights."""
+    """
+    Create weight visualization widgets based on model weights.
+
+    Args:
+        self: Reference to the dashboard instance
+        weights: Dictionary mapping layer names to weight arrays
+    """
     if not HAS_PG:
         return
 
@@ -167,7 +210,12 @@ def create_weight_viz_widgets_generic(self, weights: Dict[str, np.ndarray]):
 
 
 def generate_text_universal(self):
-    """Generate text from the model using UniversalGenerator (works for ALL models)."""
+    """
+    Generate text from the model using UniversalGenerator (works for ALL models).
+
+    Args:
+        self: Reference to the dashboard instance
+    """
     from PyQt6.QtWidgets import QApplication
     from .generation import UniversalGenerator
 
@@ -198,7 +246,12 @@ def generate_text_universal(self):
 
 
 def _ensure_generator_exists(self):
-    """Ensure the universal generator exists and is properly configured."""
+    """
+    Ensure the universal generator exists and is properly configured.
+
+    Args:
+        self: Reference to the dashboard instance
+    """
     from .generation import UniversalGenerator
 
     if self.generator is None or self.generator.model is not self.model:
@@ -218,7 +271,15 @@ def _ensure_generator_exists(self):
 
 
 def _determine_vocab_size(model) -> int:
-    """Determine the vocabulary size for the model."""
+    """
+    Determine the vocabulary size for the model.
+
+    Args:
+        model: PyTorch model
+
+    Returns:
+        Vocabulary size
+    """
     # Default: printable ASCII
     vocab_size = 95
     if hasattr(model, 'vocab_size'):
